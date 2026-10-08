@@ -8,11 +8,14 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Unit 01: project foundation (`featureSpecs/01-foundation.md`).
+- Unit 04: buyers and listings (`featureSpecs/04-buyers-and-listings.md`).
 
 ## Completed
 
-- Planning: project plan v2 and the context files (project-overview, architecture-context, design, code-standards, security-context, ai-workflow-rules, progress-tracker, featureSpecs, AGENTS.md).
+- Planning: project plan v2 and the context files.
+- Unit 01: project foundation (`featureSpecs/01-foundation.md`).
+- Unit 02: auth and roles (`featureSpecs/02-auth-and-roles.md`).
+- Unit 03: farmer profile and ID verification (`featureSpecs/03-farmer-profile-and-id.md`).
 
 ## In Progress
 
@@ -22,9 +25,6 @@ Update this file whenever the current phase, active feature, or implementation s
 
 Phase 1, in order:
 
-1. `01-foundation.md`
-2. `02-auth-and-roles.md`
-3. `03-farmer-profile-and-id.md`
 4. `04-buyers-and-listings.md`
 5. `05-matching-and-pooling.md`
 6. `06-pickup-and-payment-status.md`

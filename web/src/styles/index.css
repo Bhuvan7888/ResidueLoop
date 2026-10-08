@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-subtle: var(--bg-subtle);
+  
+  --color-border-surface-border: var(--border-default);
+  --color-border-surface-border-subtle: var(--border-subtle);
+  
+  --color-text-copy-primary: var(--text-primary);
+  --color-text-copy-secondary: var(--text-secondary);
+  --color-text-copy-muted: var(--text-muted);
+  --color-text-copy-faint: var(--text-faint);
+  
+  --color-bg-brand: var(--accent-primary);
+  --color-text-brand: var(--accent-primary-text);
+  --color-bg-accent-dim: var(--accent-primary-dim);
+  --color-text-on-brand: var(--on-accent);
+  
+  --color-text-state-error: var(--state-error);
+  --color-text-state-success: var(--state-success);
+  --color-text-state-warning: var(--state-warning);
+  
+  --color-bg-state-error-dim: var(--state-error-dim);
+  --color-bg-state-success-dim: var(--state-success-dim);
+  --color-bg-state-warning-dim: var(--state-warning-dim);
+
+  --font-display: var(--font-display), var(--font-gurmukhi-display), serif;
+  --font-sans: var(--font-sans), var(--font-gurmukhi), system-ui, sans-serif;
+}
+
+@layer base {
+  :root {
+    --bg-base: #faf6ef;
+    --bg-surface: #fffdf8;
+    --bg-elevated: #ffffff;
+    --bg-subtle: #f1eadb;
+    --border-default: #e0d0af;
+    --border-subtle: #ece3cf;
+    --text-primary: #0b0b0a;
+    --text-secondary: #373f47;
+    --text-muted: #5f656b;
+    --text-faint: #8a8d90;
+    --accent-primary: #d6bd2c;
+    --accent-primary-dim: rgba(214, 189, 44, 0.18);
+    --accent-primary-text: #7a6a00;
+    --on-accent: #0b0b0a;
+    --state-error: #a63a2a;
+    --state-error-dim: rgba(166, 58, 42, 0.1);
+    --state-success: #3d6b4a;
+    --state-success-dim: rgba(61, 107, 74, 0.1);
+    --state-warning: #8a5a00;
+    --state-warning-dim: rgba(138, 90, 0, 0.1);
+    
+    --font-display: 'Fraunces', serif;
+    --font-sans: 'Inter', sans-serif;
+    --font-gurmukhi: 'Noto Sans Gurmukhi', sans-serif;
+    --font-gurmukhi-display: 'Noto Serif Gurmukhi', serif;
+  }
+}
