@@ -3,7 +3,7 @@ import { Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { getProfile } from '../api'
 
-export type UserRole = 'farmer' | 'buyer' | 'donor' | 'ngo' | 'baler'
+export type UserRole = 'farmer' | 'buyer' | 'donor' | 'ngo'
 
 export interface AuthState {
   session: Session | null
