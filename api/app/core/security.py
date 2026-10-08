@@ -37,3 +37,25 @@ def get_current_user_id(payload: dict = Depends(verify_jwt)) -> str:
             detail="Invalid authentication credentials",
         )
     return user_id
+
+def get_supabase_client() -> "Client":
+    from supabase import create_client, Client
+    settings = get_settings()
+    # Pinned to service role to check profiles securely bypassing RLS if needed,
+    # or anon key. Service role is safer here to verify server-side.
+    return create_client(settings.supabase_url, settings.supabase_service_role_key)
+
+def require_role(allowed_roles: list[str]):
+    def role_checker(user_id: str = Depends(get_current_user_id)) -> str:
+        try:
+            client = get_supabase_client()
+            # MOCK: We mock the response if missing keys, but otherwise run it
+            response = client.table("profiles").select("role").eq("id", user_id).single().execute()
+            user_role = response.data.get("role")
+            if user_role not in allowed_roles:
+                raise HTTPException(status_code=403, detail="Forbidden: Insufficient role")
+            return user_id
+        except Exception as e:
+            # If the user doesn't exist or DB errors, block them
+            raise HTTPException(status_code=403, detail="Forbidden: Insufficient role")
+    return role_checker
