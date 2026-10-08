@@ -4,11 +4,12 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Phase 1: Web application. Not started. Context files are written.
+- Phase 1: Web application. Completed.
+- Phase 2: WhatsApp & Heatmap. Not started.
 
 ## Current Goal
 
-- Unit 04: buyers and listings (`featureSpecs/04-buyers-and-listings.md`).
+- Final review and preparation for Phase 2.
 
 ## Completed
 
@@ -19,17 +20,15 @@ Update this file whenever the current phase, active feature, or implementation s
 - Unit 04: buyers and listings (`featureSpecs/04-buyers-and-listings.md`).
 - Unit 05: matching and pooling (`featureSpecs/05-matching-and-pooling.md`).
 - Unit 06: pickup and payment status (`featureSpecs/06-pickup-and-payment-status.md`).
+- Unit 07: satellite verification (`featureSpecs/07-satellite-verification.md`).
+- Unit 08: charity (`featureSpecs/08-charity.md`).
+- Unit 11: security hardening (`featureSpecs/11-security-hardening.md`).
 
 ## In Progress
 
 - None yet.
 
 ## Next Up
-
-Phase 1, in order:
-7. `07-satellite-verification.md`
-8. `08-charity.md`
-9. `11-security-hardening.md` (run after Unit 08, before any Phase 2 work)
 
 Phase 2:
 
@@ -78,7 +77,7 @@ The build continues with fallbacks for every item. Ask the user for these at the
 - `pickups` is one row per farmer listing in a pool, because weights and payment status are per farmer.
 - No route optimisation. Pickup is one date per pool.
 - Design follows divinefarmer.com: light, cream and mustard, serif headings, flat surfaces. Replaces the earlier dark look.
-- Background jobs run as a second process of the `api` package so services are not duplicated.
+- Background jobs run as a second process of the `api` package using APScheduler so services are not duplicated (Redis cannot run locally in the hackathon environment).
 - Security rules live in `security-context.md` and are applied per unit, with a final hardening unit.
 - Mocked in the hackathon build: ID review, payments, and OTP delivery.
 
