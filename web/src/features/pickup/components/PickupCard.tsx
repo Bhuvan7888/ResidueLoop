@@ -1,10 +1,13 @@
 import { useState } from 'react'
-import { PickupForm } from './PickupForm'
+import { useTranslation } from 'react-i18next'
+import { WeightForm } from './WeightForm'
+import { PaymentForm } from './PaymentForm'
 
 interface Pickup {
   id: string
   pool_id: string
   actual_tonnes: number | null
+  amount_due: number | null
   payment_status: string
   pools: {
     pickup_date: string | null
@@ -13,45 +16,80 @@ interface Pickup {
 
 interface PickupCardProps {
   pickup: Pickup
-  onUpdate: (id: string, data: { actual_tonnes: number, payment_status: string }) => Promise<void>
+  mode: 'buyer' | 'farmer'
+  onUpdateWeight?: (id: string, data: { actual_tonnes: number }) => Promise<void>
+  onUpdatePayment?: (id: string, data: { payment_status: 'pending' | 'received' | 'not_received' }) => Promise<void>
 }
 
-export function PickupCard({ pickup, onUpdate }: PickupCardProps) {
+export function PickupCard({ pickup, mode, onUpdateWeight, onUpdatePayment }: PickupCardProps) {
+  const { t } = useTranslation()
   const [isEditing, setIsEditing] = useState(false)
 
   return (
     <div className="bg-surface border border-surface-border rounded-xl p-4">
       <div className="flex justify-between mb-4">
         <div>
-          <p className="text-sm text-copy-secondary">Scheduled Date</p>
-          <p className="text-base font-medium text-copy-primary">{pickup.pools.pickup_date || 'Pending'}</p>
+          <p className="text-sm text-copy-secondary">{t('pickup.scheduled_date', 'Scheduled Date')}</p>
+          <p className="text-base font-medium text-copy-primary">{pickup.pools.pickup_date || t('status.pending', 'Pending')}</p>
         </div>
         <div className="text-right">
-          <p className="text-sm text-copy-secondary">Status</p>
-          <p className="text-base font-medium text-copy-primary capitalize">{pickup.payment_status}</p>
+          <p className="text-sm text-copy-secondary">{t('pickup.status', 'Status')}</p>
+          <p className="text-base font-medium text-copy-primary capitalize">{t(`status.${pickup.payment_status}`, pickup.payment_status)}</p>
         </div>
       </div>
 
-      {!isEditing && pickup.actual_tonnes === null ? (
-        <button
-          onClick={() => setIsEditing(true)}
-          className="w-full bg-brand text-on-brand rounded-xl py-2 font-medium hover:bg-accent-secondary"
-        >
-          Update Weighbridge Details
-        </button>
-      ) : isEditing ? (
-        <PickupForm 
-          onSubmit={async (data) => {
-            await onUpdate(pickup.id, data)
-            setIsEditing(false)
-          }}
-          onCancel={() => setIsEditing(false)}
-        />
-      ) : (
-        <div className="bg-bg-subtle p-3 rounded-xl flex justify-between items-center">
-          <span className="text-sm text-copy-secondary">Actual Weight</span>
-          <span className="text-base font-medium text-copy-primary">{pickup.actual_tonnes} t</span>
-        </div>
+      <div className="mb-4">
+        <p className="text-sm text-copy-secondary">{t('pickup.amount_due', 'Amount Due')}</p>
+        <p className="text-base font-medium text-copy-primary">
+          {pickup.amount_due !== null ? `₹${pickup.amount_due}` : '-'}
+        </p>
+      </div>
+
+      {mode === 'buyer' && (
+        <>
+          {!isEditing && pickup.actual_tonnes === null ? (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="w-full bg-brand text-on-brand rounded-xl py-2 font-medium hover:bg-accent-secondary"
+            >
+              {t('pickup.update_weight', 'Update Weighbridge Details')}
+            </button>
+          ) : isEditing ? (
+            <WeightForm 
+              onSubmit={async (data) => {
+                if (onUpdateWeight) await onUpdateWeight(pickup.id, data)
+                setIsEditing(false)
+              }}
+              onCancel={() => setIsEditing(false)}
+            />
+          ) : (
+            <div className="bg-bg-subtle p-3 rounded-xl flex justify-between items-center">
+              <span className="text-sm text-copy-secondary">{t('pickup.actual_weight', 'Actual Weight')}</span>
+              <span className="text-base font-medium text-copy-primary">{pickup.actual_tonnes} t</span>
+            </div>
+          )}
+        </>
+      )}
+
+      {mode === 'farmer' && (
+        <>
+          {!isEditing ? (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="w-full bg-surface text-copy-primary border border-surface-border rounded-xl py-2 font-medium hover:bg-bg-subtle"
+            >
+              {t('pickup.update_payment', 'Update Payment Status')}
+            </button>
+          ) : (
+            <PaymentForm 
+              onSubmit={async (data) => {
+                if (onUpdatePayment) await onUpdatePayment(pickup.id, data)
+                setIsEditing(false)
+              }}
+              onCancel={() => setIsEditing(false)}
+            />
+          )}
+        </>
       )}
     </div>
   )
