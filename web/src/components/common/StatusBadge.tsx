@@ -1,5 +1,6 @@
 import React from "react"
 import { cn } from "@/lib/utils"
+import { CheckCircle2, AlertTriangle, HelpCircle, Clock, CheckCircle, XCircle, XOctagon, Check, X, MessageCircle } from "lucide-react"
 
 interface StatusBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
   status: 'verified' | 'fire_detected' | 'inconclusive' | 'pending' | 'received' | 'not_received' | 'rejected' | 'approved' | 'declined' | 'whatsapp'
@@ -20,6 +21,19 @@ export function StatusBadge({ status, label, className, ...props }: StatusBadgeP
     whatsapp: "bg-subtle text-copy-secondary",
   }
 
+  const icons = {
+    verified: <CheckCircle2 className="mr-1 h-3 w-3" />,
+    fire_detected: <AlertTriangle className="mr-1 h-3 w-3" />,
+    inconclusive: <HelpCircle className="mr-1 h-3 w-3" />,
+    pending: <Clock className="mr-1 h-3 w-3" />,
+    received: <CheckCircle className="mr-1 h-3 w-3" />,
+    not_received: <XCircle className="mr-1 h-3 w-3" />,
+    rejected: <XOctagon className="mr-1 h-3 w-3" />,
+    approved: <Check className="mr-1 h-3 w-3" />,
+    declined: <X className="mr-1 h-3 w-3" />,
+    whatsapp: <MessageCircle className="mr-1 h-3 w-3" />,
+  }
+
   return (
     <div
       className={cn(
@@ -29,6 +43,7 @@ export function StatusBadge({ status, label, className, ...props }: StatusBadgeP
       )}
       {...props}
     >
+      {icons[status]}
       {label}
     </div>
   )
