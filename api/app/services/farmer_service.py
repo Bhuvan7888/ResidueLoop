@@ -23,9 +23,9 @@ async def upload_id_document(user_id: str, id_type: str, id_last4: str, file: Up
     # 2. Strip metadata (mocked: assume stripped or use a library like PIL for images in production)
     
     # 3. Generate random filename
-    ext = ".pdf" if is_pdf else (".png" if is_png else ".jpg")
-    filename = f"{uuid.uuid4()}{ext}"
-    path = f"{user_id}/{filename}"
+    # ext = ".pdf" if is_pdf else (".png" if is_png else ".jpg")
+    # filename = f"{uuid.uuid4()}{ext}"
+    # path = f"{user_id}/{filename}"
     
     # 4. Encrypt file (mocked)
     
@@ -35,8 +35,8 @@ async def upload_id_document(user_id: str, id_type: str, id_last4: str, file: Up
     
     # 6. Insert into id_verifications table
     # MOCK: Auto-approve unless id_last4 is '0000' (seeded rejection case)
-    status = 'rejected' if id_last4 == '0000' else 'verified'
-    rejection_reason = 'Invalid ID document' if status == 'rejected' else None
+    # status = 'rejected' if id_last4 == '0000' else 'verified'
+    # rejection_reason = 'Invalid ID document' if status == 'rejected' else None
     
     # (Mocking actual db insertion)
     pass
