@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { APP_CONFIG } from '@/config'
+import { useTranslation } from 'react-i18next'
 
 const buyerProfileSchema = z.object({
   orgName: z.string().min(1, 'Organisation name is required'),
@@ -18,6 +19,7 @@ interface BuyerProfileFormProps {
 }
 
 export function BuyerProfileForm({ initialData, onSubmit }: BuyerProfileFormProps) {
+  const { t } = useTranslation()
   const [error, setError] = useState<string | null>(null)
   
   const form = useForm<z.infer<typeof buyerProfileSchema>>({
@@ -43,7 +45,7 @@ export function BuyerProfileForm({ initialData, onSubmit }: BuyerProfileFormProp
       {error && <p className="text-state-error text-sm">{error}</p>}
       
       <div>
-        <label className="block text-sm font-medium text-copy-primary mb-1">Organisation Name</label>
+        <label className="block text-sm font-medium text-copy-primary mb-1">{t('buyer.org_name', 'Organisation Name')}</label>
         <input
           {...form.register('orgName')}
           className="w-full rounded-xl border border-surface-border p-2 focus:ring-2 focus:ring-accent-primary outline-none"
@@ -54,15 +56,15 @@ export function BuyerProfileForm({ initialData, onSubmit }: BuyerProfileFormProp
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-copy-primary mb-1">Organisation Type</label>
+        <label className="block text-sm font-medium text-copy-primary mb-1">{t('buyer.org_type', 'Organisation Type')}</label>
         <select
           {...form.register('type')}
           className="w-full rounded-xl border border-surface-border p-2 focus:ring-2 focus:ring-accent-primary outline-none"
         >
-          <option value="biomass">Biomass Plant</option>
-          <option value="cbg">CBG Plant</option>
-          <option value="kiln">Brick Kiln</option>
-          <option value="mill">Paper Mill</option>
+          <option value="biomass">{t('buyer.type_biomass', 'Biomass Plant')}</option>
+          <option value="cbg">{t('buyer.type_cbg', 'CBG Plant')}</option>
+          <option value="kiln">{t('buyer.type_kiln', 'Brick Kiln')}</option>
+          <option value="mill">{t('buyer.type_mill', 'Paper Mill')}</option>
         </select>
         {form.formState.errors.type && (
           <p className="text-state-error text-sm mt-1">{form.formState.errors.type.message}</p>
@@ -70,7 +72,7 @@ export function BuyerProfileForm({ initialData, onSubmit }: BuyerProfileFormProp
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-copy-primary mb-1">Annual Capacity (tonnes)</label>
+        <label className="block text-sm font-medium text-copy-primary mb-1">{t('buyer.capacity', 'Annual Capacity (tonnes)')}</label>
         <input
           type="number"
           {...form.register('capacity', { valueAsNumber: true })}
@@ -82,7 +84,7 @@ export function BuyerProfileForm({ initialData, onSubmit }: BuyerProfileFormProp
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-copy-primary mb-1">Price per tonne (₹)</label>
+        <label className="block text-sm font-medium text-copy-primary mb-1">{t('buyer.price_per_tonne', 'Price per tonne (₹)')}</label>
         <input
           type="number"
           {...form.register('pricePerTonne', { valueAsNumber: true })}
@@ -98,7 +100,7 @@ export function BuyerProfileForm({ initialData, onSubmit }: BuyerProfileFormProp
         disabled={form.formState.isSubmitting}
         className="w-full bg-brand text-on-brand rounded-xl py-2 font-medium hover:bg-accent-secondary disabled:opacity-50"
       >
-        {form.formState.isSubmitting ? 'Saving...' : 'Save Profile'}
+        {form.formState.isSubmitting ? t('common.saving', 'Saving...') : t('buyer.save_profile', 'Save Profile')}
       </button>
     </form>
   )

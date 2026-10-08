@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslation } from 'react-i18next'
 
 const demandPostSchema = z.object({
   tonnesNeeded: z.number().min(1, 'Tonnes needed must be positive'),
@@ -16,6 +17,7 @@ interface DemandPostFormProps {
 }
 
 export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
+  const { t } = useTranslation()
   const [error, setError] = useState<string | null>(null)
   
   const form = useForm<z.infer<typeof demandPostSchema>>({
@@ -37,7 +39,7 @@ export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
       {error && <p className="text-state-error text-sm">{error}</p>}
 
       <div>
-        <label className="block text-sm font-medium text-copy-primary mb-1">Tonnes Needed</label>
+        <label className="block text-sm font-medium text-copy-primary mb-1">{t('buyer.tonnes_needed', 'Tonnes Needed')}</label>
         <input
           type="number"
           {...form.register('tonnesNeeded', { valueAsNumber: true })}
@@ -49,7 +51,7 @@ export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-copy-primary mb-1">Price per tonne (₹)</label>
+        <label className="block text-sm font-medium text-copy-primary mb-1">{t('buyer.price_per_tonne', 'Price per tonne (₹)')}</label>
         <input
           type="number"
           {...form.register('pricePerTonne', { valueAsNumber: true })}
@@ -62,7 +64,7 @@ export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-copy-primary mb-1">Start Date</label>
+          <label className="block text-sm font-medium text-copy-primary mb-1">{t('buyer.start_date', 'Start Date')}</label>
           <input
             type="date"
             {...form.register('dateFrom')}
@@ -73,7 +75,7 @@ export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium text-copy-primary mb-1">End Date</label>
+          <label className="block text-sm font-medium text-copy-primary mb-1">{t('buyer.end_date', 'End Date')}</label>
           <input
             type="date"
             {...form.register('dateTo')}
@@ -91,14 +93,14 @@ export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
           onClick={onCancel}
           className="flex-1 rounded-xl py-2 font-medium border border-surface-border text-copy-secondary hover:bg-bg-subtle"
         >
-          Cancel
+          {t('common.cancel', 'Cancel')}
         </button>
         <button
           type="submit"
           disabled={form.formState.isSubmitting}
           className="flex-1 bg-brand text-on-brand rounded-xl py-2 font-medium hover:bg-accent-secondary disabled:opacity-50"
         >
-          {form.formState.isSubmitting ? 'Saving...' : 'Post Demand'}
+          {form.formState.isSubmitting ? t('common.saving', 'Saving...') : t('buyer.post_demand', 'Post Demand')}
         </button>
       </div>
     </form>

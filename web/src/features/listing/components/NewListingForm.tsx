@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { APP_CONFIG } from '@/config'
+import { useTranslation } from 'react-i18next'
 
 const listingSchema = z.object({
   plotId: z.string().min(1, 'Please select a plot'),
@@ -23,6 +24,7 @@ interface NewListingFormProps {
 }
 
 export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProps) {
+  const { t } = useTranslation()
   const [error, setError] = useState<string | null>(null)
   
   const form = useForm<z.infer<typeof listingSchema>>({
@@ -52,14 +54,14 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
       {error && <p className="text-state-error text-sm">{error}</p>}
       
       <div>
-        <label className="block text-sm font-medium text-copy-primary mb-1">Select Plot</label>
+        <label className="block text-sm font-medium text-copy-primary mb-1">{t('listing.select_plot', 'Select Plot')}</label>
         <select
           {...form.register('plotId')}
           className="w-full rounded-xl border border-surface-border p-2 focus:ring-2 focus:ring-accent-primary outline-none"
         >
-          <option value="">Select a plot...</option>
+          <option value="">{t('listing.select_plot_placeholder', 'Select a plot...')}</option>
           {plots.map(plot => (
-            <option key={plot.id} value={plot.id}>{plot.name} ({plot.acres} acres)</option>
+            <option key={plot.id} value={plot.id}>{plot.name} ({plot.acres} {t('listing.acres', 'acres')})</option>
           ))}
         </select>
         {form.formState.errors.plotId && (
@@ -93,11 +95,11 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
 
       {selectedPlot && (
         <div className="bg-bg-subtle p-4 rounded-xl">
-          <p className="text-sm text-copy-secondary font-medium">Estimated Yield</p>
+          <p className="text-sm text-copy-secondary font-medium">{t('listing.estimated_yield', 'Estimated Yield')}</p>
           <p className="text-2xl font-display text-copy-primary mt-1">
-            {estMin.toFixed(1)} - {estMax.toFixed(1)} tonnes
+            {estMin.toFixed(1)} - {estMax.toFixed(1)} {t('listing.tonnes', 'tonnes')}
           </p>
-          <p className="text-xs text-copy-muted mt-1 uppercase tracking-wide">Estimate</p>
+          <p className="text-xs text-copy-muted mt-1 uppercase tracking-wide">{t('listing.estimate_badge', 'Estimate')}</p>
         </div>
       )}
 
@@ -107,14 +109,14 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
           onClick={onCancel}
           className="flex-1 rounded-xl py-2 font-medium border border-surface-border text-copy-secondary hover:bg-bg-subtle"
         >
-          Cancel
+          {t('common.cancel', 'Cancel')}
         </button>
         <button
           type="submit"
           disabled={form.formState.isSubmitting || !selectedPlot}
           className="flex-1 bg-brand text-on-brand rounded-xl py-2 font-medium hover:bg-accent-secondary disabled:opacity-50"
         >
-          {form.formState.isSubmitting ? 'Confirming...' : 'Confirm Listing'}
+          {form.formState.isSubmitting ? t('listing.confirming', 'Confirming...') : t('listing.confirm', 'Confirm Listing')}
         </button>
       </div>
     </form>
