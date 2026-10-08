@@ -7,6 +7,8 @@ import { DemandPostForm } from '@/features/buyer/components/DemandPostForm'
 import { NewListingForm } from '@/features/listing/components/NewListingForm'
 import { createBuyerProfile, createDemandPost } from '@/features/buyer/api'
 import { createListing, getPlots } from '@/features/listing/api'
+import { getOffers, handleOfferAction } from '@/features/matching/api'
+import { OfferCard } from '@/features/matching/components/OfferCard'
 
 function BuyerDashboard() {
   const [view, setView] = useState<'profile' | 'demand' | 'dashboard'>('dashboard')
@@ -45,9 +47,11 @@ function BuyerDashboard() {
 function FarmerDashboard({ userId }: { userId: string }) {
   const [view, setView] = useState<'listing' | 'dashboard'>('dashboard')
   const [plots, setPlots] = useState<{ id: string; acres: number }[]>([])
+  const [offers, setOffers] = useState<{ id: string; status: string; price_per_tonne: number }[]>([])
 
   useEffect(() => {
     getPlots(userId).then(setPlots).catch(console.error)
+    getOffers().then(setOffers).catch(console.error)
   }, [userId])
 
   return (
@@ -69,8 +73,30 @@ function FarmerDashboard({ userId }: { userId: string }) {
       )}
 
       {view === 'dashboard' && (
-        <div className="bg-surface border border-surface-border rounded-2xl p-6">
-          <p className="text-copy-secondary">Farmer Dashboard - Listings and Offers will appear here.</p>
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-copy-primary">Your Offers</h3>
+          {offers.length === 0 ? (
+            <div className="bg-surface border border-surface-border rounded-2xl p-6">
+              <p className="text-copy-secondary">Farmer Dashboard - Listings and Offers will appear here.</p>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {offers.map(offer => (
+                <OfferCard 
+                  key={offer.id} 
+                  offer={offer} 
+                  onAccept={async (id) => {
+                    await handleOfferAction(id, 'accept')
+                    getOffers().then(setOffers)
+                  }}
+                  onDecline={async (id) => {
+                    await handleOfferAction(id, 'decline')
+                    getOffers().then(setOffers)
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.routers.v1 import health, farmer, buyer, listing
+from app.routers.v1 import health, farmer, buyer, listing, offer
 from app.core.config import get_settings
 from app.core.errors import setup_exception_handlers
 
@@ -57,3 +57,4 @@ app.include_router(health.router, prefix="/api/v1")
 app.include_router(farmer.router, prefix="/api/v1")
 app.include_router(buyer.router, prefix="/api/v1")
 app.include_router(listing.router, prefix="/api/v1")
+app.include_router(offer.router, prefix="/api/v1")
