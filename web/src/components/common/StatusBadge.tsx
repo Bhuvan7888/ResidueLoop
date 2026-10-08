@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 
 interface StatusBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
   status: 'verified' | 'fire_detected' | 'inconclusive' | 'pending' | 'received' | 'not_received' | 'rejected' | 'approved' | 'declined' | 'whatsapp'
-  label: str
+  label: string
 }
 
 export function StatusBadge({ status, label, className, ...props }: StatusBadgeProps) {
