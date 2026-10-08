@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import { signInWithOtp, verifyOtp } from "../api"
 import { phoneSchema, otpSchema } from "../schemas"
 
@@ -10,6 +11,7 @@ interface PhoneOtpFormProps {
 }
 
 export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
+  const { t } = useTranslation()
   const [step, setStep] = useState<'phone' | 'otp'>('phone')
   const [phone, setPhone] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -58,7 +60,7 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
     return (
       <form onSubmit={phoneForm.handleSubmit(onPhoneSubmit)} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-copy-primary mb-1">Phone Number</label>
+          <label className="block text-sm font-medium text-copy-primary mb-1">{t('auth.phone_label')}</label>
           <input
             {...phoneForm.register('phone')}
             placeholder="+919999999999"
@@ -75,7 +77,7 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
           disabled={phoneForm.formState.isSubmitting}
           className="w-full bg-brand text-on-brand rounded-xl py-2 font-medium disabled:opacity-50"
         >
-          {phoneForm.formState.isSubmitting ? 'Sending...' : 'Send OTP'}
+          {phoneForm.formState.isSubmitting ? t('auth.verifying') : t('auth.send_otp')}
         </button>
       </form>
     )
@@ -84,7 +86,7 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
   return (
     <form onSubmit={otpForm.handleSubmit(onOtpSubmit)} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-copy-primary mb-1">Enter OTP sent to {phone}</label>
+        <label className="block text-sm font-medium text-copy-primary mb-1">{t('auth.enter_otp_msg')} {phone}</label>
         <input
           {...otpForm.register('token')}
           placeholder="123456"
@@ -101,7 +103,7 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
         disabled={otpForm.formState.isSubmitting}
         className="w-full bg-brand text-on-brand rounded-xl py-2 font-medium disabled:opacity-50"
       >
-        {otpForm.formState.isSubmitting ? 'Verifying...' : 'Verify'}
+        {otpForm.formState.isSubmitting ? t('auth.verifying') : t('auth.verify_otp')}
       </button>
       <div className="text-center text-sm">
         {countdown > 0 ? (

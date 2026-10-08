@@ -1,11 +1,13 @@
 import { Navigate, Outlet } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 
 export function ProtectedLayout() {
   const { session, role, loading } = useAuth()
+  const { t } = useTranslation()
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen bg-base">Loading...</div>
+    return <div className="flex items-center justify-center min-h-screen bg-base">{t('common.loading')}</div>
   }
 
   if (!session) {
@@ -22,7 +24,7 @@ export function ProtectedLayout() {
   return (
     <div className="min-h-screen bg-base flex flex-col">
       <header className="border-b border-surface-border-subtle bg-surface px-6 py-4 flex justify-between items-center">
-        <h1 className="font-display text-xl text-copy-primary">ResidueLoop</h1>
+        <h1 className="font-display text-xl text-copy-primary">{t('auth.brand')}</h1>
         {/* Navbar shell items here */}
       </header>
       <main className="flex-1 p-6 max-w-5xl mx-auto w-full">

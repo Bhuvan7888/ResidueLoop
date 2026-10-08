@@ -1,4 +1,31 @@
 {
   "welcome": "Welcome to ResidueLoop",
-  "subtitle": "Stop burning, start selling."
+  "subtitle": "Stop burning, start selling.",
+  "auth": {
+    "welcome_prefix": "Welcome to",
+    "brand": "ResidueLoop",
+    "phone_label": "Phone Number",
+    "send_otp": "Send OTP",
+    "otp_label": "OTP Code",
+    "verifying": "Verifying...",
+    "verify_otp": "Verify OTP",
+    "enter_otp_msg": "Enter OTP to login",
+    "choose_role": "Choose Your Role",
+    "role_farmer": "Farmer",
+    "role_farmer_desc": "I want to sell paddy straw from my fields.",
+    "role_buyer": "Buyer",
+    "role_buyer_desc": "I need to buy baled paddy straw.",
+    "role_donor": "Donor",
+    "role_donor_desc": "I want to fund pickups to stop burning.",
+    "role_ngo": "NGO",
+    "role_ngo_desc": "I want to manage funding and farmers."
+  },
+  "common": {
+    "loading": "Loading...",
+    "sign_out": "Sign Out",
+    "dashboard": "Dashboard"
+  },
+  "dashboard": {
+    "welcome_msg": "Welcome to your {{role}} dashboard. ID: {{id}}"
+  }
 }

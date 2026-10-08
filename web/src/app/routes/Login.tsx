@@ -8,7 +8,7 @@ export function Login() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
 
-  if (loading) return <div>Loading...</div>
+  if (loading) return <div>{t('common.loading')}</div>
 
   if (session) {
     return <Navigate to="/" replace />
@@ -26,8 +26,8 @@ export function Login() {
       </header>
       <main className="flex-1 flex flex-col md:flex-row items-center justify-center max-w-5xl mx-auto w-full px-6 py-16 md:py-24 gap-12">
         <div className="flex-1 text-center md:text-left">
-          <p className="text-copy-secondary italic font-display mb-2">Welcome to</p>
-          <h1 className="text-5xl md:text-7xl font-display text-copy-primary mb-4">ResidueLoop</h1>
+          <p className="text-copy-secondary italic font-display mb-2">{t('auth.welcome_prefix')}</p>
+          <h1 className="text-5xl md:text-7xl font-display text-copy-primary mb-4">{t('auth.brand')}</h1>
           <p className="text-xl text-copy-secondary">{t('subtitle')}</p>
         </div>
         <div className="w-full max-w-md">

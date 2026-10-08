@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { updateProfileRole } from "../api"
 import { UserRole } from "../hooks/useAuth"
 
@@ -8,6 +9,7 @@ interface RolePickerProps {
 }
 
 export function RolePicker({ userId, onRoleSelected }: RolePickerProps) {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -25,7 +27,7 @@ export function RolePicker({ userId, onRoleSelected }: RolePickerProps) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-display text-center text-copy-primary">Choose your role</h2>
+      <h2 className="text-2xl font-display text-center text-copy-primary">{t('auth.choose_role')}</h2>
       {error && <p className="text-state-error text-center">{error}</p>}
       <div className="grid gap-4">
         <button
@@ -33,24 +35,24 @@ export function RolePicker({ userId, onRoleSelected }: RolePickerProps) {
           disabled={loading}
           className="p-6 bg-surface border border-border-surface-border rounded-2xl text-left hover:bg-bg-subtle transition-colors"
         >
-          <div className="text-lg font-medium text-copy-primary">Farmer</div>
-          <div className="text-copy-secondary text-sm mt-1">I want to sell paddy straw from my fields.</div>
+          <div className="text-lg font-medium text-copy-primary">{t('auth.role_farmer')}</div>
+          <div className="text-copy-secondary text-sm mt-1">{t('auth.role_farmer_desc')}</div>
         </button>
         <button
           onClick={() => handleSelect('buyer')}
           disabled={loading}
           className="p-6 bg-surface border border-border-surface-border rounded-2xl text-left hover:bg-bg-subtle transition-colors"
         >
-          <div className="text-lg font-medium text-copy-primary">Buyer</div>
-          <div className="text-copy-secondary text-sm mt-1">I want to buy paddy straw for my plant.</div>
+          <div className="text-lg font-medium text-copy-primary">{t('auth.role_buyer')}</div>
+          <div className="text-copy-secondary text-sm mt-1">{t('auth.role_buyer_desc')}</div>
         </button>
         <button
           onClick={() => handleSelect('donor')}
           disabled={loading}
           className="p-6 bg-surface border border-border-surface-border rounded-2xl text-left hover:bg-bg-subtle transition-colors"
         >
-          <div className="text-lg font-medium text-copy-primary">Donor</div>
-          <div className="text-copy-secondary text-sm mt-1">I want to fund alternatives to crop burning.</div>
+          <div className="text-lg font-medium text-copy-primary">{t('auth.role_donor')}</div>
+          <div className="text-copy-secondary text-sm mt-1">{t('auth.role_donor_desc')}</div>
         </button>
       </div>
     </div>
