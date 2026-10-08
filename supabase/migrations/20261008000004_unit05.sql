@@ -3,7 +3,7 @@
 CREATE TABLE offers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     listing_id UUID NOT NULL REFERENCES listings(id),
-    buyer_id UUID NOT NULL REFERENCES buyers(id),
+    buyer_id UUID NOT NULL REFERENCES buyers(profile_id),
     baler_id UUID NOT NULL REFERENCES balers(id),
     status TEXT NOT NULL CHECK (status IN ('pending', 'accepted', 'declined')),
     price_per_tonne NUMERIC NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE offers (
 CREATE TABLE pools (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     village_id UUID NOT NULL, -- references villages(id) once created
-    buyer_id UUID NOT NULL REFERENCES buyers(id),
+    buyer_id UUID NOT NULL REFERENCES buyers(profile_id),
     baler_id UUID NOT NULL REFERENCES balers(id),
     status TEXT NOT NULL CHECK (status IN ('forming', 'ready', 'in_progress', 'completed')),
     target_tonnes NUMERIC NOT NULL,
@@ -44,17 +44,13 @@ CREATE POLICY "Farmers can update own offers" ON offers FOR UPDATE USING (
     )
 );
 
-CREATE POLICY "Buyers see own offers" ON offers FOR SELECT USING (buyer_id IN (SELECT id FROM buyers WHERE profile_id = auth.uid()));
-CREATE POLICY "Balers see own offers" ON offers FOR SELECT USING (baler_id IN (SELECT id FROM balers WHERE profile_id = auth.uid()));
+CREATE POLICY "Buyers see own offers" ON offers FOR SELECT USING (buyer_id = auth.uid());
 
 CREATE POLICY "Anyone in pool can see pool" ON pools FOR SELECT USING (
-    buyer_id IN (SELECT id FROM buyers WHERE profile_id = auth.uid()) OR
-    baler_id IN (SELECT id FROM balers WHERE profile_id = auth.uid()) OR
+    buyer_id = auth.uid() OR
     id IN (
-        SELECT pool_id FROM listings WHERE plot_id IN (
-            SELECT id FROM plots WHERE farmer_id = auth.uid()
-        )
-    ) -- assuming listing will have a pool_id FK added
+        SELECT pool_id FROM listings WHERE farmer_id = auth.uid()
+    )
 );
 
 ALTER TABLE listings ADD COLUMN pool_id UUID REFERENCES pools(id);
