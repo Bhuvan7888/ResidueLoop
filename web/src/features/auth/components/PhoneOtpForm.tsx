@@ -41,8 +41,8 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
       setPhone(values.phone)
       setStep('otp')
       setCountdown(60)
-    } catch (err: any) {
-      setError(err.message || 'Failed to send OTP')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to send OTP')
     }
   }
 
@@ -51,8 +51,8 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
     try {
       await verifyOtp(phone, values.token)
       onSuccess()
-    } catch (err: any) {
-      setError(err.message || 'Invalid OTP')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Invalid OTP')
     }
   }
 
