@@ -16,6 +16,9 @@ Update this file whenever the current phase, active feature, or implementation s
 - Unit 01: project foundation (`featureSpecs/01-foundation.md`).
 - Unit 02: auth and roles (`featureSpecs/02-auth-and-roles.md`).
 - Unit 03: farmer profile and ID verification (`featureSpecs/03-farmer-profile-and-id.md`).
+- Unit 04: buyers and listings (`featureSpecs/04-buyers-and-listings.md`).
+- Unit 05: matching and pooling (`featureSpecs/05-matching-and-pooling.md`).
+- Unit 06: pickup and payment status (`featureSpecs/06-pickup-and-payment-status.md`).
 
 ## In Progress
 
@@ -24,10 +27,6 @@ Update this file whenever the current phase, active feature, or implementation s
 ## Next Up
 
 Phase 1, in order:
-
-4. `04-buyers-and-listings.md`
-5. `05-matching-and-pooling.md`
-6. `06-pickup-and-payment-status.md`
 7. `07-satellite-verification.md`
 8. `08-charity.md`
 9. `11-security-hardening.md` (run after Unit 08, before any Phase 2 work)
