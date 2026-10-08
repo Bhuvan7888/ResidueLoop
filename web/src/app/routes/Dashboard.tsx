@@ -9,6 +9,8 @@ import { createBuyerProfile, createDemandPost } from '@/features/buyer/api'
 import { createListing, getPlots } from '@/features/listing/api'
 import { getOffers, handleOfferAction } from '@/features/matching/api'
 import { OfferCard } from '@/features/matching/components/OfferCard'
+import { getPickups, updatePickup } from '@/features/pickup/api'
+import { PickupCard } from '@/features/pickup/components/PickupCard'
 
 function BuyerDashboard() {
   const [view, setView] = useState<'profile' | 'demand' | 'dashboard'>('dashboard')
@@ -103,6 +105,38 @@ function FarmerDashboard({ userId }: { userId: string }) {
   )
 }
 
+function BalerDashboard() {
+  const [pickups, setPickups] = useState<{ id: string; pool_id: string; actual_tonnes: number | null; payment_status: string; pools: { pickup_date: string | null } }[]>([])
+
+  useEffect(() => {
+    getPickups().then(setPickups).catch(console.error)
+  }, [])
+
+  return (
+    <div className="space-y-6">
+      <h3 className="text-lg font-medium text-copy-primary">Your Pickups</h3>
+      {pickups.length === 0 ? (
+        <div className="bg-surface border border-surface-border rounded-2xl p-6">
+          <p className="text-copy-secondary">Baler Dashboard - Assigned pickups will appear here.</p>
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {pickups.map(pickup => (
+            <PickupCard 
+              key={pickup.id} 
+              pickup={pickup} 
+              onUpdate={async (id, data) => {
+                await updatePickup(id, data)
+                getPickups().then(setPickups)
+              }} 
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function Dashboard() {
   const { role, session } = useAuth()
   const { t } = useTranslation()
@@ -115,6 +149,7 @@ export function Dashboard() {
       
       {role === 'buyer' && <BuyerDashboard />}
       {role === 'farmer' && <FarmerDashboard userId={session?.user.id || ''} />}
+      {role === 'baler' && <BalerDashboard />}
     </div>
   )
 }
