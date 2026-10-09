@@ -51,7 +51,7 @@ Every flow starts at the same login page. Expected results are written after eac
 
 1. User opens the app. If not signed in, every protected route redirects to the login page.
 2. User picks a display language (English or Punjabi) on the login page.
-3. User enters a 10-digit Indian mobile number. The app adds 91 (without the +) and sends an OTP to work with Twilio. Result: OTP screen appears.
+3. User enters a 10-digit Indian mobile number. The app adds +91 and sends an OTP via WhatsApp (Phase 2 config). Result: OTP screen appears.
 4. User enters the 6-digit OTP. Result: signed in and redirected by role.
 5. Wrong OTP shows an inline error. Expired OTP shows a resend option. Resend is blocked during a cooldown.
 6. First-time user (no profile) sees a role picker: Farmer, Buyer, Donor. Role is saved once and cannot be changed in the app.

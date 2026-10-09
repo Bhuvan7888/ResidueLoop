@@ -43,7 +43,7 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
       return
     }
     try {
-      const e164Phone = `91${values.phone}`
+      const e164Phone = `+91${values.phone}`
       await signInWithOtp(e164Phone, captchaToken)
       setPhone(e164Phone)
       setStep('otp')
@@ -69,10 +69,11 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
         <div>
           <label className="block text-sm font-medium text-copy-primary mb-1">{t('auth.phone_label')}</label>
           <div className="flex relative items-center">
+            <span className="absolute left-3 text-copy-muted">+91</span>
             <input
               {...phoneForm.register('phone')}
               placeholder="9999999999"
-              className="w-full rounded-xl border border-border-surface-border py-2 px-3 focus:ring-2 focus:ring-accent-primary outline-none"
+              className="w-full rounded-xl border border-border-surface-border py-2 pl-10 pr-2 focus:ring-2 focus:ring-accent-primary outline-none"
               disabled={phoneForm.formState.isSubmitting}
             />
           </div>
