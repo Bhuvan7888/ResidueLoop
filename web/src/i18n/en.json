@@ -36,5 +36,16 @@
     "you_wrote": "You",
     "reply": "Reply",
     "listing_created": "Listing created, about {{tonnes}} t"
+  },
+  "heatmap": {
+    "open": "Demand map",
+    "title": "Demand map",
+    "subtitle": "Village level. Posted demand against current supply.",
+    "legend_demand": "Filled circle: posted demand",
+    "legend_supply": "Ring: supply from open listings and pools",
+    "legend_unfilled": "Outlined and labelled: unfilled demand zone",
+    "unfilled_label": "{{name}}: {{tonnes}} t unfilled",
+    "no_zones": "No unfilled demand right now.",
+    "error": "Could not load the map data."
   }
 }

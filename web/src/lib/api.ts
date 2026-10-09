@@ -17,7 +17,7 @@ export class ApiError extends Error {
 
 export async function apiRequest<T = unknown>(
   path: string,
-  options: { method?: 'POST' | 'PATCH'; body?: unknown } = {},
+  options: { method?: 'GET' | 'POST' | 'PATCH'; body?: unknown } = {},
 ): Promise<T> {
   const { data: session } = await supabase.auth.getSession()
   const token = session.session?.access_token

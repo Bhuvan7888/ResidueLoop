@@ -1,12 +1,18 @@
-import { useState, useEffect } from 'react'
+import { lazy, Suspense, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BuyerProfileForm } from './BuyerProfileForm'
 import { DemandPostForm } from './DemandPostForm'
 import { createBuyerProfile, createDemandPost } from '../api'
 import { completePickup, getPickups, updatePickupWeight } from '@/features/pickup/api'
 import { PickupCard } from '@/features/pickup/components/PickupCard'
 
+const DemandHeatmap = lazy(() =>
+  import('@/features/heatmap/components/DemandHeatmap').then((module) => ({ default: module.DemandHeatmap })),
+)
+
 export function BuyerDashboard() {
-  const [view, setView] = useState<'profile' | 'demand' | 'dashboard'>('dashboard')
+  const { t } = useTranslation()
+  const [view, setView] = useState<'profile' | 'demand' | 'heatmap' | 'dashboard'>('dashboard')
   const [pickups, setPickups] = useState<{ id: string; pool_id: string; weighed_tonnes: number | null; completed_at: string | null; amount_due: number | null; payment_status: string; pools: { pickup_date: string | null } }[]>([])
 
   useEffect(() => {
@@ -18,6 +24,7 @@ export function BuyerDashboard() {
       <div className="flex space-x-4">
         <button onClick={() => setView('profile')} className="px-4 py-2 bg-brand text-on-brand rounded-xl font-medium">Edit Profile</button>
         <button onClick={() => setView('demand')} className="px-4 py-2 bg-brand text-on-brand rounded-xl font-medium">Post Demand</button>
+        <button onClick={() => setView('heatmap')} className="px-4 py-2 bg-brand text-on-brand rounded-xl font-medium">{t('heatmap.open', 'Demand map')}</button>
         <button onClick={() => setView('dashboard')} className="px-4 py-2 bg-surface border border-surface-border rounded-xl font-medium">Back</button>
       </div>
 
@@ -26,6 +33,12 @@ export function BuyerDashboard() {
           await createBuyerProfile(data)
           setView('dashboard')
         }} />
+      )}
+
+      {view === 'heatmap' && (
+        <Suspense fallback={<p className="text-copy-secondary">{t('common.loading', 'Loading...')}</p>}>
+          <DemandHeatmap />
+        </Suspense>
       )}
 
       {view === 'demand' && (
