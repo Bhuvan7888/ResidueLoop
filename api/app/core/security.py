@@ -1,6 +1,11 @@
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from functools import lru_cache
+
 import jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from postgrest.exceptions import APIError
+from supabase import Client, create_client
+
 from app.core.config import get_settings
 
 security = HTTPBearer()
@@ -38,8 +43,8 @@ def get_current_user_id(payload: dict = Depends(verify_jwt)) -> str:
         )
     return user_id
 
-def get_supabase_client() -> "Client":
-    from supabase import create_client, Client
+@lru_cache
+def get_supabase_client() -> Client:
     settings = get_settings()
     # Pinned to service role to check profiles securely bypassing RLS if needed,
     # or anon key. Service role is safer here to verify server-side.
@@ -48,14 +53,11 @@ def get_supabase_client() -> "Client":
 def require_role(allowed_roles: list[str]):
     def role_checker(user_id: str = Depends(get_current_user_id)) -> str:
         try:
-            client = get_supabase_client()
-            # MOCK: We mock the response if missing keys, but otherwise run it
-            response = client.table("profiles").select("role").eq("id", user_id).single().execute()
-            user_role = response.data.get("role")
-            if user_role not in allowed_roles:
-                raise HTTPException(status_code=403, detail="Forbidden: Insufficient role")
-            return user_id
-        except Exception as e:
-            # If the user doesn't exist or DB errors, block them
+            response = get_supabase_client().table("profiles").select("role").eq("id", user_id).single().execute()
+        except APIError:
+            # No profile row for this user: treat as no role.
+            raise HTTPException(status_code=403, detail="Forbidden: Insufficient role") from None
+        if response.data.get("role") not in allowed_roles:
             raise HTTPException(status_code=403, detail="Forbidden: Insufficient role")
+        return user_id
     return role_checker
