@@ -21,7 +21,7 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
 
   const phoneForm = useForm<z.infer<typeof phoneSchema>>({
     resolver: zodResolver(phoneSchema),
-    defaultValues: { phone: '+91' }
+    defaultValues: { phone: '' }
   })
 
   const otpForm = useForm<z.infer<typeof otpSchema>>({
@@ -43,8 +43,9 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
       return
     }
     try {
-      await signInWithOtp(values.phone, captchaToken)
-      setPhone(values.phone)
+      const e164Phone = `+91${values.phone}`
+      await signInWithOtp(e164Phone, captchaToken)
+      setPhone(e164Phone)
       setStep('otp')
       setCountdown(60)
     } catch (err: unknown) {
@@ -67,12 +68,15 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
       <form onSubmit={phoneForm.handleSubmit(onPhoneSubmit)} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-copy-primary mb-1">{t('auth.phone_label')}</label>
-          <input
-            {...phoneForm.register('phone')}
-            placeholder="+919999999999"
-            className="w-full rounded-xl border border-border-surface-border p-2 focus:ring-2 focus:ring-accent-primary outline-none"
-            disabled={phoneForm.formState.isSubmitting}
-          />
+          <div className="flex relative items-center">
+            <span className="absolute left-3 text-copy-muted">+91</span>
+            <input
+              {...phoneForm.register('phone')}
+              placeholder="9999999999"
+              className="w-full rounded-xl border border-border-surface-border py-2 pl-10 pr-2 focus:ring-2 focus:ring-accent-primary outline-none"
+              disabled={phoneForm.formState.isSubmitting}
+            />
+          </div>
           {phoneForm.formState.errors.phone && (
             <p className="text-state-error text-sm mt-1">{phoneForm.formState.errors.phone.message}</p>
           )}

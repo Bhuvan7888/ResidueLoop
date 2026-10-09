@@ -23,10 +23,11 @@ Update this file whenever the current phase, active feature, or implementation s
 - Unit 08: charity (`featureSpecs/08-charity.md`).
 - Unit 11: security hardening (`featureSpecs/11-security-hardening.md`).
 - Phase 1: Web application completed.
+- Unit 09: WhatsApp synchronization (`featureSpecs/09-whatsapp-sync.md`).
 
 ## In Progress
 
-- Unit 09: WhatsApp synchronization (`featureSpecs/09-whatsapp-sync.md`).
+- Unit 10: Buyer Heatmap (`featureSpecs/10-buyer-heatmap.md`).
 
 ## Next Up
 
@@ -68,7 +69,7 @@ The build continues with fallbacks for every item. Ask the user for these at the
 ## Architecture Decisions
 
 - Database is Supabase Postgres with PostGIS. Schema changes only through migrations in `supabase/migrations`.
-- Authentication is Supabase Auth with phone OTP. Hackathon build uses Supabase test phone numbers and fixed OTPs.
+- Authentication is Supabase Auth with phone OTP. Hackathon build uses Supabase test phone numbers and fixed OTPs (the UI takes 10 digits and prepends +91, which must exactly match the E.164 test number in Supabase to bypass Twilio).
 - ID documents go in a private Supabase Storage bucket. Only ID type, last four digits, and status are stored in the database.
 - No payment gateway. Payment status is recorded by the farmer. Donations are recorded in test mode.
 - No digital certificate. Verification is shown as a status inside the app.
