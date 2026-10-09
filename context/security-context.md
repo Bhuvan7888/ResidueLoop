@@ -117,6 +117,9 @@ ID documents are the only uploads in Phase 1.
 - WhatsApp webhook (Phase 2): verify the signature on the raw request body with a constant-time comparison, reject missing or invalid signatures, and ignore duplicate message IDs to prevent replays.
 - LLM parsing (Phase 2): treat message text as untrusted input. The model output must match a strict JSON schema with an allowlist of intents. The model cannot call tools or reach other data. The acting user always comes from the phone number mapping, never from message content. Limit message length.
 - Questions on WhatsApp are answered from database queries, not from model text.
+- The webhook route accepts form fields because Twilio sends them, so it is the one exception to "JSON only". The signature is checked before anything else, and an unset `TWILIO_AUTH_TOKEN` rejects every request.
+- The public webhook host (a tunnel in development) is added to the trusted hosts from `PUBLIC_BASE_URL`. No other host is added.
+- Outbound hosts added for Unit 09: `api.twilio.com` and `generativelanguage.googleapis.com`. The shared client uses timeouts, retries with backoff, and does not follow redirects.
 
 ## Supply Chain
 

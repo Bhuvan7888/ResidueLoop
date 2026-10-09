@@ -31,8 +31,7 @@ The earlier "Phase 1 complete" status was wrong for the backend as it was not co
 
 ## In Progress
 
-- Unit 09 (WhatsApp sync) on branch `phase-2-whatsapp`. The core spine repair is done and committed, see Session Notes.
-- Blocked on input: the new migration `20261009000000_core_spine.sql` must be run in the Supabase SQL Editor, then the live flow can be walked.
+- Unit 09 (WhatsApp sync) is built on branch `phase-2-whatsapp` and awaiting live checks. See "Unit 09 Acceptance" in Session Notes.
 
 ## Deferred (needs the team, not part of the spine repair)
 
@@ -96,6 +95,9 @@ The build continues with fallbacks for every item. Ask the user for these at the
 - Mocked in the hackathon build: ID review, payments, and OTP delivery.
 
 ## Session Notes
+
+- Unit 09 acceptance (2026-10-09). Passed by tests with fixtures: forged signature rejected (webhook returns 403); replayed message id ignored; unknown number gets the registration message; non-farmer gets "farmers only"; over-long message is not parsed; unparseable or out-of-allowlist message gets a clarification and creates nothing; a message cannot name another user's record or user (the parser schema forbids extra fields); WhatsApp listing runs through the web service with `source = whatsapp`; pool, pickup and payment answers are filled from database values into fixed templates. Blocked on input: a real Punjabi message through the Twilio sandbox (needs `PUBLIC_BASE_URL` tunnel, `MOCK_WHATSAPP_SEND=false`, `MOCK_LLM_PARSER=false`, a rotated Gemini key). Not built: "is my plot verified" and "request NGO support" over chat (they need the deferred verification and charity tables).
+- Punjabi strings for native review: all of `api/app/services/whatsapp_templates.py`, and the `whatsapp` block in `web/src/i18n/pa.json`.
 
 - 2026-10-09, core spine repair (branch `phase-2-whatsapp`): API boots; repositories layer (`api/app/repositories`); real services for plots, ID (review mocked), buyer profile and demand, listings, matching (weights in config), offers, pools, pickups, weights, payment status; web calls the FastAPI through `web/src/lib/api.ts`; 31 API tests, ruff and mypy clean on the new code. Not yet checked against a live database.
 - Mocked in this repair: ID review (`MOCK_ID_REVIEW`), ID file storage and encryption, verification queue (`queue_verification` is a stub).

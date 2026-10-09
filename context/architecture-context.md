@@ -98,7 +98,7 @@ Rules:
 | `assistance_requests` | id, farmer_id, listing_id, ngo_id, reason, amount_requested, status (submitted, approved, disbursed, declined), decided_at                          |
 | `disbursements`       | id, assistance_request_id, donation_id, ngo_id, payee_type (baler, transport, farmer), amount, note, created_at                                    |
 | `notifications`       | id, user_id, type, body, linked_record_type, linked_record_id, read_at, created_at                                                                 |
-| `messages` (Phase 2)  | id, phone, profile_id, direction, raw_text, parsed_json, intent, linked_record_type, linked_record_id, created_at                                  |
+| `messages` (Phase 2)  | id, provider_message_id (unique, replay protection), profile_id (null for unknown numbers), phone_masked, direction, raw_text, parsed_json, intent, linked_record_type, linked_record_id, created_at |
 | `risk_scores` (Phase 3) | village_id, date, score, forecast_tonnes                                                                                                         |
 
 `pickups` is one row per farmer listing in a pool, because weights and payment status are per farmer. `listings.pool_id` is set when an offer is accepted. The row is created at that moment, with `unique(listing_id)`. `pickups.weighed_tonnes` is the column name everywhere (the first migration called it `actual_tonnes`; migration `20261009000000_core_spine.sql` renames it). `pickups` also carries `payment_updated_at`, `quality_notes`, and `completed_at`.
@@ -150,6 +150,12 @@ Rules:
 - Records created over WhatsApp carry `source = whatsapp` and appear in the farmer's activity timeline and the buyer's view.
 - An unknown phone number gets a short message pointing to registration.
 - If a record is edited on web and WhatsApp, the latest edit wins and both stay in the activity log.
+- Implementation: `POST /api/v1/webhooks/whatsapp` (Twilio form fields) verifies `X-Twilio-Signature` over `PUBLIC_BASE_URL` plus the path and every form field, then queues `conversation_service.handle_inbound` as a FastAPI background task and returns an empty TwiML response. The message is stored first, and a repeated `MessageSid` is dropped. The acting user is looked up from the sender's phone number in `profiles`.
+- `integrations/llm.py` returns only a `ParsedMessage` (intent from the allowlist plus acres, harvest date, payment status). Output that fails the schema, has extra fields, or comes from a failed call becomes intent `unknown`, which gets a clarification reply and creates nothing. `integrations/whatsapp.py` is the single Twilio adapter (signature check, send).
+- Operations reuse `listing_service`, `matching_service` and `pickup_service`. Questions are answered from repository reads filled into `services/whatsapp_templates.py`.
+- Only farmers may use the chat. Other roles get a short "farmers only" reply. "Request support" replies that it is unavailable until the charity tables exist.
+- Mocks (config flags, default on): `MOCK_WHATSAPP_SEND` (replies are stored and logged, not sent) and `MOCK_LLM_PARSER` (keyword parser for the demo phrases). Signature verification is never mocked.
+- Full phone numbers are not stored in `messages`. Only the masked form is, which keeps the rule that full numbers live in `profiles`.
 
 ## Forecast Model (Phase 3)
 
