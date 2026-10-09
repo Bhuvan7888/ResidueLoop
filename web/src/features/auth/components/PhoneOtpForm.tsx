@@ -43,8 +43,9 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
       return
     }
     try {
-      await signInWithOtp(values.phone, captchaToken)
-      setPhone(values.phone)
+      const e164Phone = `91${values.phone}`
+      await signInWithOtp(e164Phone, captchaToken)
+      setPhone(e164Phone)
       setStep('otp')
       setCountdown(60)
     } catch (err: unknown) {
