@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 
 const weightSchema = z.object({
-  actual_tonnes: z.number().min(0.1, 'Must be greater than 0'),
+  weighed_tonnes: z.number().min(0.1, 'Must be greater than 0'),
 })
 
 interface WeightFormProps {
@@ -39,11 +39,11 @@ export function WeightForm({ onSubmit, onCancel }: WeightFormProps) {
         <input
           type="number"
           step="0.1"
-          {...form.register('actual_tonnes', { valueAsNumber: true })}
+          {...form.register('weighed_tonnes', { valueAsNumber: true })}
           className="w-full rounded-xl border border-surface-border p-2 focus:ring-2 focus:ring-accent-primary outline-none"
         />
-        {form.formState.errors.actual_tonnes && (
-          <p className="text-state-error text-sm mt-1">{form.formState.errors.actual_tonnes.message}</p>
+        {form.formState.errors.weighed_tonnes && (
+          <p className="text-state-error text-sm mt-1">{form.formState.errors.weighed_tonnes.message}</p>
         )}
       </div>
 

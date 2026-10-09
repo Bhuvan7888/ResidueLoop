@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react'
 import { BuyerProfileForm } from './BuyerProfileForm'
 import { DemandPostForm } from './DemandPostForm'
 import { createBuyerProfile, createDemandPost } from '../api'
-import { getPickups, updatePickupWeight } from '@/features/pickup/api'
+import { completePickup, getPickups, updatePickupWeight } from '@/features/pickup/api'
 import { PickupCard } from '@/features/pickup/components/PickupCard'
 
 export function BuyerDashboard() {
   const [view, setView] = useState<'profile' | 'demand' | 'dashboard'>('dashboard')
-  const [pickups, setPickups] = useState<{ id: string; pool_id: string; actual_tonnes: number | null; amount_due: number | null; payment_status: string; pools: { pickup_date: string | null } }[]>([])
+  const [pickups, setPickups] = useState<{ id: string; pool_id: string; weighed_tonnes: number | null; completed_at: string | null; amount_due: number | null; payment_status: string; pools: { pickup_date: string | null } }[]>([])
 
   useEffect(() => {
     getPickups().then(setPickups).catch(console.error)
@@ -55,7 +55,11 @@ export function BuyerDashboard() {
                   onUpdateWeight={async (id, data) => {
                     await updatePickupWeight(id, data)
                     getPickups().then(setPickups)
-                  }} 
+                  }}
+                  onComplete={async (id) => {
+                    await completePickup(id)
+                    getPickups().then(setPickups)
+                  }}
                 />
               ))}
             </div>

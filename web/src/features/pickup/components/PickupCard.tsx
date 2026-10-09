@@ -6,7 +6,8 @@ import { PaymentForm } from './PaymentForm'
 interface Pickup {
   id: string
   pool_id: string
-  actual_tonnes: number | null
+  weighed_tonnes: number | null
+  completed_at: string | null
   amount_due: number | null
   payment_status: string
   pools: {
@@ -17,11 +18,12 @@ interface Pickup {
 interface PickupCardProps {
   pickup: Pickup
   mode: 'buyer' | 'farmer'
-  onUpdateWeight?: (id: string, data: { actual_tonnes: number }) => Promise<void>
+  onUpdateWeight?: (id: string, data: { weighed_tonnes: number }) => Promise<void>
+  onComplete?: (id: string) => Promise<void>
   onUpdatePayment?: (id: string, data: { payment_status: 'pending' | 'received' | 'not_received' }) => Promise<void>
 }
 
-export function PickupCard({ pickup, mode, onUpdateWeight, onUpdatePayment }: PickupCardProps) {
+export function PickupCard({ pickup, mode, onUpdateWeight, onComplete, onUpdatePayment }: PickupCardProps) {
   const { t } = useTranslation()
   const [isEditing, setIsEditing] = useState(false)
 
@@ -47,7 +49,7 @@ export function PickupCard({ pickup, mode, onUpdateWeight, onUpdatePayment }: Pi
 
       {mode === 'buyer' && (
         <>
-          {!isEditing && pickup.actual_tonnes === null ? (
+          {!isEditing && pickup.weighed_tonnes === null ? (
             <button
               onClick={() => setIsEditing(true)}
               className="w-full bg-brand text-on-brand rounded-xl py-2 font-medium hover:bg-accent-secondary"
@@ -63,9 +65,19 @@ export function PickupCard({ pickup, mode, onUpdateWeight, onUpdatePayment }: Pi
               onCancel={() => setIsEditing(false)}
             />
           ) : (
-            <div className="bg-bg-subtle p-3 rounded-xl flex justify-between items-center">
-              <span className="text-sm text-copy-secondary">{t('pickup.actual_weight', 'Actual Weight')}</span>
-              <span className="text-base font-medium text-copy-primary">{pickup.actual_tonnes} t</span>
+            <div className="space-y-3">
+              <div className="bg-bg-subtle p-3 rounded-xl flex justify-between items-center">
+                <span className="text-sm text-copy-secondary">{t('pickup.actual_weight', 'Actual Weight')}</span>
+                <span className="text-base font-medium text-copy-primary">{pickup.weighed_tonnes} t</span>
+              </div>
+              {pickup.completed_at === null && onComplete && (
+                <button
+                  onClick={() => onComplete(pickup.id)}
+                  className="w-full bg-brand text-on-brand rounded-xl py-2 font-medium hover:bg-accent-secondary"
+                >
+                  {t('pickup.mark_complete', 'Mark pickup complete')}
+                </button>
+              )}
             </div>
           )}
         </>

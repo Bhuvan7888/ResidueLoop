@@ -15,13 +15,13 @@ export function FarmerDashboard({ userId }: { userId: string }) {
   const [listings, setListings] = useState<{ id: string; acres: number; status: string; harvest_date: string }[]>([])
   const [plots, setPlots] = useState<{ id: string; acres: number; verifications?: { verdict: 'verified' | 'fire_detected' | 'inconclusive'; firms_hits: number; nbr_delta: number; confidence: string; checked_at: string }[] }[]>([])
   const [offers, setOffers] = useState<{ id: string; status: string; price_per_tonne: number }[]>([])
-  const [pickups, setPickups] = useState<{ id: string; pool_id: string; actual_tonnes: number | null; amount_due: number | null; payment_status: string; pools: { pickup_date: string | null } }[]>([])
+  const [pickups, setPickups] = useState<{ id: string; pool_id: string; weighed_tonnes: number | null; completed_at: string | null; amount_due: number | null; payment_status: string; pools: { pickup_date: string | null } }[]>([])
 
   useEffect(() => {
     getPlots(userId).then(setPlots).catch(console.error)
     getOffers().then(setOffers).catch(console.error)
     getPickups().then(setPickups).catch(console.error)
-    getListings(userId).then(setListings).catch(console.error)
+    getListings().then(setListings).catch(console.error)
   }, [userId])
 
   return (

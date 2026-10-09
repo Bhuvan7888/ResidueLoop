@@ -1,21 +1,16 @@
+import { apiRequest } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
 
-export async function updatePickupWeight(pickupId: string, data: { actual_tonnes: number }) {
-  const { data: res, error } = await supabase.functions.invoke(`api/v1/pickups/${pickupId}/weight`, {
-    body: data,
-    method: 'PATCH'
-  })
-  if (error) throw error
-  return res
+export function updatePickupWeight(pickupId: string, data: { weighed_tonnes: number }) {
+  return apiRequest(`/pickups/${pickupId}/weight`, { method: 'PATCH', body: data })
 }
 
-export async function updatePickupPayment(pickupId: string, data: { payment_status: 'pending' | 'received' | 'not_received' }) {
-  const { data: res, error } = await supabase.functions.invoke(`api/v1/pickups/${pickupId}/payment_status`, {
-    body: data,
-    method: 'PATCH'
-  })
-  if (error) throw error
-  return res
+export function completePickup(pickupId: string) {
+  return apiRequest(`/pickups/${pickupId}/complete`)
+}
+
+export function updatePickupPayment(pickupId: string, data: { payment_status: 'pending' | 'received' | 'not_received' }) {
+  return apiRequest(`/pickups/${pickupId}/payment_status`, { method: 'PATCH', body: data })
 }
 
 export async function getPickups() {
@@ -23,7 +18,7 @@ export async function getPickups() {
     .from('pickups')
     .select('*, pools(*)')
     .order('created_at', { ascending: false })
-  
+
   if (error) throw error
   return data
 }
