@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { signInWithOtp, verifyOtp } from "../api"
 import { phoneSchema, otpSchema } from "../schemas"
+import { Turnstile } from '@marsidev/react-turnstile'
 
 interface PhoneOtpFormProps {
   onSuccess: () => void
@@ -16,6 +17,7 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
   const [phone, setPhone] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [countdown, setCountdown] = useState(0)
+  const [captchaToken, setCaptchaToken] = useState<string>('')
 
   const phoneForm = useForm<z.infer<typeof phoneSchema>>({
     resolver: zodResolver(phoneSchema),
@@ -36,8 +38,12 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
 
   const onPhoneSubmit = async (values: z.infer<typeof phoneSchema>) => {
     setError(null)
+    if (!captchaToken) {
+      setError('Please complete the CAPTCHA')
+      return
+    }
     try {
-      await signInWithOtp(values.phone)
+      await signInWithOtp(values.phone, captchaToken)
       setPhone(values.phone)
       setStep('otp')
       setCountdown(60)
@@ -70,6 +76,12 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
           {phoneForm.formState.errors.phone && (
             <p className="text-state-error text-sm mt-1">{phoneForm.formState.errors.phone.message}</p>
           )}
+        </div>
+        <div className="flex justify-center my-4">
+          <Turnstile 
+            siteKey={import.meta.env.VITE_CAPTCHA_SITE_KEY || '1x00000000000000000000AA'} 
+            onSuccess={(token) => { setCaptchaToken(token); setError(null); }}
+          />
         </div>
         {error && <p className="text-state-error text-sm">{error}</p>}
         <button
