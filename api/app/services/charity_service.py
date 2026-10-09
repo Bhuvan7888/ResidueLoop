@@ -1,13 +1,10 @@
 from app.core.security import get_supabase_client
-from app.integrations.openmeteo import OpenMeteoClient
 from fastapi import HTTPException
 
 async def get_ranked_villages(target_lat: float, target_lon: float):
     client = get_supabase_client()
     res = client.table("villages").select("*").execute()
     villages = res.data
-    
-    openmeteo = OpenMeteoClient()
     
     ranked = []
     for v in villages:

@@ -13,7 +13,7 @@ class OpenMeteoClient:
         """
         # We simulate a request to prove the allowlist works
         if self.settings.nasa_firms_map_key != "mock":
-            res = await SharedHttpClient.get(f"{self.base_url}?latitude={lat}&longitude={lon}&current_weather=true")
+            await SharedHttpClient.get(f"{self.base_url}?latitude={lat}&longitude={lon}&current_weather=true")
             # Parse wind direction from response
             pass
         return 315.0

@@ -2,6 +2,8 @@ import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useTranslation } from 'react-i18next'
 import { BuyerDashboard } from '@/features/buyer/components/BuyerDashboard'
 import { FarmerDashboard } from '@/features/farmer/components/FarmerDashboard'
+import { DonorDashboard } from '@/features/charity/components/DonorDashboard'
+import { NgoDashboard } from '@/features/charity/components/NgoDashboard'
 
 export function Dashboard() {
   const { role, session } = useAuth()
@@ -15,6 +17,8 @@ export function Dashboard() {
       
       {role === 'buyer' && <BuyerDashboard />}
       {role === 'farmer' && <FarmerDashboard userId={session?.user.id || ''} />}
+      {role === 'donor' && <DonorDashboard userId={session?.user.id || ''} />}
+      {role === 'ngo' && <NgoDashboard userId={session?.user.id || ''} />}
     </div>
   )
 }

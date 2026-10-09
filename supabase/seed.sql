@@ -64,3 +64,29 @@ values
   ('33333333-3333-3333-3333-333333333334', 'Baler 4 (Demo)', ST_SetSRID(ST_MakePoint(75.14, 30.84), 4326), 20, true),
   ('33333333-3333-3333-3333-333333333335', 'Baler 5 (Demo)', ST_SetSRID(ST_MakePoint(75.15, 30.85), 4326), 25, true)
 on conflict do nothing;
+
+-- Demo Plot and Verification
+insert into auth.users (id, phone, role, aud, confirmation_token)
+values 
+  ('44444444-4444-4444-4444-444444444444', '+919999999971', 'authenticated', 'authenticated', '')
+on conflict do nothing;
+
+insert into public.profiles (id, phone, role, name, language)
+values 
+  ('44444444-4444-4444-4444-444444444444', '+919999999971', 'farmer', 'Verified Farmer Demo', 'en')
+on conflict do nothing;
+
+insert into public.farmers (profile_id, village_id, id_status, trust_score)
+values 
+  ('44444444-4444-4444-4444-444444444444', '11111111-1111-1111-1111-111111111111', 'verified', 100)
+on conflict do nothing;
+
+insert into public.plots (id, farmer_id, village_id, centre, radius_m, acres)
+values 
+  ('55555555-5555-5555-5555-555555555555', '44444444-4444-4444-4444-444444444444', '11111111-1111-1111-1111-111111111111', ST_SetSRID(ST_MakePoint(75.17, 30.82), 4326), 100, 5)
+on conflict do nothing;
+
+insert into public.verifications (id, plot_id, window_start, window_end, firms_hits, nbr_delta, verdict, confidence, checked_at)
+values 
+  ('66666666-6666-6666-6666-666666666666', '55555555-5555-5555-5555-555555555555', '2024-10-01', '2024-11-01', 0, 0.05, 'verified', 'high', now())
+on conflict do nothing;
