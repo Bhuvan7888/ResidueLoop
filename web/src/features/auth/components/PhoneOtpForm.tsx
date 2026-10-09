@@ -127,7 +127,7 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
         ) : (
           <button
             type="button"
-            onClick={() => onPhoneSubmit({ phone })}
+            onClick={() => onPhoneSubmit({ phone: phoneForm.getValues('phone') })}
             className="text-brand hover:underline"
           >
             Resend OTP
