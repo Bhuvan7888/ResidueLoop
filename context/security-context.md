@@ -62,6 +62,9 @@ Flood and abuse protection:
 - Never trust an ID from the client to mean access. A valid UUID for someone else's record returns `404`, not `403`, to avoid confirming it exists.
 - The service role key lives only in the API and worker environment and is used only for cross-user operations that the access table allows.
 - NGO roles are created only by seed or admin migration, never by sign-up.
+- Business writes are API-only. There is no browser insert or update policy on `listings`, `offers` or `pickups`, and the browser roles cannot insert or update `id_status` on `farmers` or any row of `id_verifications`. This keeps "only verified farmers can list" and "only the pool's buyer enters weights" from being bypassed with the anon key. See "Write Path" in `architecture-context.md`.
+- The role check treats a missing profile as no role (`403`) and lets real database errors surface as `500`. It never turns an outage into a silent permission result.
+- Every `.env` file is git-ignored by the root `.gitignore`. Only `.env.example` (names only) is committed.
 
 ## Web And API Hardening
 

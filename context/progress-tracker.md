@@ -13,7 +13,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Audit Of Phase 1 (2026-10-09)
 
-The earlier "Phase 1 complete" status was wrong for the backend. Real state before the repair:
+The earlier "Phase 1 complete" status was wrong for the backend as it was not complete. Real state before the repair:
 
 - The API could not start: `main.py` imported `routers/v1/charity.py`, which was not in the repo.
 - The web app called `supabase.functions.invoke('api/v1/...')`, not the FastAPI service.
@@ -54,15 +54,16 @@ The build continues with fallbacks for every item. Ask the user for these at the
 
 | Input                                                      | Needed by | Used for                            | Where to get it                              | Env file and variable                                   | Status |
 | ---------------------------------------------------------- | --------- | ----------------------------------- | -------------------------------------------- | ------------------------------------------------------- | ------ |
-| Supabase project: URL, anon key, service role key, DB URL, JWT secret | Unit 01 | Database, auth, storage             | Supabase dashboard, Project Settings         | `web/.env.local`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. `api/.env`: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `SUPABASE_JWT_SECRET` | Needed |
+| Supabase project: URL, anon key, service role key, DB URL, JWT secret | Unit 01 | Database, auth, storage             | Supabase dashboard, Project Settings         | `web/.env.local`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. `api/.env`: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `SUPABASE_JWT_SECRET` | Provided (team project, migrations 00 to 05 applied) |
 | Supabase phone provider with test numbers and fixed OTPs   | Unit 02   | OTP sign-in for the demo            | Supabase dashboard, Authentication           | Dashboard setting                                       | Needed |
 | CAPTCHA site key and secret (Turnstile or hCaptcha)        | Unit 02   | OTP abuse protection                | Cloudflare or hCaptcha dashboard             | `web/.env.local`: `VITE_CAPTCHA_SITE_KEY`. Secret in the Supabase dashboard | Needed |
-| MapTiler key                                               | Unit 03   | Basemap tiles                       | MapTiler account                             | `web/.env.local`: `VITE_MAPTILER_KEY`                   | Needed |
-| NASA FIRMS MAP_KEY                                         | Unit 07   | Fire detections                     | FIRMS website                                | `api/.env`: `NASA_FIRMS_MAP_KEY`                        | Needed |
+| MapTiler key                                               | Unit 03   | Basemap tiles                       | MapTiler account                             | `web/.env.local`: `VITE_MAPTILER_KEY`                   | Provided |
+| NASA FIRMS MAP_KEY                                         | Unit 07   | Fire detections                     | FIRMS website                                | `api/.env`: `NASA_FIRMS_MAP_KEY`                        | Provided |
 | Copernicus Data Space OAuth client (or Earth Engine)       | Unit 07   | Sentinel-2 imagery                  | Copernicus Data Space dashboard              | `api/.env`: `CDSE_CLIENT_ID`, `CDSE_CLIENT_SECRET`      | Needed |
+| API base URL for the web app                               | Core spine | Web calls the FastAPI            | The URL where the API runs (`http://localhost:8000` locally) | `web/.env.local`: `VITE_API_URL`                      | Set locally |
 | Google Cloud Translation API key (optional)                | Any unit  | Dev-time Punjabi draft or cross-check, not shipped | Google Cloud console          | `api/.env` or a local-only script env: `GOOGLE_TRANSLATE_API_KEY` | Optional |
-| WhatsApp provider (Twilio sandbox or Meta test number)     | Unit 09   | Two-way WhatsApp                    | Twilio or Meta for Developers                | `api/.env`: provider variables                          | Phase 2 |
-| LLM API key                                                | Unit 09   | WhatsApp message parsing            | LLM provider console                         | `api/.env`: `LLM_API_KEY`                               | Phase 2 |
+| WhatsApp provider (Twilio sandbox or Meta test number)     | Unit 09   | Two-way WhatsApp                    | Twilio or Meta for Developers                | `api/.env`: provider variables                          | Provided (Twilio sandbox, number +1 737 250 8034, join code `twilio-trial`) |
+| LLM API key                                                | Unit 09   | WhatsApp message parsing            | LLM provider console                         | `api/.env`: `LLM_API_KEY`                               | Provided (Gemini). Rotate: the first key was exposed in chat |
 
 ## Open Questions
 

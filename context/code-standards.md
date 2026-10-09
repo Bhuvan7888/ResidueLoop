@@ -63,7 +63,10 @@ Write the least code that meets the acceptance criteria, in the place where a re
 - Settings come from one `pydantic-settings` class, validated at startup. The app refuses to start if a required secret is missing.
 - Dependencies (current user, database session, settings) are injected with FastAPI `Depends`. No module-level mutable state.
 - Use `async` for I/O. Never block the event loop with a satellite or LLM call inside a request.
-- Raise typed domain errors in services. One exception handler maps them to the standard error shape. No bare `except`, no swallowed exceptions.
+- Raise typed domain errors in services (`DomainError`, `NotFoundError`, `ForbiddenError`, `ConflictError` in `core/errors.py`). One exception handler maps them to the standard error shape, and `HTTPException` is mapped to the same shape. No bare `except`, no swallowed exceptions.
+- Statuses (listing, offer, pool, payment, ID, source) are `StrEnum`s in `core/enums.py`, mirroring the database. Tunable numbers (matching weights, minimum load, lead days, yield per acre) are fields on `Settings` in `core/config.py`.
+- The Supabase client is synchronous, so services and routers are plain `def` and FastAPI runs them in its thread pool. Use `async def` only where the code awaits something (for example reading an upload).
+- Web code calls the API only through `web/src/lib/api.ts`. Do not call `supabase.functions.invoke`.
 - Outbound HTTP goes through one shared client in `integrations/` with timeouts, retries with backoff, and the host allowlist. Validate third-party responses with schemas.
 - Background jobs are idempotent: running the same job twice produces the same result.
 

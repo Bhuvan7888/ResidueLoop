@@ -101,7 +101,16 @@ Rules:
 | `messages` (Phase 2)  | id, phone, profile_id, direction, raw_text, parsed_json, intent, linked_record_type, linked_record_id, created_at                                  |
 | `risk_scores` (Phase 3) | village_id, date, score, forecast_tonnes                                                                                                         |
 
-`pickups` is one row per farmer listing in a pool, because weights and payment status are per farmer. `listings.pool_id` is set when an offer is accepted.
+`pickups` is one row per farmer listing in a pool, because weights and payment status are per farmer. `listings.pool_id` is set when an offer is accepted. The row is created at that moment, with `unique(listing_id)`. `pickups.weighed_tonnes` is the column name everywhere (the first migration called it `actual_tonnes`; migration `20261009000000_core_spine.sql` renames it). `pickups` also carries `payment_updated_at`, `quality_notes`, and `completed_at`.
+
+## Write Path
+
+- Browser reads go to Supabase under row level security. Browser writes for business records (listings, offers, pools, pickups, ID status, payment status) go through the FastAPI with the user's bearer token (`web/src/lib/api.ts`). The API checks role and ownership, then writes with the service role.
+- Row level security therefore has no insert or update policy for those tables. Migration `20261009000000_core_spine.sql` dropped the earlier direct-write policies on `listings`, `offers` and `pickups`, and revoked insert and update on `farmers` and `id_verifications` from the browser roles (a farmer can only insert their own `profile_id` and `village_id` on `farmers`). A farmer can never set their own `id_status` from the client.
+- `buyer_owns_pool(pool_id)` is a security definer helper used by policies on `listings` and `pickups`. It exists to avoid an RLS loop between `pools` and `listings`.
+- `listing_match_candidates(listing_id)` is an RPC callable only by the service role. It returns buyers and available balers with their distance in kilometres from the listing's plot, because PostgREST cannot read PostGIS geometry as numbers.
+- The API follows the layers in `code-standards.md`: `routers/v1` (thin) calls `services` (rules) which call `repositories` (the only code that touches tables). Services and routers are synchronous functions because the Supabase client is synchronous; FastAPI runs them in its thread pool. Geometry is written as EWKT text (`SRID=4326;POINT(lng lat)`).
+- A record that exists but belongs to another user returns `404`, through the `NotFoundError` domain error.
 
 ## Matching And Pooling Model
 
