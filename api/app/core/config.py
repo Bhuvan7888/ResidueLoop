@@ -28,6 +28,20 @@ class Settings(BaseSettings):
     # MOCK: ID review is auto-approved in the hackathon build, last four "0000" is rejected.
     mock_id_review: bool = True
 
+    # WhatsApp (Twilio sandbox) and the LLM parser. Empty keys are fine while the flags below are on.
+    twilio_account_sid: str = ""
+    twilio_auth_token: str = ""
+    twilio_whatsapp_from: str = ""
+    public_base_url: str = ""
+    llm_api_key: str = ""
+    llm_model: str = "gemini-2.5-flash"
+    whatsapp_max_message_chars: int = 500
+
+    # MOCK: no outbound WhatsApp send, replies are only stored and logged. Turn off with real Twilio keys.
+    mock_whatsapp_send: bool = True
+    # MOCK: a keyword parser stands in for the LLM. Turn off once LLM_API_KEY is set.
+    mock_llm_parser: bool = True
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
