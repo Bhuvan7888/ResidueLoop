@@ -1,23 +1,44 @@
-from app.core.security import get_supabase_client
-from fastapi import HTTPException
-import uuid
+from datetime import date
 
-async def create_listing(user_id: str, listing_data) -> str:
-    client = get_supabase_client()
-    
-    # 1. Check if farmer is verified
-    response = client.table("farmers").select("id_status").eq("profile_id", user_id).execute()
-    # In mock mode, if table doesn't exist yet or fails, we might just pass or fail.
-    # We will raise HTTPException if they are not verified.
-    if not response.data or len(response.data) == 0:
-        raise HTTPException(status_code=403, detail="Farmer profile not found or unverified")
-        
-    farmer_record = response.data[0]
-    if farmer_record.get("id_status") != "verified":
-        raise HTTPException(status_code=403, detail="You must be verified to create a listing")
-        
-    # 2. Estimate bounds check (handled in UI, but could be validated here)
-    # The config values are 2 to 3 tonnes per acre, but we accept what the UI sends as est_tonnes for now.
+from app.core.config import get_settings
+from app.core.enums import IdStatus, ListingSource
+from app.core.errors import DomainError, ForbiddenError, NotFoundError
+from app.repositories import farmers, listings, plots
+from app.services import matching_service
 
-    # MOCK DB logic to insert listing
-    return str(uuid.uuid4())
+
+def estimate_tonnes(acres: float) -> float:
+    """Midpoint of the configured straw yield range, shown to the farmer as an estimate."""
+    settings = get_settings()
+    return round(acres * (settings.tonnes_per_acre_min + settings.tonnes_per_acre_max) / 2, 1)
+
+
+def estimate_bounds(acres: float) -> tuple[float, float]:
+    settings = get_settings()
+    return acres * settings.tonnes_per_acre_min, acres * settings.tonnes_per_acre_max
+
+
+def create_listing(
+    user_id: str,
+    plot_id: str,
+    harvest_date: date,
+    combine_sms_used: bool,
+    est_tonnes: float | None = None,
+    source: ListingSource = ListingSource.WEB,
+) -> dict[str, object]:
+    farmer = farmers.get_farmer(user_id)
+    if farmer is None or farmer["id_status"] != IdStatus.VERIFIED:
+        raise ForbiddenError("Only verified farmers can create a listing")
+
+    plot = plots.get_plot(plot_id)
+    if plot is None or plot["farmer_id"] != user_id:
+        raise NotFoundError("Plot not found")
+
+    tonnes = est_tonnes if est_tonnes is not None else estimate_tonnes(plot["acres"])
+    low, high = estimate_bounds(plot["acres"])
+    if not low <= tonnes <= high:
+        raise DomainError(f"Estimate must be between {low:.1f} and {high:.1f} tonnes for this plot")
+
+    listing = listings.insert_listing(user_id, plot_id, tonnes, harvest_date, combine_sms_used, source)
+    offer = matching_service.match_listing(user_id, listing["id"])
+    return {"id": listing["id"], "est_tonnes": tonnes, "offer_id": offer["id"] if offer else None}

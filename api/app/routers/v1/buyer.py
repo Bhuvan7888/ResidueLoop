@@ -1,55 +1,72 @@
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
-from typing import List
 from datetime import date
+from typing import Literal
+
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel, ConfigDict, Field
+
 from app.core.security import require_role
-from app.services.buyer_service import create_buyer_profile, create_demand_post, update_demand_post
+from app.services import buyer_service
 
 router = APIRouter(prefix="/buyers", tags=["buyers"])
 
+
 class BuyerProfileCreate(BaseModel):
-    org_name: str
-    type: str
-    lat: float
-    lng: float
-    capacity: int
-    price_per_tonne: float
-    min_load_tonnes: float = 8.0
+    model_config = ConfigDict(extra="forbid")
+
+    org_name: str = Field(min_length=1, max_length=120)
+    type: Literal["biomass", "cbg", "kiln", "mill"]
+    lat: float = Field(ge=-90, le=90)
+    lng: float = Field(ge=-180, le=180)
+    capacity: int = Field(gt=0)
+    price_per_tonne: float = Field(gt=0)
+    min_load_tonnes: float = Field(default=8.0, gt=0)
+
 
 class DemandPostCreate(BaseModel):
-    tonnes_needed: float
-    price_per_tonne: float
-    lat: float
-    lng: float
+    model_config = ConfigDict(extra="forbid")
+
+    tonnes_needed: float = Field(gt=0)
+    price_per_tonne: float = Field(gt=0)
+    lat: float = Field(ge=-90, le=90)
+    lng: float = Field(ge=-180, le=180)
     date_from: date
     date_to: date
 
+
 class DemandPostUpdate(BaseModel):
-    tonnes_needed: float | None = None
-    price_per_tonne: float | None = None
-    status: str | None = None
+    model_config = ConfigDict(extra="forbid")
+
+    tonnes_needed: float | None = Field(default=None, gt=0)
+    price_per_tonne: float | None = Field(default=None, gt=0)
+    status: Literal["open", "fulfilled", "closed"] | None = None
+
 
 @router.post("/profile")
-async def create_profile(
-    profile: BuyerProfileCreate,
-    user_id: str = Depends(require_role(["buyer"]))
-):
-    await create_buyer_profile(user_id, profile)
+def create_profile(profile: BuyerProfileCreate, user_id: str = Depends(require_role(["buyer"]))) -> dict[str, str]:
+    buyer_service.create_buyer_profile(
+        user_id,
+        profile.org_name,
+        profile.type,
+        profile.lat,
+        profile.lng,
+        profile.capacity,
+        profile.price_per_tonne,
+        profile.min_load_tonnes,
+    )
     return {"data": "success"}
 
+
 @router.post("/demand")
-async def add_demand_post(
-    post: DemandPostCreate,
-    user_id: str = Depends(require_role(["buyer"]))
-):
-    post_id = await create_demand_post(user_id, post)
+def add_demand_post(post: DemandPostCreate, user_id: str = Depends(require_role(["buyer"]))) -> dict[str, object]:
+    post_id = buyer_service.create_demand_post(
+        user_id, post.tonnes_needed, post.price_per_tonne, post.lat, post.lng, post.date_from, post.date_to
+    )
     return {"data": {"id": post_id}}
 
+
 @router.patch("/demand/{post_id}")
-async def update_demand(
-    post_id: str,
-    update_data: DemandPostUpdate,
-    user_id: str = Depends(require_role(["buyer"]))
-):
-    await update_demand_post(user_id, post_id, update_data)
+def update_demand(
+    post_id: str, update: DemandPostUpdate, user_id: str = Depends(require_role(["buyer"]))
+) -> dict[str, str]:
+    buyer_service.update_demand_post(user_id, post_id, update.model_dump(exclude_none=True))
     return {"data": "success"}

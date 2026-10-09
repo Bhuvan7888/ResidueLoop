@@ -1,42 +1,49 @@
+import math
 import uuid
-from fastapi import UploadFile, HTTPException
-# MOCK: In the hackathon build, we mock the ID review and encryption.
-# In production, use AES-256-GCM to encrypt the file before sending to Supabase Storage.
 
-async def create_plot(user_id: str, plot_data: dict) -> None:
-    # Here we would use the repository to insert into the `plots` table.
-    # For now, it's a stub to satisfy the router.
-    pass
+from fastapi import UploadFile
 
-async def upload_id_document(user_id: str, id_type: str, id_last4: str, file: UploadFile) -> None:
-    # 1. Signature check (magic bytes)
+from app.core.config import get_settings
+from app.core.enums import IdStatus
+from app.core.errors import ConflictError, DomainError
+from app.repositories import farmers, plots
+
+ACCEPTED_ID_TYPES = {"aadhaar", "voter_id", "driving_licence", "pan"}
+MOCK_REJECTED_LAST4 = "0000"
+SQUARE_METRES_PER_ACRE = 4046.86
+_SIGNATURES = (b"\xff\xd8\xff", b"\x89PNG", b"%PDF")
+
+
+def plot_radius_m(acres: float) -> float:
+    """Radius of a circle with the plot's area, used as the satellite buffer."""
+    return round(math.sqrt(acres * SQUARE_METRES_PER_ACRE / math.pi), 1)
+
+
+def create_plot(user_id: str, village_id: str, lat: float, lng: float, acres: float) -> dict[str, object]:
+    farmers.ensure_farmer(user_id, village_id)
+    return plots.insert_plot(user_id, village_id, lat, lng, acres, plot_radius_m(acres))
+
+
+def review_id(id_last4: str) -> tuple[IdStatus, str | None]:
+    # MOCK: the hackathon build auto-approves. Last four "0000" is the seeded rejection case.
+    if not get_settings().mock_id_review:
+        return IdStatus.PENDING, None
+    if id_last4 == MOCK_REJECTED_LAST4:
+        return IdStatus.REJECTED, "Invalid ID document"
+    return IdStatus.VERIFIED, None
+
+
+async def upload_id_document(user_id: str, id_type: str, id_last4: str, file: UploadFile) -> IdStatus:
+    if id_type not in ACCEPTED_ID_TYPES or not (len(id_last4) == 4 and id_last4.isdigit()):
+        raise DomainError("Invalid ID type or last four digits")
     header = await file.read(4)
-    await file.seek(0)
-    
-    is_jpeg = header.startswith(b'\xff\xd8\xff')
-    is_png = header.startswith(b'\x89PNG')
-    is_pdf = header.startswith(b'%PDF')
-    
-    if not (is_jpeg or is_png or is_pdf):
-        raise HTTPException(status_code=400, detail="Invalid file type. Only JPEG, PNG, and PDF are allowed.")
-        
-    # 2. Strip metadata (mocked: assume stripped or use a library like PIL for images in production)
-    
-    # 3. Generate random filename
-    # ext = ".pdf" if is_pdf else (".png" if is_png else ".jpg")
-    # filename = f"{uuid.uuid4()}{ext}"
-    # path = f"{user_id}/{filename}"
-    
-    # 4. Encrypt file (mocked)
-    
-    # 5. Upload to Supabase Storage (id-documents bucket)
-    # This requires the service role key since it's private.
-    # (Mocking actual supabase client call)
-    
-    # 6. Insert into id_verifications table
-    # MOCK: Auto-approve unless id_last4 is '0000' (seeded rejection case)
-    # status = 'rejected' if id_last4 == '0000' else 'verified'
-    # rejection_reason = 'Invalid ID document' if status == 'rejected' else None
-    
-    # (Mocking actual db insertion)
-    pass
+    if not header.startswith(_SIGNATURES):
+        raise DomainError("Only JPEG, PNG and PDF files are accepted")
+    if farmers.get_farmer(user_id) is None:
+        raise ConflictError("Add your village and a plot before submitting an ID")
+
+    status, reason = review_id(id_last4)
+    # MOCK: the file is validated but not stored or encrypted yet. Only the path a real upload would use is recorded.
+    farmers.insert_id_verification(user_id, id_type, id_last4, f"{user_id}/{uuid.uuid4()}", status, reason)
+    farmers.set_id_status(user_id, status)
+    return status

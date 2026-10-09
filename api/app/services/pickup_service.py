@@ -1,30 +1,60 @@
-from app.core.security import get_supabase_client
-from fastapi import HTTPException
+import logging
+from datetime import UTC, datetime
+from typing import Any
 
-async def update_pickup_weight(user_id: str, pickup_id: str, actual_tonnes: float) -> None:
-    client = get_supabase_client()
-    
-    # 1. Check ownership (buyer of the pool)
-    pickup_res = client.table("pickups").select("*, pools(buyer_id), listings(offers(price_per_tonne))").eq("id", pickup_id).single().execute()
-    if not pickup_res.data or pickup_res.data["pools"]["buyer_id"] != user_id:
-        raise HTTPException(status_code=403, detail="Forbidden")
-        
-    price = pickup_res.data["listings"]["offers"][0]["price_per_tonne"]
-    amount_due = actual_tonnes * price
-    
-    client.table("pickups").update({
-        "actual_tonnes": actual_tonnes,
-        "amount_due": amount_due
-    }).eq("id", pickup_id).execute()
+from app.core.enums import ListingStatus, PaymentStatus, PoolStatus
+from app.core.errors import ConflictError, DomainError, NotFoundError
+from app.repositories import listings, offers, pickups, pools
 
-async def update_pickup_payment(user_id: str, pickup_id: str, payment_status: str) -> None:
-    client = get_supabase_client()
-    
-    # 1. Check ownership (farmer of the listing)
-    pickup_res = client.table("pickups").select("*, listings(farmer_id)").eq("id", pickup_id).single().execute()
-    if not pickup_res.data or pickup_res.data["listings"]["farmer_id"] != user_id:
-        raise HTTPException(status_code=403, detail="Forbidden")
-        
-    client.table("pickups").update({
-        "payment_status": payment_status
-    }).eq("id", pickup_id).execute()
+logger = logging.getLogger(__name__)
+
+
+def compute_amount_due(weighed_tonnes: float, price_per_tonne: float) -> float:
+    return round(weighed_tonnes * price_per_tonne, 2)
+
+
+def queue_verification(listing_id: str) -> None:
+    # MOCK: the satellite verification job arrives with Unit 07. This keeps the call site stable.
+    logger.info("verification queued (stub) listing=%s", listing_id)
+
+
+def _pickup_of_buyer(buyer_id: str, pickup_id: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    pickup = pickups.get_pickup(pickup_id)
+    pool = pools.get_pool(pickup["pool_id"]) if pickup else None
+    if pickup is None or pool is None or pool["buyer_id"] != buyer_id:
+        raise NotFoundError("Pickup not found")
+    return pickup, pool
+
+
+def record_weight(buyer_id: str, pickup_id: str, weighed_tonnes: float, quality_notes: str | None) -> float:
+    pickup, _ = _pickup_of_buyer(buyer_id, pickup_id)
+    if weighed_tonnes <= 0:
+        raise DomainError("Weighed tonnes must be above zero")
+    offer = offers.accepted_offer_for_listing(pickup["listing_id"])
+    if offer is None:
+        raise ConflictError("No accepted offer for this pickup")
+    amount = compute_amount_due(weighed_tonnes, float(offer["price_per_tonne"]))
+    pickups.update_pickup(
+        pickup_id, {"weighed_tonnes": weighed_tonnes, "amount_due": amount, "quality_notes": quality_notes}
+    )
+    return amount
+
+
+def complete_pickup(buyer_id: str, pickup_id: str) -> None:
+    pickup, pool = _pickup_of_buyer(buyer_id, pickup_id)
+    if pickup["weighed_tonnes"] is None:
+        raise ConflictError("Enter the weighed tonnes before completing the pickup")
+    pickups.update_pickup(pickup_id, {"completed_at": datetime.now(UTC).isoformat()})
+    listings.set_listing_status(pickup["listing_id"], ListingStatus.COMPLETED)
+    queue_verification(pickup["listing_id"])
+    pool_listings = listings.list_pool_listings(pool["id"])
+    if all(item["status"] == ListingStatus.COMPLETED for item in pool_listings):
+        pools.set_pool_status(pool["id"], PoolStatus.COMPLETED)
+
+
+def set_payment_status(farmer_id: str, pickup_id: str, status: PaymentStatus) -> None:
+    pickup = pickups.get_pickup(pickup_id)
+    listing = listings.get_listing(pickup["listing_id"]) if pickup else None
+    if pickup is None or listing is None or listing["farmer_id"] != farmer_id:
+        raise NotFoundError("Pickup not found")
+    pickups.update_pickup(pickup_id, pickups.payment_fields(status))
