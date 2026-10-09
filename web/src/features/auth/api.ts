@@ -38,9 +38,13 @@ export async function getProfile(userId: string) {
 }
 
 export async function updateProfileRole(userId: string, role: string) {
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError) throw userError
+  if (!user || !user.phone) throw new Error('User phone not found')
+
   const { data, error } = await supabase
     .from('profiles')
-    .insert([{ id: userId, role }])
+    .insert([{ id: userId, phone: user.phone, role }])
     .select()
     .single()
   
