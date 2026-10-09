@@ -32,3 +32,12 @@ ResidueLoop is a web platform that helps Punjab farmers sell paddy straw instead
   - API: `cd api && mypy .`
 
 For more detailed project specifications, see the [context/](context/) directory.
+
+## DNS Security Checklist (Unit 11)
+
+- [x] Registrar lock and 2FA enabled
+- [x] DNSSEC enabled where supported
+- [x] CAA records configured
+- [x] No dangling or wildcard records
+- [x] HTTPS only with HSTS
+- [x] API origin locked to the CDN or WAF

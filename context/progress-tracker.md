@@ -4,12 +4,11 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Phase 1: Web application. Completed.
-- Phase 2: WhatsApp & Heatmap. Not started.
+- Phase 2: WhatsApp & Heatmap. In Progress (starting Unit 09).
 
 ## Current Goal
 
-- Final review and preparation for Phase 2.
+- Begin WhatsApp synchronization.
 
 ## Completed
 
@@ -23,17 +22,17 @@ Update this file whenever the current phase, active feature, or implementation s
 - Unit 07: satellite verification (`featureSpecs/07-satellite-verification.md`).
 - Unit 08: charity (`featureSpecs/08-charity.md`).
 - Unit 11: security hardening (`featureSpecs/11-security-hardening.md`).
+- Phase 1: Web application completed.
 
 ## In Progress
 
-- None yet.
+- Unit 09: WhatsApp synchronization (`featureSpecs/09-whatsapp-sync.md`).
 
 ## Next Up
 
 Phase 2:
 
-10. `09-whatsapp-sync.md`
-11. `10-buyer-heatmap.md`
+10. `10-buyer-heatmap.md`
 
 ## Inputs Needed From User
 
@@ -41,15 +40,15 @@ The build continues with fallbacks for every item. Ask the user for these at the
 
 | Input                                                      | Needed by | Used for                            | Where to get it                              | Env file and variable                                   | Status |
 | ---------------------------------------------------------- | --------- | ----------------------------------- | -------------------------------------------- | ------------------------------------------------------- | ------ |
-| Supabase project: URL, anon key, service role key, DB URL, JWT secret | Unit 01 | Database, auth, storage             | Supabase dashboard, Project Settings         | `web/.env.local`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. `api/.env`: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `SUPABASE_JWT_SECRET` | Needed |
-| Supabase phone provider with test numbers and fixed OTPs   | Unit 02   | OTP sign-in for the demo            | Supabase dashboard, Authentication           | Dashboard setting                                       | Needed |
-| CAPTCHA site key and secret (Turnstile or hCaptcha)        | Unit 02   | OTP abuse protection                | Cloudflare or hCaptcha dashboard             | `web/.env.local`: `VITE_CAPTCHA_SITE_KEY`. Secret in the Supabase dashboard | Needed |
-| MapTiler key                                               | Unit 03   | Basemap tiles                       | MapTiler account                             | `web/.env.local`: `VITE_MAPTILER_KEY`                   | Needed |
-| NASA FIRMS MAP_KEY                                         | Unit 07   | Fire detections                     | FIRMS website                                | `api/.env`: `NASA_FIRMS_MAP_KEY`                        | Needed |
-| Copernicus Data Space OAuth client (or Earth Engine)       | Unit 07   | Sentinel-2 imagery                  | Copernicus Data Space dashboard              | `api/.env`: `CDSE_CLIENT_ID`, `CDSE_CLIENT_SECRET`      | Needed |
+| Supabase project: URL, anon key, service role key, DB URL, JWT secret | Unit 01 | Database, auth, storage             | Supabase dashboard, Project Settings         | `web/.env.local`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. `api/.env`: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `SUPABASE_JWT_SECRET` | Provided |
+| Supabase phone provider with test numbers and fixed OTPs   | Unit 02   | OTP sign-in for the demo            | Supabase dashboard, Authentication           | Dashboard setting                                       | Provided |
+| CAPTCHA site key and secret (Turnstile or hCaptcha)        | Unit 02   | OTP abuse protection                | Cloudflare or hCaptcha dashboard             | `web/.env.local`: `VITE_CAPTCHA_SITE_KEY`. Secret in the Supabase dashboard | Provided |
+| MapTiler key                                               | Unit 03   | Basemap tiles                       | MapTiler account                             | `web/.env.local`: `VITE_MAPTILER_KEY`                   | Provided |
+| NASA FIRMS MAP_KEY                                         | Unit 07   | Fire detections                     | FIRMS website                                | `api/.env`: `NASA_FIRMS_MAP_KEY`                        | Provided |
+| Copernicus Data Space OAuth client (or Earth Engine)       | Unit 07   | Sentinel-2 imagery                  | Copernicus Data Space dashboard              | `api/.env`: `CDSE_CLIENT_ID`, `CDSE_CLIENT_SECRET`      | Provided |
 | Google Cloud Translation API key (optional)                | Any unit  | Dev-time Punjabi draft or cross-check, not shipped | Google Cloud console          | `api/.env` or a local-only script env: `GOOGLE_TRANSLATE_API_KEY` | Optional |
 | WhatsApp provider (Twilio sandbox or Meta test number)     | Unit 09   | Two-way WhatsApp                    | Twilio or Meta for Developers                | `api/.env`: provider variables                          | Phase 2 |
-| LLM API key                                                | Unit 09   | WhatsApp message parsing            | LLM provider console                         | `api/.env`: `LLM_API_KEY`                               | Phase 2 |
+| LLM API key                                                | Unit 09   | WhatsApp message parsing            | LLM provider console                         | `api/.env`: `LLM_API_KEY`                               | Provided |
 
 ## Open Questions
 
@@ -79,7 +78,7 @@ The build continues with fallbacks for every item. Ask the user for these at the
 - Design follows divinefarmer.com: light, cream and mustard, serif headings, flat surfaces. Replaces the earlier dark look.
 - Background jobs run as a second process of the `api` package using APScheduler so services are not duplicated (Redis cannot run locally in the hackathon environment).
 - Security rules live in `security-context.md` and are applied per unit, with a final hardening unit.
-- Mocked in the hackathon build: ID review, payments, and OTP delivery.
+- Mocked in the hackathon build: ID review (auto-approve), payments, and OTP delivery. Satellite integrations (NASA FIRMS and Sentinel CDSE) and ID storage are fully integrated.
 
 ## Session Notes
 

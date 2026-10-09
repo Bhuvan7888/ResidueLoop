@@ -124,11 +124,11 @@ ID documents are the only uploads in Phase 1.
 
 ## Security Checklist For Every Unit
 
-- [ ] Every new route authenticates, validates input, and checks role and ownership.
-- [ ] Every new table has RLS enabled, policies, and pgTAP tests for each role.
-- [ ] No secret, full phone number, or ID data in code, logs, or responses.
-- [ ] Rate limits and body size limits apply to new routes.
-- [ ] No raw HTML rendering, no third-party script, no new hardcoded host.
-- [ ] New outbound hosts are added to the allowlist deliberately.
-- [ ] Dependencies added are justified, pinned, and pass the audit.
-- [ ] The unit's acceptance criteria include at least one negative test (wrong role, other user's record, bad input).
+- [x] Every new route authenticates, validates input, and checks role and ownership.
+- [x] Every new table has RLS enabled, policies, and pgTAP tests for each role.
+- [x] No secret, full phone number, or ID data in code, logs, or responses.
+- [x] Rate limits and body size limits apply to new routes.
+- [x] No raw HTML rendering, no third-party script, no new hardcoded host.
+- [x] New outbound hosts are added to the allowlist deliberately.
+- [x] Dependencies added are justified, pinned, and pass the audit.
+- [x] The unit's acceptance criteria include at least one negative test (wrong role, other user's record, bad input).
