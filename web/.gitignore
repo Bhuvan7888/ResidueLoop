@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Build output that must never shadow the real config
+vite.config.js
+vite.config.d.ts
+*.tsbuildinfo
