@@ -26,12 +26,12 @@ Certificates, hashes, QR codes, share links, forecast, performing satellite work
 
 ## Acceptance Criteria
 
-- [ ] A fixture with a FIRMS hit returns Fire detected.
-- [ ] A fixture with no hit, no drop, and usable images on both sides returns Verified.
-- [ ] A fixture with cloud cover returns Inconclusive and schedules a recheck. It is never shown as Verified.
-- [ ] The result row stores only the small summary. No imagery is persisted.
-- [ ] Verdict rules are unit tested for all three outcomes.
-- [ ] The API handler only queues the job and returns.
+- [x] A fixture with a FIRMS hit returns Fire detected.
+- [x] A fixture with no hit, no drop, and usable images on both sides returns Verified.
+- [x] A fixture with cloud cover returns Inconclusive and schedules a recheck. It is never shown as Verified.
+- [x] The result row stores only the small summary. No imagery is persisted.
+- [x] Verdict rules are unit tested for all three outcomes.
+- [x] The API handler only queues the job and returns.
 
 ## Verify
 
