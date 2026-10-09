@@ -7,6 +7,7 @@ import { getPickups, updatePickupPayment } from '@/features/pickup/api'
 import { PickupCard } from '@/features/pickup/components/PickupCard'
 import { VerificationCard } from '@/features/verification/components/VerificationCard'
 
+import { ActivityTimeline } from '@/features/whatsapp/components/ActivityTimeline'
 import { AssistanceRequestForm } from '@/features/charity/components/AssistanceRequestForm'
 
 export function FarmerDashboard({ userId }: { userId: string }) {
@@ -118,6 +119,8 @@ export function FarmerDashboard({ userId }: { userId: string }) {
               ))}
             </div>
           )}
+
+          <ActivityTimeline />
         </div>
       )}
     </div>

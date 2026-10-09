@@ -27,5 +27,14 @@
   },
   "dashboard": {
     "welcome_msg": "ਤੁਹਾਡੇ {{role}} ਡੈਸ਼ਬੋਰਡ ਵਿੱਚ ਸੁਆਗਤ ਹੈ। ਆਈਡੀ: {{id}}"
+  },
+  "whatsapp": {
+    "via_whatsapp": "ਵਟਸਐਪ ਰਾਹੀਂ",
+    "via_web": "ਵੈੱਬ",
+    "timeline_title": "ਗਤੀਵਿਧੀ",
+    "timeline_empty": "ਅਜੇ ਕੋਈ ਗਤੀਵਿਧੀ ਨਹੀਂ।",
+    "you_wrote": "ਤੁਸੀਂ",
+    "reply": "ਜਵਾਬ",
+    "listing_created": "ਲਿਸਟਿੰਗ ਬਣੀ, ਲਗਭਗ {{tonnes}} ਟਨ"
   }
 }

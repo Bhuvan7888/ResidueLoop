@@ -16,7 +16,7 @@ export function updatePickupPayment(pickupId: string, data: { payment_status: 'p
 export async function getPickups() {
   const { data, error } = await supabase
     .from('pickups')
-    .select('*, pools(*)')
+    .select('*, pools(*), listings(source)')
     .order('created_at', { ascending: false })
 
   if (error) throw error

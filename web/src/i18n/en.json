@@ -27,5 +27,14 @@
   },
   "dashboard": {
     "welcome_msg": "Welcome to your {{role}} dashboard. ID: {{id}}"
+  },
+  "whatsapp": {
+    "via_whatsapp": "Via WhatsApp",
+    "via_web": "Web",
+    "timeline_title": "Activity",
+    "timeline_empty": "No activity yet.",
+    "you_wrote": "You",
+    "reply": "Reply",
+    "listing_created": "Listing created, about {{tonnes}} t"
   }
 }

@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { WeightForm } from './WeightForm'
 import { PaymentForm } from './PaymentForm'
+import { SourceBadge } from '@/features/whatsapp/components/SourceBadge'
 
 interface Pickup {
   id: string
   pool_id: string
   weighed_tonnes: number | null
   completed_at: string | null
+  listings?: { source: 'web' | 'whatsapp' } | null
   amount_due: number | null
   payment_status: string
   pools: {
@@ -29,6 +31,11 @@ export function PickupCard({ pickup, mode, onUpdateWeight, onComplete, onUpdateP
 
   return (
     <div className="bg-surface border border-surface-border rounded-xl p-4">
+      {pickup.listings && (
+        <div className="mb-3">
+          <SourceBadge source={pickup.listings.source} />
+        </div>
+      )}
       <div className="flex justify-between mb-4">
         <div>
           <p className="text-sm text-copy-secondary">{t('pickup.scheduled_date', 'Scheduled Date')}</p>
