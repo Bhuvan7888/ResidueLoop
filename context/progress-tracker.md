@@ -31,7 +31,7 @@ The earlier "Phase 1 complete" status was wrong for the backend as it was not co
 
 ## In Progress
 
-- Unit 09 (WhatsApp sync) is built on branch `phase-2-whatsapp` and awaiting live checks. See "Unit 09 Acceptance" in Session Notes.
+- Unit 09 (WhatsApp sync) and Unit 10 (buyer heatmap) are built on branch `phase-2-whatsapp`. Live checks that need the team are listed in Session Notes.
 
 ## Deferred (needs the team, not part of the spine repair)
 
@@ -95,6 +95,10 @@ The build continues with fallbacks for every item. Ask the user for these at the
 - Mocked in the hackathon build: ID review, payments, and OTP delivery.
 
 ## Session Notes
+
+- Unit 10 acceptance (2026-10-09). Passed by tests: only the buyer role can call `GET /api/v1/heatmap/villages` (farmer, donor and NGO get 403, no token is rejected); the response holds village-level fields only, with no plot or farmer field; an unfilled zone exists only while demand is above supply. Checked in the browser with fixture data: demand and supply layers render over the Moga basemap, and each unfilled zone is outlined and labelled in text on the map and in the overlay list. Not yet checked live against the database: it needs the `20261009000002_heatmap.sql` migration and the demand seed run in the Supabase SQL Editor. Seeded supply does not exist, so supply appears when real listings are created.
+- Release audit findings (2026-10-09), fixed on this branch: (1) the Tailwind theme named its colour variables so none of the documented utilities (`bg-surface`, `text-copy-primary`, `border-surface-border`, ...) existed, so every screen rendered without colour. Fixed in `web/src/styles/index.css`, plus a base `body` background and text colour. (2) A stale committed `web/vite.config.js` shadowed `vite.config.ts`, so edits to the TypeScript config were ignored. Removed, and build output is git-ignored. (3) `npm ci` failed on an out-of-sync lockfile. (4) `api/.env` was not git-ignored.
+- Still open from the audit: `bg-accent-secondary` is used for hover states but no `--accent-secondary` variable exists, so hover does nothing; most dashboard strings are hardcoded English with `t(key, default)` fallbacks and sparse `en.json` and `pa.json`; `web/package.json` has no `test` script; the existing pgTAP files need rewriting; the charity and verification files are missing from the repository.
 
 - Unit 09 acceptance (2026-10-09). Passed by tests with fixtures: forged signature rejected (webhook returns 403); replayed message id ignored; unknown number gets the registration message; non-farmer gets "farmers only"; over-long message is not parsed; unparseable or out-of-allowlist message gets a clarification and creates nothing; a message cannot name another user's record or user (the parser schema forbids extra fields); WhatsApp listing runs through the web service with `source = whatsapp`; pool, pickup and payment answers are filled from database values into fixed templates. Also run end to end against the team Supabase with a throwaway farmer (Twilio send and LLM mocked): listing by chat saved with `source = whatsapp`, offer accepted, pool and pickup answers from database values, payment set by chat, replayed message id ignored, unknown number answered. Blocked on input: a real Punjabi message through the Twilio sandbox (needs `PUBLIC_BASE_URL` tunnel, `MOCK_WHATSAPP_SEND=false`, `MOCK_LLM_PARSER=false`, a rotated Gemini key). Not built: "is my plot verified" and "request NGO support" over chat (they need the deferred verification and charity tables).
 - Punjabi strings for native review: all of `api/app/services/whatsapp_templates.py`, and the `whatsapp` block in `web/src/i18n/pa.json`.

@@ -157,6 +157,13 @@ Rules:
 - Mocks (config flags, default on): `MOCK_WHATSAPP_SEND` (replies are stored and logged, not sent) and `MOCK_LLM_PARSER` (keyword parser for the demo phrases). Signature verification is never mocked.
 - Full phone numbers are not stored in `messages`. Only the masked form is, which keeps the rule that full numbers live in `profiles`.
 
+## Demand Heatmap Model (Phase 2)
+
+- `village_demand_supply()` is a database function callable only by the service role. It assigns each open `demand_posts` row to its nearest village and sums open listings (status open, matched or pooled) by the plot's village. Plots, farmers and buyers never leave the database.
+- `GET /api/v1/heatmap/villages` (buyers only) returns one row per village with demand, supply, unfilled tonnes (`max(0, demand - supply)`) and `is_unfilled_zone`. Villages with neither demand nor supply are left out.
+- The web map (`features/heatmap`) draws demand as filled circles, supply as rings, and each unfilled zone as an outlined circle with a text label in the map and the left overlay list. MapLibre is lazy-loaded and uses MapTiler tiles, with a plain `--bg-subtle` background when no key is set.
+- Supply is current open listings and pools only. Forecast supply arrives with Phase 3.
+
 ## Forecast Model (Phase 3)
 
 - Harvest timing from Sentinel-2 NDVI time series, combined with three seasons of FIRMS fire counts, area under paddy, distance to the nearest baler and buyer, and days left before wheat sowing.

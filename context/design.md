@@ -32,7 +32,7 @@ All colors are defined as CSS custom properties in `web/src/styles/index.css` an
 
 Each state color also has a `-dim` fill at 10 percent opacity for badge backgrounds, for example `--state-success-dim`.
 
-Tailwind utility names map to these variables:
+Tailwind utility names map to these variables. In `index.css` the `@theme` block declares `--color-<name>` variables (Tailwind v4 turns each into `bg-<name>`, `text-<name>` and `border-<name>`), and `bg-base`, `bg-brand`, `border-brand` and `text-brand` are `@utility` rules because `text-base` is a built-in font size and brand needs a different variable for text. Never name a theme variable after its property (`--color-bg-surface` gives `bg-bg-surface`, not `bg-surface`).
 
 | Utility                                                        | Variable                |
 | -------------------------------------------------------------- | ----------------------- |
@@ -138,6 +138,8 @@ MapLibre GL JS on a light, low-saturation basemap style so the cream interface a
 - Wind-link map (donor): ranked villages shown as numbered markers with a line to the chosen city. Label the list "likely influence".
 - Demand heatmap (Phase 2): demand in `--accent-primary`, forecast supply in `--text-secondary`, unfilled demand zones outlined in `--state-warning` and labelled in text.
 - Individual plots are never drawn on any public or donor-facing map. Only village-level markers.
+- MapLibre's stylesheet forces its container to `position: relative`. Put the map container inside a sized wrapper (`absolute inset-0`), or it collapses to zero height.
+- `optimizeDeps.exclude: ['maplibre-gl']` is set in `vite.config.ts` so the dev server can load MapLibre's worker.
 
 ## Component Library
 
