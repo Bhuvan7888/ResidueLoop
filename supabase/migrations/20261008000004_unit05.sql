@@ -53,4 +53,5 @@ CREATE POLICY "Anyone in pool can see pool" ON pools FOR SELECT USING (
     )
 );
 
-ALTER TABLE listings ADD COLUMN pool_id UUID REFERENCES pools(id);
+-- listings.pool_id already exists from unit 04; attach the foreign key now that pools exists.
+ALTER TABLE listings ADD CONSTRAINT listings_pool_id_fkey FOREIGN KEY (pool_id) REFERENCES pools(id);
