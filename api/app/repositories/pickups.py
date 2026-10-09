@@ -27,3 +27,11 @@ def update_pickup(pickup_id: str, fields: dict[str, Any]) -> None:
 
 def payment_fields(status: PaymentStatus) -> dict[str, Any]:
     return {"payment_status": status.value, "payment_updated_at": datetime.now(UTC).isoformat()}
+
+
+def latest_for_listings(listing_ids: list[str]) -> Row | None:
+    res = (
+        db().table("pickups").select(_COLUMNS).in_("listing_id", listing_ids)
+        .order("created_at", desc=True).limit(1).execute()
+    )
+    return first(res)

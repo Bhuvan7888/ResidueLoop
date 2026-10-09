@@ -1,15 +1,17 @@
 import logging
 import uuid
-from typing import Callable, Awaitable
+from typing import Awaitable, Callable
+from urllib.parse import urlparse
+
 from fastapi import FastAPI, Request, Response
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.routers.v1 import health, farmer, buyer, listing, offer, pickup
 from app.core.config import get_settings
 from app.core.errors import setup_exception_handlers
+from app.routers.v1 import buyer, farmer, health, listing, offer, pickup, webhooks
 
 # Validate settings at startup
 get_settings()
@@ -22,8 +24,11 @@ app = FastAPI(
 )
 
 # Baseline Security Middleware
+# The public webhook host (a tunnel in development) must be trusted or Twilio's calls are rejected.
+_public_host = urlparse(get_settings().public_base_url).hostname
 app.add_middleware(
-    TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "residueloop.example.com"]
+    TrustedHostMiddleware,
+    allowed_hosts=["localhost", "127.0.0.1", "residueloop.example.com", *([_public_host] if _public_host else [])],
 )
 
 app.add_middleware(
@@ -93,3 +98,4 @@ app.include_router(buyer.router, prefix="/api/v1")
 app.include_router(listing.router, prefix="/api/v1")
 app.include_router(offer.router, prefix="/api/v1")
 app.include_router(pickup.router, prefix="/api/v1")
+app.include_router(webhooks.router, prefix="/api/v1")
