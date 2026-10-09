@@ -3,6 +3,8 @@ import uuid
 from typing import Callable, Awaitable
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
+import time
+from collections import defaultdict
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -43,9 +45,6 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Content-Security-Policy"] = "default-src 'self'"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         return response
-
-import time
-from collections import defaultdict
 
 # Simple in-memory rate limiter
 RATE_LIMIT_REQUESTS = 100

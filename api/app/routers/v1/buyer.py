@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from typing import List
 from datetime import date
 from app.core.security import require_role
 from app.services.buyer_service import create_buyer_profile, create_demand_post, update_demand_post

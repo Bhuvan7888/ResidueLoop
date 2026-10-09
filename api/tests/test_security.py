@@ -1,4 +1,3 @@
-import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -10,9 +9,7 @@ def test_oversized_body():
     # Unit 11 spec asks for oversized body rejection.
     large_body = {"data": "x" * (1024 * 1024 * 5)} # 5MB
     response = client.post("/api/v1/auth/verify-otp", json=large_body)
-    # The actual implementation of body size limit in FastAPI is often via middleware.
-    # If we didn't implement it, we might get 422 or 200, let's see.
-    pass
+    assert response.status_code == 413
 
 def test_idor_wrong_user():
     # If a user tries to access a pickup or listing they don't own.

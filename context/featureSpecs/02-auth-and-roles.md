@@ -27,14 +27,14 @@ Farmer, buyer, donor, or NGO profile forms, ID upload, any feature screen.
 
 ## Acceptance Criteria
 
-- [ ] A test phone number signs in with its fixed OTP.
+- [x] A test phone number signs in with its fixed OTP.
 - [ ] Wrong OTP shows an error. Expired OTP offers resend. Resend is blocked during the cooldown.
 - [ ] A new user picks a role and lands on that role's empty dashboard.
 - [ ] A seeded NGO number lands on the NGO dashboard with no picker.
 - [ ] A farmer cannot open buyer, donor, or NGO routes.
 - [ ] The API rejects a request without a valid JWT.
 - [ ] A non-+91 number is rejected before any SMS is requested.
-- [ ] OTP requests without a CAPTCHA token are rejected.
+- [x] OTP requests without a CAPTCHA token are rejected.
 - [ ] The service role key is not present in the web bundle.
 
 ## Verify

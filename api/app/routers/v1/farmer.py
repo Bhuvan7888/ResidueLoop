@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, status
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from pydantic import BaseModel
-from typing import List, Optional
 from app.core.security import require_role
 from app.services.farmer_service import upload_id_document, create_plot
 

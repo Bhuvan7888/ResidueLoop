@@ -60,7 +60,6 @@ async def accept_offer(user_id: str, offer_id: str) -> None:
     # Find open pool for buyer in village
     pool_res = client.table("pools").select("*").eq("buyer_id", buyer_id).eq("village_id", village_id).in_("status", ["forming"]).execute()
     
-    from app.core.config import get_settings
     # For now, hardcode min load as 8 if config not available in db
     min_load = 8.0 
     

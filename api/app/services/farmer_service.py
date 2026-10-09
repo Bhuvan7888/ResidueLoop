@@ -1,9 +1,9 @@
-import uuid
 from fastapi import UploadFile, HTTPException
 # MOCK: In the hackathon build, we mock the ID review and encryption.
 # In production, use AES-256-GCM to encrypt the file before sending to Supabase Storage.
 
-async def create_plot(user_id: str, plot_data: dict) -> None:
+from typing import Any
+async def create_plot(user_id: str, plot_data: Any) -> None:
     # Here we would use the repository to insert into the `plots` table.
     # For now, it's a stub to satisfy the router.
     pass

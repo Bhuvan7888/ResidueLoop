@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from pydantic import BaseModel
 from typing import Literal
 from app.core.security import require_role
 from app.services.pickup_service import update_pickup_weight, update_pickup_payment
-
+from app.services.verification_service import run_plot_verification
 router = APIRouter(prefix="/pickups", tags=["pickups"])
 
 class WeightUpdate(BaseModel):
@@ -16,9 +16,13 @@ class PaymentUpdate(BaseModel):
 async def update_weight(
     pickup_id: str,
     payload: WeightUpdate,
+    background_tasks: BackgroundTasks,
     user_id: str = Depends(require_role(["buyer"]))
 ):
-    await update_pickup_weight(user_id, pickup_id, payload.actual_tonnes)
+    listing_id = await update_pickup_weight(user_id, pickup_id, payload.actual_tonnes)
+    
+    # Queue background verification job
+    background_tasks.add_task(run_plot_verification, listing_id)
     return {"data": "success"}
 
 @router.patch("/{pickup_id}/payment_status")

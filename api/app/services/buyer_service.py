@@ -1,4 +1,3 @@
-from app.core.security import get_supabase_client
 import uuid
 
 async def create_buyer_profile(user_id: str, profile_data) -> None:
