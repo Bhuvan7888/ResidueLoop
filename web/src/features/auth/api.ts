@@ -42,9 +42,11 @@ export async function updateProfileRole(userId: string, role: string) {
   if (userError) throw userError
   if (!user || !user.phone) throw new Error('User phone not found')
 
+  const formattedPhone = user.phone.startsWith('+') ? user.phone : `+${user.phone}`
+
   const { data, error } = await supabase
     .from('profiles')
-    .insert([{ id: userId, phone: user.phone, role }])
+    .insert([{ id: userId, phone: formattedPhone, role }])
     .select()
     .single()
   
