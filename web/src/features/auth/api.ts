@@ -4,8 +4,7 @@ export async function signInWithOtp(phone: string, captchaToken?: string) {
   const { data, error } = await supabase.auth.signInWithOtp({
     phone,
     options: {
-      captchaToken,
-      channel: 'whatsapp'
+      captchaToken
     }
   })
   if (error) throw error
@@ -16,7 +15,7 @@ export async function verifyOtp(phone: string, token: string) {
   const { data, error } = await supabase.auth.verifyOtp({
     phone,
     token,
-    type: 'whatsapp'
+    type: 'sms'
   })
   if (error) throw error
   return data
