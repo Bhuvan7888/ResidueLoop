@@ -88,7 +88,52 @@ export function FarmerSetup() {
 }
 
 function VillageSelect({ label, options, registration }: { label: string; options: Village[]; registration: UseFormRegisterReturn }) {
-  return <label className="text-sm text-copy-primary">{label}<select className="mt-1 w-full rounded-xl border border-surface-border bg-surface p-2" {...registration}><option value="" />{options.map((village) => <option key={village.id} value={village.id}>{village.name}, {village.district}</option>)}</select></label>
+  const [selectedState, setSelectedState] = useState<string>('')
+
+  // Map districts to states for UI filtering
+  const stateMap: Record<string, string> = {
+    Moga: 'Punjab',
+    Karnal: 'Haryana',
+    Ambala: 'Haryana',
+  }
+
+  // Get unique states from the available options
+  const availableStates = Array.from(new Set(options.map(v => stateMap[v.district] || 'Other'))).sort()
+
+  // Filter villages by the selected state
+  const filteredVillages = options.filter(v => (stateMap[v.district] || 'Other') === selectedState)
+
+  return (
+    <div className="space-y-3">
+      <label className="text-sm text-copy-primary">
+        State
+        <select 
+          className="mt-1 w-full rounded-xl border border-surface-border bg-surface p-2" 
+          value={selectedState} 
+          onChange={(e) => setSelectedState(e.target.value)}
+        >
+          <option value="">Select State...</option>
+          {availableStates.map(state => (
+            <option key={state} value={state}>{state}</option>
+          ))}
+        </select>
+      </label>
+      
+      <label className="text-sm text-copy-primary">
+        {label}
+        <select 
+          className="mt-1 w-full rounded-xl border border-surface-border bg-surface p-2 disabled:opacity-50" 
+          disabled={!selectedState}
+          {...registration}
+        >
+          <option value="">Select Town/Village...</option>
+          {filteredVillages.map((village) => (
+            <option key={village.id} value={village.id}>{village.name}, {village.district}</option>
+          ))}
+        </select>
+      </label>
+    </div>
+  )
 }
 
 function NumberField({ label, registration, step }: { label: string; registration: UseFormRegisterReturn; step: string }) {
