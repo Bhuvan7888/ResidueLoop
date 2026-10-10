@@ -4,6 +4,7 @@ import { z } from "zod"
 import { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { signInWithOtp, verifyOtp } from "../api"
+import { getCaptchaSiteKey } from '../captcha'
 import { phoneSchema, otpSchema } from "../schemas"
 import { Turnstile } from '@marsidev/react-turnstile'
 
@@ -18,6 +19,10 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [countdown, setCountdown] = useState(0)
   const [captchaToken, setCaptchaToken] = useState<string>('')
+  const captchaSiteKey = getCaptchaSiteKey({
+    configuredSiteKey: import.meta.env.VITE_CAPTCHA_SITE_KEY,
+    isDevelopment: import.meta.env.DEV,
+  })
 
   const phoneForm = useForm<z.infer<typeof phoneSchema>>({
     resolver: zodResolver(phoneSchema),
@@ -83,7 +88,7 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
         </div>
         <div className="flex justify-center my-4">
           <Turnstile 
-            siteKey={import.meta.env.VITE_CAPTCHA_SITE_KEY || '1x00000000000000000000AA'} 
+            siteKey={captchaSiteKey}
             onSuccess={(token) => { setCaptchaToken(token); setError(null); }}
           />
         </div>

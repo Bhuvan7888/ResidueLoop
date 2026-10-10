@@ -22,6 +22,10 @@ This tracker records verified evidence only. Earlier completion claims were inde
 - [x] Local integration launch on 2026-10-10: FastAPI served `GET /api/v1/health` as `{"data":"ok"}` on port 8000; Vite served `/`, `/login`, and `/app` as HTTP 200 on port 5173. API security headers were present. Web typecheck/lint/test/build passed; API Ruff/mypy/pytest passed (6 tests).
 - [ ] Browser visual and live authentication-flow QA remain unverified: the controlled browser runtime was unavailable and real OTP/provider credentials are still required.
 
+## Authentication Configuration Repair — 2026-10-10
+
+- [x] Local Turnstile no longer consumes a configured production key: `getCaptchaSiteKey` uses Cloudflare's published test site key only when Vite runs in development and uses the configured public key outside development. `web/src/features/auth/captcha.test.ts` verifies both paths and prevents a development-key fallback in production.
+
 ## Recovery Decisions
 
 - D1. FastAPI under `/api/v1` is the only mutation boundary. The web app uses one token-aware API client and no Supabase Edge Functions.
