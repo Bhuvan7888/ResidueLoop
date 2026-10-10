@@ -62,7 +62,7 @@ SELECT results_eq(
 
 -- TEST 4: Buyer 1 can update their pool pickup weight
 SELECT lives_ok(
-    $$ UPDATE public.pickups SET actual_tonnes = 15 WHERE id = 'ffffffff-ffff-ffff-ffff-ffffffffffff' $$,
+    $$ SET local role authenticated; UPDATE public.pickups SET weighed_tonnes = 15 WHERE id = 'ffffffff-ffff-ffff-ffff-ffffffffffff' $$,
     'Buyer can update their pickup'
 );
 

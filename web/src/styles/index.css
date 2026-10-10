@@ -15,6 +15,7 @@
   --color-copy-faint: var(--text-faint);
 
   --color-accent-primary: var(--accent-primary);
+  --color-accent-secondary: var(--accent-secondary);
   --color-accent-dim: var(--accent-primary-dim);
   --color-on-brand: var(--on-accent);
 
@@ -62,6 +63,7 @@
     --text-muted: #5f656b;
     --text-faint: #8a8d90;
     --accent-primary: #d6bd2c;
+    --accent-secondary: #e5cd41;
     --accent-primary-dim: rgba(214, 189, 44, 0.18);
     --accent-primary-text: #7a6a00;
     --on-accent: #0b0b0a;
