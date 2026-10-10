@@ -41,6 +41,7 @@ This tracker records verified evidence only. Earlier completion claims were inde
 - F14 confirmed: web had no `typecheck` or `test` scripts; `poetry run pytest` failed without `PYTHONPATH`; mypy package discovery hid 41 strict typing failures; ruff had five errors.
 - F15 confirmed: Phase 1, Unit 09, and Unit 10 were recorded as complete/in progress without end-to-end evidence.
 - 2026-10-10 local checks after Phase 1 edits: `web npm run typecheck`, `test`, `lint`, and `build` pass (5 Vitest tests); `api poetry run ruff check .`, `mypy .`, and `pytest -q` pass (6 tests); `curl /api/v1/health` returns `{"data":"ok"}`; web root returns HTTP 200. `npm audit --audit-level=high` reports 0 vulnerabilities.
+- 2026-10-10 Phase 1 end-to-end code re-audit: every main web mutation calls `supabase.functions.invoke("api/v1/…")`, but the repository contains no Supabase Edge Functions; FastAPI is a separate service. Farmer and buyer write services still contain no-op stubs, listing creation returns a generated UUID without persisting, and the migrations contain known incompatible schema/policy references. This explains why form actions cannot complete an end-to-end product flow.
 - Database, RLS, and pgTAP checks are blocked: Supabase CLI is not installed yet, and the D4 hosted-data gate has not been cleared.
 
 ## Independent Acceptance Re-check
