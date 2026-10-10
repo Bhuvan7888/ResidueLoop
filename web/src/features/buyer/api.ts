@@ -1,28 +1,16 @@
 import { supabase } from '@/lib/supabase'
+import { apiRequest } from '@/lib/api-client'
 
 export async function createBuyerProfile(data: Record<string, unknown>) {
-  const { data: res, error } = await supabase.functions.invoke('api/v1/buyers/profile', {
-    body: data
-  })
-  if (error) throw error
-  return res
+  return apiRequest('/buyers/profile', { body: data, method: 'POST' })
 }
 
 export async function createDemandPost(data: Record<string, unknown>) {
-  const { data: res, error } = await supabase.functions.invoke('api/v1/buyers/demand', {
-    body: data
-  })
-  if (error) throw error
-  return res
+  return apiRequest('/buyers/demand', { body: data, method: 'POST' })
 }
 
 export async function updateDemandPost(postId: string, data: Record<string, unknown>) {
-  const { data: res, error } = await supabase.functions.invoke(`api/v1/buyers/demand/${postId}`, {
-    body: data,
-    method: 'PATCH'
-  })
-  if (error) throw error
-  return res
+  return apiRequest(`/buyers/demand/${postId}`, { body: data, method: 'PATCH' })
 }
 
 export async function getDemandPosts() {

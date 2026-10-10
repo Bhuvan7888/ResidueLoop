@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { apiRequest } from '@/lib/api-client'
 
 export async function getOffers() {
   const { data, error } = await supabase
@@ -11,11 +12,7 @@ export async function getOffers() {
 }
 
 export async function handleOfferAction(offerId: string, action: 'accept' | 'decline') {
-  const { data, error } = await supabase.functions.invoke(`api/v1/offers/${offerId}/action`, {
-    body: { action }
-  })
-  if (error) throw error
-  return data
+  return apiRequest(`/offers/${offerId}/action`, { body: { action }, method: 'POST' })
 }
 
 export async function getPools() {

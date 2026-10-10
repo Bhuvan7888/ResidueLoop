@@ -1,47 +1,33 @@
 import { supabase } from '@/lib/supabase'
+import { apiRequest } from '@/lib/api-client'
+
+interface RankedVillage {
+  influence_score: number
+  label: string
+  village?: { name: string }
+}
 
 export async function getRankedVillages(city: string = "Delhi") {
-  const { data: res, error } = await supabase.functions.invoke(`api/v1/charity/villages/ranked?city=${city}`, {
-    method: 'GET'
-  })
-  if (error) throw error
-  return res
+  return apiRequest<RankedVillage[]>(`/charity/villages/ranked?city=${encodeURIComponent(city)}`)
 }
 
 export async function createDonation(data: { ngo_id: string; amount: number; target_village_id?: string }) {
-  const { data: res, error } = await supabase.functions.invoke('api/v1/charity/donate', {
-    method: 'POST',
-    body: data
-  })
-  if (error) throw error
-  return res
+  return apiRequest('/charity/donate', { body: data, method: 'POST' })
 }
 
 export async function requestAssistance(data: { ngo_id: string; listing_id: string; amount_requested: number; purpose: string }) {
-  const { data: res, error } = await supabase.functions.invoke('api/v1/charity/requests', {
-    method: 'POST',
-    body: data
-  })
-  if (error) throw error
-  return res
+  return apiRequest('/charity/requests', { body: data, method: 'POST' })
 }
 
 export async function updateRequestStatus(requestId: string, status: 'approved' | 'declined') {
-  const { data: res, error } = await supabase.functions.invoke(`api/v1/charity/requests/${requestId}/status`, {
-    method: 'PATCH',
-    body: { status }
-  })
-  if (error) throw error
-  return res
+  return apiRequest(`/charity/requests/${requestId}/status`, { body: { status }, method: 'PATCH' })
 }
 
 export async function recordDisbursement(requestId: string, payeeName: string, amount: number) {
-  const { data: res, error } = await supabase.functions.invoke(`api/v1/charity/requests/${requestId}/disbursements`, {
+  return apiRequest(`/charity/requests/${requestId}/disbursements`, {
+    body: { payee_name: payeeName, amount },
     method: 'POST',
-    body: { payee_name: payeeName, amount }
   })
-  if (error) throw error
-  return res
 }
 
 // Data fetching wrappers for UI

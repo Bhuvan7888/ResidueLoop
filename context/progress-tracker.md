@@ -9,7 +9,7 @@ This tracker records verified evidence only. Earlier completion claims were inde
 
 ## Current Goal
 
-- Confirm the hosted Supabase project contains no real data before the one-time migration reset (D4).
+- Repair the local Supabase migration chain, API mutation boundary, and browser flows now that D4 is cleared.
 - Deliver an original, token-based public landing and consistent auth/workspace shell without changing the blocked database plan.
 
 ## Frontend Experience Refresh — 2026-10-10
@@ -25,6 +25,10 @@ This tracker records verified evidence only. Earlier completion claims were inde
 ## Authentication Configuration Repair — 2026-10-10
 
 - [x] Local Turnstile no longer consumes a configured production key: `getCaptchaSiteKey` uses Cloudflare's published test site key only when Vite runs in development and uses the configured public key outside development. `web/src/features/auth/captcha.test.ts` verifies both paths and prevents a development-key fallback in production.
+
+## API Boundary Repair — 2026-10-10
+
+- [x] Replaced Phase 1 mutation calls to nonexistent Supabase Edge Functions with `web/src/lib/api-client.ts`, which sends JSON to FastAPI under `/api/v1` and forwards the current Supabase access token. `api-client.test.ts` covers authorized mutation routing and API error handling; `rg` finds no remaining `supabase.functions.invoke` call in `web/src`.
 
 ## Recovery Decisions
 
@@ -42,7 +46,7 @@ This tracker records verified evidence only. Earlier completion claims were inde
 - F15 confirmed: Phase 1, Unit 09, and Unit 10 were recorded as complete/in progress without end-to-end evidence.
 - 2026-10-10 local checks after Phase 1 edits: `web npm run typecheck`, `test`, `lint`, and `build` pass (5 Vitest tests); `api poetry run ruff check .`, `mypy .`, and `pytest -q` pass (6 tests); `curl /api/v1/health` returns `{"data":"ok"}`; web root returns HTTP 200. `npm audit --audit-level=high` reports 0 vulnerabilities.
 - 2026-10-10 Phase 1 end-to-end code re-audit: every main web mutation calls `supabase.functions.invoke("api/v1/…")`, but the repository contains no Supabase Edge Functions; FastAPI is a separate service. Farmer and buyer write services still contain no-op stubs, listing creation returns a generated UUID without persisting, and the migrations contain known incompatible schema/policy references. This explains why form actions cannot complete an end-to-end product flow.
-- Database, RLS, and pgTAP checks are blocked: Supabase CLI is not installed yet, and the D4 hosted-data gate has not been cleared.
+- D4 was cleared by the project owner on 2026-10-10: the hosted Supabase project contains no real data. Database, RLS, and pgTAP checks now await local Supabase tooling and migration repair.
 
 ## Independent Acceptance Re-check
 
@@ -56,7 +60,7 @@ Status terms: **verified** has recorded command/test/manual evidence; **partial*
 - [ ] Required-setting startup failure — not tested.
 - [ ] Host and CORS rejection — not tested.
 - [ ] Required security headers — not tested against the complete checklist.
-- [ ] Clean database reset and PostGIS — blocked on Supabase CLI/D4 gate.
+- [ ] Clean database reset and PostGIS — D4 cleared; awaiting local Supabase tooling and migration repair.
 - [ ] Clean-checkout CI and no committed secret — historical secrets remain; not verified.
 - [ ] One documented start/test/lint/typecheck command — scripts are being repaired; README is not yet verified.
 
@@ -108,8 +112,8 @@ Status terms: **verified** has recorded command/test/manual evidence; **partial*
 ## Next Up
 
 1. Finish and commit Recovery Phase 1.
-2. Confirm whether the hosted Supabase project contains any real data before running `supabase db reset` (D4 gate).
-3. Recovery Phase 2: repair migrations and replace client write RLS with SELECT-only access.
+2. Install/start local Supabase and repair the migration chain through a clean `supabase db reset`.
+3. Recovery Phase 2: replace client write RLS with SELECT-only access and route mutations through FastAPI.
 
 ## Inputs Needed From User
 
@@ -117,14 +121,13 @@ Status terms: **verified** has recorded command/test/manual evidence; **partial*
 | --- | --- | --- | --- | --- |
 | Rotated Supabase URL, anon key, service-role key, DB URL, and JWT secret | Recovery Phases 1–4 | Local API/database/auth | Supabase Project Settings | `web/.env.local`, `api/.env` | Required: previously committed values must be rotated |
 | Rotated NASA FIRMS, Copernicus, and LLM credentials | Recovery Phases 4–5 | Verification and WhatsApp | Respective provider dashboards | `api/.env` | Required: previously committed values must be rotated |
-| Hosted project data confirmation | Recovery Phase 2 | Authorise/reset decision under D4 | Supabase dashboard/project owner | N/A | Required before any reset |
+| Hosted project data confirmation | Recovery Phase 2 | Authorise/reset decision under D4 | Supabase dashboard/project owner | N/A | Confirmed on 2026-10-10: no real data to preserve |
 | OTP test numbers/fixed codes and CAPTCHA dashboard configuration | Unit 02 | Real auth-flow verification | Supabase/Turnstile dashboards | Dashboard settings and `web/.env.local` | Required for verification |
 | MapTiler key | Units 03 and 10 | Map validation | MapTiler | `web/.env.local` | Optional during plain-map fallback |
 | Twilio/Meta sandbox and WhatsApp signing secret | Unit 09 | Webhook verification | Provider dashboard | `api/.env` | Required for live provider verification |
 
 ## Open Questions
 
-- Does the hosted Supabase project contain any real user, plot, document, listing, donation, or payment-status data? This must be answered before D4 reset work.
 - What should happen when a pool misses its minimum load before the sowing window closes?
 - Confirm ID-document retention period, production SMS provider, hosting/DNS/WAF, and licensed font choice.
 

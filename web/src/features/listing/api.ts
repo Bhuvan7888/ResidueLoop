@@ -1,11 +1,8 @@
 import { supabase } from '@/lib/supabase'
+import { apiRequest } from '@/lib/api-client'
 
 export async function createListing(data: Record<string, unknown>) {
-  const { data: res, error } = await supabase.functions.invoke('api/v1/listings', {
-    body: data
-  })
-  if (error) throw error
-  return res
+  return apiRequest('/listings', { body: data, method: 'POST' })
 }
 
 export async function getListings(farmerId?: string) {
