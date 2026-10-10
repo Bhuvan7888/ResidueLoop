@@ -15,7 +15,6 @@ export function RolePickerRoute() {
     <div className="auth-page min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-md auth-page__card">
         <RolePicker 
-          userId={session.user.id} 
           onRoleSelected={() => {
             window.location.href = '/app'
           }} 

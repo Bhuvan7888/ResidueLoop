@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { apiRequest } from '@/lib/api-client'
 
 export async function signInWithOtp(phone: string, captchaToken?: string) {
   const { data, error } = await supabase.auth.signInWithOtp({
@@ -37,19 +38,9 @@ export async function getProfile(userId: string) {
   return data
 }
 
-export async function updateProfileRole(userId: string, role: string) {
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
-  if (userError) throw userError
-  if (!user || !user.phone) throw new Error('User phone not found')
-
-  const formattedPhone = user.phone.startsWith('+') ? user.phone : `+${user.phone}`
-
-  const { data, error } = await supabase
-    .from('profiles')
-    .insert([{ id: userId, phone: formattedPhone, role }])
-    .select()
-    .single()
-  
-  if (error) throw error
-  return data
+export async function updateProfileRole(role: 'farmer' | 'buyer' | 'donor') {
+  return apiRequest<{ id: string; role: string }>('/profiles', {
+    method: 'POST',
+    body: { role },
+  })
 }

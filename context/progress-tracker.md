@@ -5,11 +5,11 @@ This tracker records verified evidence only. Earlier completion claims were inde
 ## Current Phase
 
 - Recovery Phase 1: Secrets, CI, and reality report — complete pending human credential rotation and history rewrite.
-- Recovery Phase 2 is gated: do not reset Supabase until the hosted project's data state is confirmed.
+- Recovery Phase 2 uses the hosted Supabase project directly. Its data state was confirmed clear of real data; schema deployment is blocked only on a current hosted database admin connection or Supabase access token.
 
 ## Current Goal
 
-- Repair the local Supabase migration chain, API mutation boundary, and browser flows now that D4 is cleared.
+- Repair the hosted Supabase migration chain, API mutation boundary, and browser flows now that D4 is cleared.
 - Deliver an original, token-based public landing and consistent auth/workspace shell without changing the blocked database plan.
 
 ## Frontend Experience Refresh — 2026-10-10
@@ -29,6 +29,8 @@ This tracker records verified evidence only. Earlier completion claims were inde
 ## API Boundary Repair — 2026-10-10
 
 - [x] Replaced Phase 1 mutation calls to nonexistent Supabase Edge Functions with `web/src/lib/api-client.ts`, which sends JSON to FastAPI under `/api/v1` and forwards the current Supabase access token. `api-client.test.ts` covers authorized mutation routing and API error handling; `rg` finds no remaining `supabase.functions.invoke` call in `web/src`.
+- [x] Role selection now uses authenticated `POST /api/v1/profiles`; the API derives the user id and phone from the verified JWT and permits only farmer, buyer, or donor. `api/tests/test_profile_service.py` covers creation and rejects a second role selection; `web/src/features/auth/api.test.ts` covers the browser-to-API route.
+- [x] Added forward-only migration `20261010000000_profile_mutation_boundary.sql` to remove browser profile insert/update policies. It is intentionally not yet applied because the locally configured `DATABASE_URL` is not the connected hosted Supabase project.
 
 ## Recovery Decisions
 
@@ -46,7 +48,8 @@ This tracker records verified evidence only. Earlier completion claims were inde
 - F15 confirmed: Phase 1, Unit 09, and Unit 10 were recorded as complete/in progress without end-to-end evidence.
 - 2026-10-10 local checks after Phase 1 edits: `web npm run typecheck`, `test`, `lint`, and `build` pass (5 Vitest tests); `api poetry run ruff check .`, `mypy .`, and `pytest -q` pass (6 tests); `curl /api/v1/health` returns `{"data":"ok"}`; web root returns HTTP 200. `npm audit --audit-level=high` reports 0 vulnerabilities.
 - 2026-10-10 Phase 1 end-to-end code re-audit: every main web mutation calls `supabase.functions.invoke("api/v1/…")`, but the repository contains no Supabase Edge Functions; FastAPI is a separate service. Farmer and buyer write services still contain no-op stubs, listing creation returns a generated UUID without persisting, and the migrations contain known incompatible schema/policy references. This explains why form actions cannot complete an end-to-end product flow.
-- D4 was cleared by the project owner on 2026-10-10: the hosted Supabase project contains no real data. Database, RLS, and pgTAP checks now await local Supabase tooling and migration repair.
+- D4 was cleared by the project owner on 2026-10-10: the hosted Supabase project contains no real data. A read-only service-role inventory confirmed the hosted REST project is reachable and has the core Unit 02–04/08 tables, while `offers`, `pools`, `pickups`, and `verifications` are absent. The local `DATABASE_URL` does not resolve to that Supabase project, so no SQL or reset was attempted.
+- 2026-10-10 direct-hosted follow-up: API `pytest` (9), Ruff, and mypy pass; web Vitest (9), lint, typecheck, and production build pass. The only build warning is the existing Vite bundle-size warning. The route security checklist passed for the new profile boundary: missing bearer token returns `401`, validated payload permits only signup roles, mutations use the service role, and no client write policy remains after migration. `npm audit --audit-level=high` and `pip-audit` report no known vulnerabilities. The repository-wide gitleaks scan still reports the previously recorded tracked-environment/history findings.
 
 ## Independent Acceptance Re-check
 
@@ -64,8 +67,9 @@ Status terms: **verified** has recorded command/test/manual evidence; **partial*
 - [ ] Clean-checkout CI and no committed secret — historical secrets remain; not verified.
 - [ ] One documented start/test/lint/typecheck command — scripts are being repaired; README is not yet verified.
 
-### Unit 02 — Auth and roles: not verified
+### Unit 02 — Auth and roles: partial
 
+- [x] First-time role selection is routed through a JWT-authenticated API endpoint and a second role selection returns `409`; API and web boundary tests passed on 2026-10-10.
 - [ ] Fixed OTP sign-in; wrong/expired/resend behavior; new-role redirect; seeded NGO redirect; cross-role route denial; JWT rejection; Indian-number validation; CAPTCHA rejection; no service-role bundle — no real auth-provider or role-flow evidence exists. The UI has an OTP form, but this is insufficient proof.
 
 ### Unit 03 — Farmer profile and ID: not verified
@@ -112,8 +116,8 @@ Status terms: **verified** has recorded command/test/manual evidence; **partial*
 ## Next Up
 
 1. Finish and commit Recovery Phase 1.
-2. Install/start local Supabase and repair the migration chain through a clean `supabase db reset`.
-3. Recovery Phase 2: replace client write RLS with SELECT-only access and route mutations through FastAPI.
+2. Put a current direct connection for this hosted Supabase project in the ignored `api/.env` (or a Supabase access token) and apply the forward-only migration.
+3. Repair the remaining Phase 1 schema/services and verify them against the hosted project; do not start Phase 2 work.
 
 ## Inputs Needed From User
 
@@ -122,6 +126,7 @@ Status terms: **verified** has recorded command/test/manual evidence; **partial*
 | Rotated Supabase URL, anon key, service-role key, DB URL, and JWT secret | Recovery Phases 1–4 | Local API/database/auth | Supabase Project Settings | `web/.env.local`, `api/.env` | Required: previously committed values must be rotated |
 | Rotated NASA FIRMS, Copernicus, and LLM credentials | Recovery Phases 4–5 | Verification and WhatsApp | Respective provider dashboards | `api/.env` | Required: previously committed values must be rotated |
 | Hosted project data confirmation | Recovery Phase 2 | Authorise/reset decision under D4 | Supabase dashboard/project owner | N/A | Confirmed on 2026-10-10: no real data to preserve |
+| Current direct hosted database URL or Supabase access token | Recovery Phase 2 | Apply and verify forward-only migrations against the connected project | Supabase dashboard/project owner | Ignored `api/.env` `DATABASE_URL` or local CLI auth | Required: current `DATABASE_URL` points elsewhere |
 | OTP test numbers/fixed codes and CAPTCHA dashboard configuration | Unit 02 | Real auth-flow verification | Supabase/Turnstile dashboards | Dashboard settings and `web/.env.local` | Required for verification |
 | MapTiler key | Units 03 and 10 | Map validation | MapTiler | `web/.env.local` | Optional during plain-map fallback |
 | Twilio/Meta sandbox and WhatsApp signing secret | Unit 09 | Webhook verification | Provider dashboard | `api/.env` | Required for live provider verification |
@@ -134,5 +139,5 @@ Status terms: **verified** has recorded command/test/manual evidence; **partial*
 ## Needs Human
 
 - Rotate every credential that was present in tracked environment files.
-- Rewrite remote Git history after rotation; do not reset the hosted database until its data state is confirmed.
+- Rewrite remote Git history after rotation.
 - Configure DNS, registrar lock, DNSSEC/CAA, Supabase OTP settings, and provider dashboards.

@@ -4,20 +4,21 @@ import { updateProfileRole } from "../api"
 import { UserRole } from "../hooks/useAuth"
 
 interface RolePickerProps {
-  userId: string
   onRoleSelected: (role: UserRole) => void
 }
 
-export function RolePicker({ userId, onRoleSelected }: RolePickerProps) {
+type SelectableRole = Exclude<UserRole, 'ngo'>
+
+export function RolePicker({ onRoleSelected }: RolePickerProps) {
   const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const handleSelect = async (role: UserRole) => {
+  const handleSelect = async (role: SelectableRole) => {
     setLoading(true)
     setError(null)
     try {
-      await updateProfileRole(userId, role)
+      await updateProfileRole(role)
       onRoleSelected(role)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t('auth.role_save_failed'))

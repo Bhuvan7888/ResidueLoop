@@ -1,10 +1,17 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
+from dataclasses import dataclass
 from typing import Any
 from app.core.config import get_settings
 
 security = HTTPBearer()
+
+
+@dataclass(frozen=True)
+class AuthenticatedUser:
+    id: str
+    phone: str
 
 def verify_jwt(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict[str, Any]:
     settings = get_settings()
@@ -38,6 +45,17 @@ def get_current_user_id(payload: dict[str, Any] = Depends(verify_jwt)) -> str:
             detail="Invalid authentication credentials",
         )
     return str(user_id)
+
+
+def get_current_user(payload: dict[str, Any] = Depends(verify_jwt)) -> AuthenticatedUser:
+    user_id = payload.get("sub")
+    phone = payload.get("phone")
+    if not isinstance(user_id, str) or not isinstance(phone, str):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+        )
+    return AuthenticatedUser(id=user_id, phone=phone)
 
 def get_supabase_client() -> Any:
     from supabase import create_client
