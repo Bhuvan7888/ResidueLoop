@@ -39,7 +39,7 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
   const onPhoneSubmit = async (values: z.infer<typeof phoneSchema>) => {
     setError(null)
     if (!captchaToken) {
-      setError('Please complete the CAPTCHA')
+      setError(t('auth.captcha_required'))
       return
     }
     try {
@@ -49,7 +49,7 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
       setStep('otp')
       setCountdown(60)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to send OTP')
+      setError(err instanceof Error ? err.message : t('auth.otp_send_failed'))
     }
   }
 
@@ -59,7 +59,7 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
       await verifyOtp(phone, values.token)
       onSuccess()
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Invalid OTP')
+      setError(err instanceof Error ? err.message : t('auth.otp_invalid'))
     }
   }
 
@@ -72,7 +72,7 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
             <span className="absolute left-3 text-copy-muted">+91</span>
             <input
               {...phoneForm.register('phone')}
-              placeholder="9999999999"
+              placeholder={t('auth.phone_placeholder')}
               className="w-full rounded-xl border border-border-surface-border py-2 pl-10 pr-2 focus:ring-2 focus:ring-accent-primary outline-none"
               disabled={phoneForm.formState.isSubmitting}
             />
@@ -105,7 +105,7 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
         <label className="block text-sm font-medium text-copy-primary mb-1">{t('auth.enter_otp_msg')} {phone}</label>
         <input
           {...otpForm.register('token')}
-          placeholder="123456"
+          placeholder={t('auth.otp_placeholder')}
           className="w-full rounded-xl border border-border-surface-border p-2 focus:ring-2 focus:ring-accent-primary outline-none"
           disabled={otpForm.formState.isSubmitting}
         />
@@ -123,14 +123,14 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
       </button>
       <div className="text-center text-sm">
         {countdown > 0 ? (
-          <span className="text-copy-muted">Resend in {countdown}s</span>
+          <span className="text-copy-muted">{t('auth.resend_in', { seconds: countdown })}</span>
         ) : (
           <button
             type="button"
             onClick={() => onPhoneSubmit({ phone: phoneForm.getValues('phone') })}
             className="text-brand hover:underline"
           >
-            Resend OTP
+            {t('auth.resend_otp')}
           </button>
         )}
       </div>

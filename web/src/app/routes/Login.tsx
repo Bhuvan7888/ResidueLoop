@@ -1,39 +1,44 @@
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { PhoneOtpForm } from '@/features/auth/components/PhoneOtpForm'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { FieldIllustration } from '@/components/common/FieldIllustration'
+import { LanguageSwitch } from '@/components/common/LanguageSwitch'
 
 export function Login() {
   const { session, loading } = useAuth()
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   if (loading) return <div>{t('common.loading')}</div>
 
   if (session) {
-    return <Navigate to="/" replace />
+    return <Navigate to="/app" replace />
   }
 
   return (
-    <div className="min-h-screen bg-base flex flex-col">
-      <header className="px-6 py-4 flex justify-end">
-        <button 
-          onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'pa' : 'en')}
-          className="text-brand text-sm font-medium cursor-pointer"
-        >
-          {i18n.language === 'en' ? 'ਪੰਜਾਬੀ' : 'English'}
-        </button>
+    <div className="auth-page min-h-screen bg-base">
+      <header className="landing-nav">
+        <Link to="/" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-copy-primary">
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          {t('auth.back_home')}
+        </Link>
+        <LanguageSwitch compact />
       </header>
-      <main className="flex-1 flex flex-col md:flex-row items-center justify-center max-w-5xl mx-auto w-full px-6 py-16 md:py-24 gap-12">
-        <div className="flex-1 text-center md:text-left">
-          <p className="text-copy-secondary italic font-display mb-2">{t('auth.welcome_prefix')}</p>
-          <h1 className="text-5xl md:text-7xl font-display text-copy-primary mb-4">{t('auth.brand')}</h1>
-          <p className="text-xl text-copy-secondary">{t('subtitle')}</p>
+      <main className="auth-page__main">
+        <div className="auth-page__intro landing-reveal">
+          <p className="landing-eyebrow">{t('auth.welcome_prefix')}</p>
+          <h1>{t('auth.login_title')}</h1>
+          <p>{t('auth.login_body')}</p>
+          <FieldIllustration className="auth-page__art" />
         </div>
-        <div className="w-full max-w-md">
-          <div className="bg-surface rounded-2xl p-6 border border-surface-border">
-            <PhoneOtpForm onSuccess={() => navigate('/')} />
+        <div className="auth-page__card landing-reveal">
+          <div>
+            <p className="landing-eyebrow">{t('auth.sign_in_eyebrow')}</p>
+            <h2>{t('auth.brand')}</h2>
           </div>
+          <PhoneOtpForm onSuccess={() => navigate('/app')} />
         </div>
       </main>
     </div>

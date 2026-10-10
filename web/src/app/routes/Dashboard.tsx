@@ -10,10 +10,12 @@ export function Dashboard() {
   const { t } = useTranslation()
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-display text-copy-primary">
-        {t('dashboard.welcome_msg', { role, id: session?.user.id })}
-      </h2>
+    <div className="dashboard-page space-y-8">
+      <div className="dashboard-page__heading">
+        <p className="landing-eyebrow">{t('dashboard.eyebrow')}</p>
+        <h2>{t('dashboard.welcome_msg', { role: t(`auth.role_${role}`) })}</h2>
+        <p>{t('dashboard.description')}</p>
+      </div>
       
       {role === 'buyer' && <BuyerDashboard />}
       {role === 'farmer' && <FarmerDashboard userId={session?.user.id || ''} />}

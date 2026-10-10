@@ -10,6 +10,16 @@ This tracker records verified evidence only. Earlier completion claims were inde
 ## Current Goal
 
 - Confirm the hosted Supabase project contains no real data before the one-time migration reset (D4).
+- Deliver an original, token-based public landing and consistent auth/workspace shell without changing the blocked database plan.
+
+## Frontend Experience Refresh — 2026-10-10
+
+- [x] Added a public `/` landing route and moved the protected dashboard route to `/app`; sign-in, role selection, and authenticated redirects now target `/app`.
+- [x] Added an original SVG field/straw illustration, editorial landing sections, responsive navigation, token-only styling, CSS-only motion, and a `prefers-reduced-motion` fallback. No reference-site assets or fonts were copied.
+- [x] Refreshed login, role-picker container, protected header, language switch, and dashboard heading to use the shared editorial treatment.
+- [x] Added English and Punjabi strings for all new landing, navigation, login, language, and OTP-resend UI.
+- [x] Verified static quality with `cd web && npm run typecheck && npm run lint && npm run test && npm run build` (5 Vitest tests passed) on 2026-10-10.
+- [ ] Browser visual and live authentication-flow QA remain unverified: the controlled browser runtime was unavailable and real OTP/provider credentials are still required.
 
 ## Recovery Decisions
 

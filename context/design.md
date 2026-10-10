@@ -105,12 +105,21 @@ Buttons, inputs, and badges use `rounded-xl`. Status badges may use `rounded-ful
 - Buyer, donor, and NGO dashboards are desktop-first and remain usable on tablet width.
 - Auth and form pages use a centered column with `max-w-md`. Dashboards use `max-w-5xl` or wider.
 
+## Public Landing Experience
+
+The public `/` route is the product entry point. It is an original ResidueLoop composition informed by the reference's editorial rhythm, not a copied page.
+
+- It introduces the farmer, buyer, and donor journeys, then directs visitors to the existing OTP login at `/login`.
+- It uses an original inline `FieldIllustration` (abstract fields and a straw bale), not downloaded photography, reference artwork, or a licensed reference font.
+- The protected workspace lives at `/app`; unauthenticated visitors never see protected data on the landing page.
+- Landing copy is short, specific to paddy straw, and is present in both English and Punjabi translation files.
+
 ## Decorative Elements
 
 - The reference uses monochrome rock and leaf cut-outs as decoration. ResidueLoop uses its own simple monochrome straw, leaf, and stone illustrations as inline SVG in `web/src/assets/decor/`.
-- Decoration appears on the login page and in empty states only. It is `aria-hidden`, never carries meaning, and never sits behind text.
+- Decoration appears on the public landing, login page, and in empty states only. It is `aria-hidden`, never carries meaning, and never sits behind text.
 - Do not copy images or illustrations from divinefarmer.com.
-- Motion is limited to a subtle fade and rise on section entry and a slow drift on login-page decoration. Respect `prefers-reduced-motion` by turning motion off.
+- Public-page motion uses a fade-and-rise entry, a slow original illustration drift, a restrained bale movement, and a text marquee. Auth keeps the fade and drift treatment. Respect `prefers-reduced-motion` by turning motion off.
 
 ## Status Badges
 
@@ -159,7 +168,7 @@ Project-specific components built on top (not inside `ui/`, in `web/src/componen
 - Activity and notification lists follow the reference's journal pattern: a title, one line of context, a date, and a text link.
 - Footer: small, with legal links (Privacy, Terms) and a contact line. No newsletter block.
 - Empty states: a `h-8 w-8` icon, one sentence, and one action.
-- There is no separate marketing site. The login page carries the brand.
+- The public landing page is a lightweight entry to the same application, not a separate marketing product. Its only account CTA is the login flow.
 
 ## Role Dashboards
 

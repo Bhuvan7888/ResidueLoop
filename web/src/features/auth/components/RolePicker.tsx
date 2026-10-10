@@ -20,7 +20,7 @@ export function RolePicker({ userId, onRoleSelected }: RolePickerProps) {
       await updateProfileRole(userId, role)
       onRoleSelected(role)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to save role')
+      setError(err instanceof Error ? err.message : t('auth.role_save_failed'))
       setLoading(false)
     }
   }

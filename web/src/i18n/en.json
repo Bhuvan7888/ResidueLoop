@@ -18,14 +18,66 @@
     "role_donor": "Donor",
     "role_donor_desc": "I want to fund pickups to stop burning.",
     "role_ngo": "NGO",
-    "role_ngo_desc": "I want to manage funding and farmers."
+    "role_ngo_desc": "I want to manage funding and farmers.",
+    "back_home": "Back home",
+    "login_title": "Give crop residue a better next chapter.",
+    "login_body": "Sign in with your Indian mobile number to list straw, coordinate supply, or fund a cleaner season.",
+    "sign_in_eyebrow": "Secure sign in",
+    "captcha_required": "Please complete the CAPTCHA.",
+    "otp_send_failed": "We could not send an OTP. Please try again.",
+    "otp_invalid": "That OTP is not valid. Please try again.",
+    "resend_in": "Resend in {{seconds}}s",
+    "resend_otp": "Resend OTP",
+    "phone_placeholder": "9999999999",
+    "otp_placeholder": "123456",
+    "role_save_failed": "We could not save your role. Please try again."
   },
   "common": {
     "loading": "Loading...",
     "sign_out": "Sign Out",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "switch_language": "Switch language",
+    "punjabi": "ਪੰਜਾਬੀ",
+    "english": "English"
   },
   "dashboard": {
-    "welcome_msg": "Welcome to your {{role}} dashboard. ID: {{id}}"
+    "eyebrow": "Your workspace",
+    "welcome_msg": "Welcome, {{role}}.",
+    "description": "Your next action and the activity around it, in one calm place."
+  },
+  "landing": {
+    "home_label": "ResidueLoop home",
+    "primary_navigation": "Primary navigation",
+    "nav_how": "How it works",
+    "nav_roles": "For everyone",
+    "nav_impact": "Our shared air",
+    "login": "Sign in",
+    "eyebrow": "A better path for paddy straw",
+    "title": "Keep the straw in the loop.",
+    "lede": "ResidueLoop helps Punjab's farmers, buyers, donors, and local organisations turn crop residue into a useful resource—not smoke.",
+    "primary_cta": "Start with your phone",
+    "secondary_cta": "See the loop",
+    "art_caption": "Value grows when every field has a next step.",
+    "marquee": "List it · Match it · Move it · Keep the air clearer · ",
+    "process_eyebrow": "A simple, local loop",
+    "process_title": "From field to useful resource—without the detour through smoke.",
+    "steps": {
+      "list": { "title": "List the straw", "body": "A farmer records a harvest and a nearby field. We keep the details clear and practical." },
+      "match": { "title": "Make a useful match", "body": "Buyers can see available supply and arrange pooled pickup when the load is ready." },
+      "verify": { "title": "Track what matters", "body": "Field and pickup updates create a simple record for the people doing the work." }
+    },
+    "roles_eyebrow": "Built for the whole loop",
+    "roles_title": "One shared problem. Useful roles for everyone who can move it forward.",
+    "roles": {
+      "farmer": { "title": "Farmers", "body": "Turn a difficult residue decision into a visible sale and a clearer pickup plan." },
+      "buyer": { "title": "Buyers", "body": "Find nearby, baled straw and follow each pickup from plan to weight." },
+      "donor": { "title": "Donors", "body": "Back local collection and see the support your contribution makes possible." },
+      "cta": "Explore your role"
+    },
+    "impact_eyebrow": "Shared air begins nearby",
+    "impact_title": "A small next step for every field can add up to a cleaner season.",
+    "impact_body": "ResidueLoop makes the handoffs visible: harvest, match, pickup, and support. It never promises an outcome it cannot verify.",
+    "impact_cta": "Join ResidueLoop",
+    "footer": "A practical loop for paddy straw."
   }
 }

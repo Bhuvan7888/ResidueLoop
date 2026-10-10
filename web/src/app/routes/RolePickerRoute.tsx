@@ -9,16 +9,15 @@ export function RolePickerRoute() {
 
   if (loading) return <div>{t('common.loading')}</div>
   if (!session) return <Navigate to="/login" replace />
-  if (role) return <Navigate to="/" replace />
+  if (role) return <Navigate to="/app" replace />
 
   return (
-    <div className="min-h-screen bg-base flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
+    <div className="auth-page min-h-screen flex items-center justify-center p-6">
+      <div className="w-full max-w-md auth-page__card">
         <RolePicker 
           userId={session.user.id} 
           onRoleSelected={() => {
-            // Force a reload or navigate to the correct dashboard
-            window.location.href = '/'
+            window.location.href = '/app'
           }} 
         />
       </div>

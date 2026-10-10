@@ -1,10 +1,18 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import { Link, Navigate, Outlet, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { supabase } from '@/lib/supabase'
+import { LanguageSwitch } from '@/components/common/LanguageSwitch'
 
 export function ProtectedLayout() {
   const { session, role, loading } = useAuth()
   const { t } = useTranslation()
+  const navigate = useNavigate()
+
+  const signOut = async () => {
+    await supabase.auth.signOut()
+    navigate('/')
+  }
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen bg-base">{t('common.loading')}</div>
@@ -23,11 +31,15 @@ export function ProtectedLayout() {
 
   return (
     <div className="min-h-screen bg-base flex flex-col">
-      <header className="border-b border-surface-border-subtle bg-surface px-6 py-4 flex justify-between items-center">
-        <h1 className="font-display text-xl text-copy-primary">{t('auth.brand')}</h1>
-        {/* Navbar shell items here */}
+      <header className="app-nav">
+        <Link to="/app" className="font-display text-2xl tracking-tight">{t('auth.brand')}</Link>
+        <div className="flex items-center gap-2">
+          <span className="hidden rounded-full bg-subtle px-3 py-2 text-sm text-copy-secondary sm:block">{t(`auth.role_${role}`)}</span>
+          <LanguageSwitch compact />
+          <button type="button" onClick={signOut} className="app-nav__signout">{t('common.sign_out')}</button>
+        </div>
       </header>
-      <main className="flex-1 p-6 max-w-5xl mx-auto w-full">
+      <main className="flex-1 p-6 pb-12 pt-10 md:p-10 md:pb-16 max-w-6xl mx-auto w-full">
         <Outlet />
       </main>
     </div>

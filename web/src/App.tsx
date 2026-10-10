@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedLayout } from './app/layouts/ProtectedLayout'
+import { Landing } from './app/routes/Landing'
 import { Login } from './app/routes/Login'
 import { RolePickerRoute } from './app/routes/RolePickerRoute'
 import { Dashboard } from './app/routes/Dashboard'
@@ -8,12 +9,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/role-picker" element={<RolePickerRoute />} />
         
         <Route element={<ProtectedLayout />}>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/app" element={<Dashboard />} />
         </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )
