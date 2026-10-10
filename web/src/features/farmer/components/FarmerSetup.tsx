@@ -87,6 +87,13 @@ export function FarmerSetup() {
   )
 }
 
+const INDIAN_STATES = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh",
+  "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
+  "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+  "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Lakshadweep", "Puducherry"
+];
+
 function VillageSelect({ label, options, registration }: { label: string; options: Village[]; registration: UseFormRegisterReturn }) {
   const [selectedState, setSelectedState] = useState<string>('')
 
@@ -95,10 +102,13 @@ function VillageSelect({ label, options, registration }: { label: string; option
     Moga: 'Punjab',
     Karnal: 'Haryana',
     Ambala: 'Haryana',
+    Pune: 'Maharashtra',
+    Nagpur: 'Maharashtra',
+    Lucknow: 'Uttar Pradesh',
+    Kanpur: 'Uttar Pradesh',
+    Bengaluru: 'Karnataka',
+    Mysuru: 'Karnataka'
   }
-
-  // Get unique states from the available options
-  const availableStates = Array.from(new Set(options.map(v => stateMap[v.district] || 'Other'))).sort()
 
   // Filter villages by the selected state
   const filteredVillages = options.filter(v => (stateMap[v.district] || 'Other') === selectedState)
@@ -113,9 +123,10 @@ function VillageSelect({ label, options, registration }: { label: string; option
           onChange={(e) => setSelectedState(e.target.value)}
         >
           <option value="">Select State...</option>
-          {availableStates.map(state => (
+          {INDIAN_STATES.map(state => (
             <option key={state} value={state}>{state}</option>
           ))}
+          <option value="Other">Other</option>
         </select>
       </label>
       
@@ -126,7 +137,7 @@ function VillageSelect({ label, options, registration }: { label: string; option
           disabled={!selectedState}
           {...registration}
         >
-          <option value="">Select Town/Village...</option>
+          <option value="">{selectedState ? (filteredVillages.length > 0 ? 'Select Town/Village...' : 'No villages mapped yet') : 'Select State First...'}</option>
           {filteredVillages.map((village) => (
             <option key={village.id} value={village.id}>{village.name}, {village.district}</option>
           ))}
