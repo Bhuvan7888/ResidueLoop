@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     nbr_drop_threshold: float = 0.1
     verification_window_days: int = 30
     plot_buffer_radius_m: float = 100.0
+    twilio_auth_token: str | None = None
+    llm_api_key: str | None = None
+    id_document_encryption_key: str | None = None
+    mock_id_review: bool = True
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.routers.v1 import health, farmer, buyer, listing, offer, pickup, charity, profile
+from app.routers.v1 import buyer, charity, farmer, health, listing, offer, pickup, profile, whatsapp
 from app.core.config import get_settings
 from app.core.errors import setup_exception_handlers
 
@@ -94,3 +94,4 @@ app.include_router(listing.router, prefix="/api/v1")
 app.include_router(offer.router, prefix="/api/v1")
 app.include_router(pickup.router, prefix="/api/v1")
 app.include_router(charity.router, prefix="/api/v1")
+app.include_router(whatsapp.router, prefix="/api/v1")

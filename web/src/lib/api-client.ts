@@ -7,7 +7,7 @@ interface ApiErrorPayload {
 }
 
 interface ApiRequestOptions {
-  body?: unknown
+  body?: FormData | unknown
   method?: 'GET' | 'POST' | 'PATCH'
 }
 
@@ -15,10 +15,16 @@ const apiBaseUrl = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/v
 
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
   const { data: { session } } = await supabase.auth.getSession()
+  const isFormData = options.body instanceof FormData
+  const body: BodyInit | undefined = options.body === undefined
+    ? undefined
+    : options.body instanceof FormData
+      ? options.body
+      : JSON.stringify(options.body)
   const response = await fetch(`${apiBaseUrl}${path}`, {
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    body,
     headers: {
-      ...(options.body === undefined ? {} : { 'Content-Type': 'application/json' }),
+      ...(options.body === undefined || isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
     },
     method: options.method || 'GET',

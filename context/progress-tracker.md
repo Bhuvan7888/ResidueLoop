@@ -31,6 +31,10 @@ This tracker records verified evidence only. Earlier completion claims were inde
 - [x] Replaced Phase 1 mutation calls to nonexistent Supabase Edge Functions with `web/src/lib/api-client.ts`, which sends JSON to FastAPI under `/api/v1` and forwards the current Supabase access token. `api-client.test.ts` covers authorized mutation routing and API error handling; `rg` finds no remaining `supabase.functions.invoke` call in `web/src`.
 - [x] Role selection now uses authenticated `POST /api/v1/profiles`; the API derives the user id and phone from the verified JWT and permits only farmer, buyer, or donor. `api/tests/test_profile_service.py` covers creation and rejects a second role selection; `web/src/features/auth/api.test.ts` covers the browser-to-API route.
 - [x] Added forward-only migration `20261010000000_profile_mutation_boundary.sql` to remove browser profile insert/update policies. It is intentionally not yet applied because the locally configured `DATABASE_URL` is not the connected hosted Supabase project.
+- [x] Added `20261010000001_phase1_schema_repair.sql` to complete the missing hosted Phase 1 tables (`offers`, `pools`, `pickups`, and `verifications`), SELECT-only RLS policies, reference villages, and balers. It awaits manual execution in the hosted Supabase SQL Editor.
+- [x] Replaced buyer-profile, demand-post, and listing no-op service paths with persistence and ownership checks. Web API adapters now map form field names to the FastAPI contracts. Unit tests cover payload mapping, cross-buyer demand isolation, unverified-listing rejection, and listing persistence/matching dispatch. Live verification remains blocked on the migration.
+- [x] Replaced farmer profile/plot no-op paths with persistence. ID upload now validates file signature, encrypts content with AES-256-GCM, stores only a private path and last four digits, and performs the documented mock review. Live upload verification is blocked on `ID_DOCUMENT_ENCRYPTION_KEY` and the hosted migration.
+- [x] Added the farmer workspace setup forms for profile, plot, consent, and multipart ID proof submission. The API client now preserves `FormData` and `api-client.test.ts` covers this regression. English and Punjabi strings are present. The setup cannot be manually completed until the hosted schema migration, phone-Auth test accounts, and API encryption key are configured.
 
 ## Recovery Decisions
 
@@ -50,6 +54,7 @@ This tracker records verified evidence only. Earlier completion claims were inde
 - 2026-10-10 Phase 1 end-to-end code re-audit: every main web mutation calls `supabase.functions.invoke("api/v1/…")`, but the repository contains no Supabase Edge Functions; FastAPI is a separate service. Farmer and buyer write services still contain no-op stubs, listing creation returns a generated UUID without persisting, and the migrations contain known incompatible schema/policy references. This explains why form actions cannot complete an end-to-end product flow.
 - D4 was cleared by the project owner on 2026-10-10: the hosted Supabase project contains no real data. A read-only service-role inventory confirmed the hosted REST project is reachable and has the core Unit 02–04/08 tables, while `offers`, `pools`, `pickups`, and `verifications` are absent. The local `DATABASE_URL` does not resolve to that Supabase project, so no SQL or reset was attempted.
 - 2026-10-10 direct-hosted follow-up: API `pytest` (9), Ruff, and mypy pass; web Vitest (9), lint, typecheck, and production build pass. The only build warning is the existing Vite bundle-size warning. The route security checklist passed for the new profile boundary: missing bearer token returns `401`, validated payload permits only signup roles, mutations use the service role, and no client write policy remains after migration. `npm audit --audit-level=high` and `pip-audit` report no known vulnerabilities. The repository-wide gitleaks scan still reports the previously recorded tracked-environment/history findings.
+- 2026-10-10 local recovery check: API Ruff, mypy, and 16 pytest tests pass; web typecheck, lint, 13 Vitest tests, and production build pass. `GET /api/v1/health` returned HTTP 200 with the expected headers from the restored local API. The npm audit endpoint was unavailable in this environment, so no new dependency-audit result is claimed.
 
 ## Independent Acceptance Re-check
 
@@ -74,11 +79,11 @@ Status terms: **verified** has recorded command/test/manual evidence; **partial*
 
 ### Unit 03 — Farmer profile and ID: not verified
 
-- [ ] Multiple plots; private encrypted upload/path-only persistence; invalid/oversize upload rejection; minimised ID data; mocked review/rejection/resubmission; direct RLS isolation; complete English/Punjabi strings — no end-to-end evidence exists. The farmer write services remain stubs.
+- [ ] Multiple plots; private encrypted upload/path-only persistence; invalid/oversize upload rejection; minimised ID data; mocked review/rejection/resubmission; direct RLS isolation; complete English/Punjabi strings — no end-to-end evidence exists. The API implementation is no longer a stub, but the frontend workflow and hosted storage/database checks remain blocked.
 
 ### Unit 04 — Buyers and listings: not verified
 
-- [ ] Buyer profile/demand CRUD; verified listing with estimate; unverified-listing rejection in UI/API; listing ownership; config-backed estimate — no end-to-end evidence exists. Buyer and listing write services are stubs.
+- [ ] Buyer profile/demand CRUD; verified listing with estimate; unverified-listing rejection in UI/API; listing ownership; config-backed estimate — no end-to-end evidence exists. The persistence paths and request mapping are covered by unit tests; hosted schema and browser-flow checks remain outstanding.
 
 ### Unit 05 — Matching and pooling: not verified
 
@@ -127,6 +132,7 @@ Status terms: **verified** has recorded command/test/manual evidence; **partial*
 | Rotated NASA FIRMS, Copernicus, and LLM credentials | Recovery Phases 4–5 | Verification and WhatsApp | Respective provider dashboards | `api/.env` | Required: previously committed values must be rotated |
 | Hosted project data confirmation | Recovery Phase 2 | Authorise/reset decision under D4 | Supabase dashboard/project owner | N/A | Confirmed on 2026-10-10: no real data to preserve |
 | Current direct hosted database URL or Supabase access token | Recovery Phase 2 | Apply and verify forward-only migrations against the connected project | Supabase dashboard/project owner | Ignored `api/.env` `DATABASE_URL` or local CLI auth | Required: current `DATABASE_URL` points elsewhere |
+| 32-byte URL-safe base64 document encryption key | Unit 03 | Encrypt private ID documents before storage | Password manager or secret generator | Ignored `api/.env` `ID_DOCUMENT_ENCRYPTION_KEY` | Required for live ID-upload verification |
 | OTP test numbers/fixed codes and CAPTCHA dashboard configuration | Unit 02 | Real auth-flow verification | Supabase/Turnstile dashboards | Dashboard settings and `web/.env.local` | Required for verification |
 | MapTiler key | Units 03 and 10 | Map validation | MapTiler | `web/.env.local` | Optional during plain-map fallback |
 | Twilio/Meta sandbox and WhatsApp signing secret | Unit 09 | Webhook verification | Provider dashboard | `api/.env` | Required for live provider verification |

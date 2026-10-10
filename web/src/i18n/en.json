@@ -79,5 +79,29 @@
     "impact_body": "ResidueLoop makes the handoffs visible: harvest, match, pickup, and support. It never promises an outcome it cannot verify.",
     "impact_cta": "Join ResidueLoop",
     "footer": "A practical loop for paddy straw."
+  },
+  "farmer": {
+    "setup_eyebrow": "Farmer setup",
+    "setup_title": "Complete these steps to list straw",
+    "setup_body": "Save your profile, add a plot, and submit ID proof. Listings unlock after the ID review is verified.",
+    "profile_title": "1. Your profile",
+    "plot_title": "2. Your plot",
+    "id_title": "3. ID proof",
+    "name": "Name",
+    "village": "Village",
+    "save_profile": "Save profile",
+    "acres": "Acres",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "add_plot": "Add plot",
+    "id_type": "ID type",
+    "last_four": "Last four digits",
+    "document": "Document (JPEG, PNG, or PDF)",
+    "consent": "I consent to secure document review. Only the ID type, last four digits, status, and encrypted private file path are retained.",
+    "submit_id": "Submit ID proof",
+    "profile_saved": "Profile saved.",
+    "plot_saved": "Plot saved. You can add another plot.",
+    "id_status": "ID review status: {{status}}.",
+    "villages_error": "We could not load villages. Run the supplied Supabase migration, then try again."
   }
 }

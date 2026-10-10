@@ -2,6 +2,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useTranslation } from 'react-i18next'
 import { BuyerDashboard } from '@/features/buyer/components/BuyerDashboard'
 import { FarmerDashboard } from '@/features/farmer/components/FarmerDashboard'
+import { FarmerSetup } from '@/features/farmer/components/FarmerSetup'
 import { DonorDashboard } from '@/features/charity/components/DonorDashboard'
 import { NgoDashboard } from '@/features/charity/components/NgoDashboard'
 
@@ -18,7 +19,12 @@ export function Dashboard() {
       </div>
       
       {role === 'buyer' && <BuyerDashboard />}
-      {role === 'farmer' && <FarmerDashboard userId={session?.user.id || ''} />}
+      {role === 'farmer' && (
+        <>
+          <FarmerSetup />
+          <FarmerDashboard userId={session?.user.id || ''} />
+        </>
+      )}
       {role === 'donor' && <DonorDashboard userId={session?.user.id || ''} />}
       {role === 'ngo' && <NgoDashboard userId={session?.user.id || ''} />}
     </div>

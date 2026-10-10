@@ -24,12 +24,12 @@ Voice notes, speech-to-text, any operation that exists only on WhatsApp, the hea
 
 ## Acceptance Criteria
 
-- [ ] A WhatsApp message creates the same listing record as the web form, with `source = whatsapp`.
-- [ ] The raw message, parsed JSON, and intent are stored.
-- [ ] Questions return values read from the database, never model-generated values.
-- [ ] A forged webhook signature is rejected.
-- [ ] The timeline and the buyer view show the WhatsApp-sourced records.
-- [ ] If parsing fails, the farmer gets a short clarification and no record is created.
+- [x] A WhatsApp message creates the same listing record as the web form, with `source = whatsapp`.
+- [x] The raw message, parsed JSON, and intent are stored.
+- [x] Questions return values read from the database, never model-generated values.
+- [x] A forged webhook signature is rejected.
+- [x] The timeline and the buyer view show the WhatsApp-sourced records.
+- [x] If parsing fails, the farmer gets a short clarification and no record is created.
 
 ## Verify
 

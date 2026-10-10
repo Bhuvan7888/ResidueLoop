@@ -1,17 +1,10 @@
 from typing import Any
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
-from datetime import date
 from app.core.security import require_role
 from app.services.listing_service import create_listing
+from app.schemas.market import ListingCreate
 
 router = APIRouter(prefix="/listings", tags=["listings"])
-
-class ListingCreate(BaseModel):
-    plot_id: str
-    harvest_date: date
-    combine_sms_used: bool
-    est_tonnes: float
 
 @router.post("")
 async def add_listing(

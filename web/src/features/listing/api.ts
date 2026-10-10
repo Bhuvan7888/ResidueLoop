@@ -1,8 +1,23 @@
 import { supabase } from '@/lib/supabase'
 import { apiRequest } from '@/lib/api-client'
 
-export async function createListing(data: Record<string, unknown>) {
-  return apiRequest('/listings', { body: data, method: 'POST' })
+interface ListingPayload {
+  plotId: string
+  harvestDate: string
+  combineSmsUsed: boolean
+  estTonnes: number
+}
+
+export async function createListing(data: ListingPayload) {
+  return apiRequest('/listings', {
+    body: {
+      plot_id: data.plotId,
+      harvest_date: data.harvestDate,
+      combine_sms_used: data.combineSmsUsed,
+      est_tonnes: data.estTonnes,
+    },
+    method: 'POST',
+  })
 }
 
 export async function getListings(farmerId?: string) {

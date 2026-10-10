@@ -44,4 +44,19 @@ describe('apiRequest', () => {
 
     await expect(apiRequest('/listings', { method: 'POST' })).rejects.toThrow('Authentication required')
   })
+
+  it('preserves multipart data for the encrypted ID-upload endpoint', async () => {
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({ data: { session: null }, error: null } as never)
+    vi.mocked(fetch).mockResolvedValue(new Response(JSON.stringify({ data: { status: 'verified' } }), { status: 200 }))
+    const body = new FormData()
+    body.append('id_last4', '1234')
+
+    await apiRequest('/farmers/id_verification', { body, method: 'POST' })
+
+    expect(fetch).toHaveBeenCalledWith('http://127.0.0.1:8000/api/v1/farmers/id_verification', expect.objectContaining({
+      body,
+      headers: {},
+      method: 'POST',
+    }))
+  })
 })

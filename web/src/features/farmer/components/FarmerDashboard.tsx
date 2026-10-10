@@ -7,21 +7,24 @@ import { getPickups, updatePickupPayment } from '@/features/pickup/api'
 import { PickupCard } from '@/features/pickup/components/PickupCard'
 import { VerificationCard } from '@/features/verification/components/VerificationCard'
 
+import { getMessages } from '@/features/whatsapp/api'
 import { AssistanceRequestForm } from '@/features/charity/components/AssistanceRequestForm'
 
 export function FarmerDashboard({ userId }: { userId: string }) {
   const [view, setView] = useState<'listing' | 'dashboard' | 'assistance'>('dashboard')
   const [activeListing, setActiveListing] = useState<string | null>(null)
-  const [listings, setListings] = useState<{ id: string; acres: number; status: string; harvest_date: string }[]>([])
+  const [listings, setListings] = useState<{ id: string; acres: number; status: string; harvest_date: string; source: string }[]>([])
   const [plots, setPlots] = useState<{ id: string; acres: number; verifications?: { verdict: 'verified' | 'fire_detected' | 'inconclusive'; firms_hits: number; nbr_delta: number; confidence: string; checked_at: string }[] }[]>([])
   const [offers, setOffers] = useState<{ id: string; status: string; price_per_tonne: number }[]>([])
   const [pickups, setPickups] = useState<{ id: string; pool_id: string; actual_tonnes: number | null; amount_due: number | null; payment_status: string; pools: { pickup_date: string | null } }[]>([])
+  const [messages, setMessages] = useState<{ id: string; direction: string; raw_text: string; created_at: string }[]>([])
 
   useEffect(() => {
     getPlots(userId).then(setPlots).catch(console.error)
     getOffers().then(setOffers).catch(console.error)
     getPickups().then(setPickups).catch(console.error)
     getListings(userId).then(setListings).catch(console.error)
+    getMessages(userId).then(setMessages).catch(console.error)
   }, [userId])
 
   return (
@@ -57,7 +60,12 @@ export function FarmerDashboard({ userId }: { userId: string }) {
             {listings.map(listing => (
               <div key={listing.id} className="bg-surface border border-surface-border rounded-2xl p-4 flex justify-between items-center">
                 <div>
-                  <p className="font-medium text-copy-primary">{listing.acres} acres - {listing.status}</p>
+                  <div className="flex items-center space-x-2">
+                    <p className="font-medium text-copy-primary">{listing.acres} acres - {listing.status}</p>
+                    {listing.source === 'whatsapp' && (
+                      <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">via WhatsApp</span>
+                    )}
+                  </div>
                   <p className="text-sm text-copy-secondary">Harvest: {listing.harvest_date}</p>
                 </div>
                 <button onClick={() => { setActiveListing(listing.id); setView('assistance') }} className="px-3 py-1 bg-brand text-on-brand rounded-lg text-sm">Request Support</button>
@@ -115,6 +123,22 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                     getPickups().then(setPickups)
                   }} 
                 />
+              ))}
+            </div>
+          )}
+
+          <h3 className="text-lg font-medium text-copy-primary mt-8">WhatsApp Messages</h3>
+          {messages.length === 0 ? (
+            <div className="bg-surface border border-surface-border rounded-2xl p-6">
+              <p className="text-copy-secondary">No messages yet. Send a message to start!</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {messages.map(msg => (
+                <div key={msg.id} className={`p-3 rounded-xl max-w-sm ${msg.direction === 'inbound' ? 'bg-surface border border-surface-border mr-auto' : 'bg-brand text-on-brand ml-auto'}`}>
+                  <p className="text-sm">{msg.raw_text}</p>
+                  <p className="text-xs opacity-70 mt-1">{new Date(msg.created_at).toLocaleString()}</p>
+                </div>
               ))}
             </div>
           )}
