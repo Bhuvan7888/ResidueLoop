@@ -5,6 +5,7 @@ import { createBuyerProfile, createDemandPost } from '../api'
 import { getPickups, updatePickupWeight } from '@/features/pickup/api'
 import { PickupCard } from '@/features/pickup/components/PickupCard'
 import { getListings } from '@/features/listing/api'
+import { DemandHeatmap } from '@/features/heatmap/components/DemandHeatmap'
 
 export function BuyerDashboard() {
   const [view, setView] = useState<'profile' | 'demand' | 'dashboard'>('dashboard')
@@ -40,9 +41,7 @@ export function BuyerDashboard() {
 
       {view === 'dashboard' && (
         <div className="space-y-6">
-          <div className="bg-surface border border-surface-border rounded-2xl p-6">
-            <p className="text-copy-secondary">Buyer Dashboard - Demand Posts will appear here.</p>
-          </div>
+          <DemandHeatmap />
 
           <h3 className="text-lg font-medium text-copy-primary mt-8">Available Supply (Listings)</h3>
           {listings.length === 0 ? (
