@@ -60,18 +60,18 @@ export function FarmerSetup() {
       {message && <p className="rounded-xl bg-state-success-dim p-3 text-sm text-state-success" role="status">{message}</p>}
       <SetupCard title={t('farmer.profile_title')}>
         <form className="grid gap-3 sm:grid-cols-3" onSubmit={profileForm.handleSubmit(submitProfile)}>
-          <label className="text-sm text-copy-primary">{t('farmer.name')}<input className="mt-1 w-full rounded-xl border border-surface-border p-2" {...profileForm.register('name')} /></label>
+          <label className="text-sm text-copy-primary flex flex-col">{t('farmer.name')}<input className="mt-1 w-full rounded-xl border border-surface-border p-2" {...profileForm.register('name')} /></label>
           <VillageSelect label={t('farmer.village')} options={villageOptions} registration={profileForm.register('villageId')} />
-          <button className="self-end rounded-xl bg-brand px-4 py-2 font-medium text-on-brand disabled:opacity-50" disabled={profileForm.formState.isSubmitting}>{t('farmer.save_profile')}</button>
+          <button className="self-end justify-self-end sm:col-start-3 rounded-xl bg-brand px-4 py-2 font-medium text-on-brand disabled:opacity-50" disabled={profileForm.formState.isSubmitting}>{t('farmer.save_profile')}</button>
         </form>
       </SetupCard>
       <SetupCard title={t('farmer.plot_title')}>
-        <form className="grid gap-3 sm:grid-cols-4" onSubmit={plotForm.handleSubmit(submitPlot)}>
+        <form className="grid gap-3 sm:grid-cols-5" onSubmit={plotForm.handleSubmit(submitPlot)}>
           <VillageSelect label={t('farmer.village')} options={villageOptions} registration={plotForm.register('villageId')} />
           <NumberField label={t('farmer.acres')} registration={plotForm.register('acres')} step="0.1" />
           <NumberField label={t('farmer.latitude')} registration={plotForm.register('lat')} step="0.0001" />
           <NumberField label={t('farmer.longitude')} registration={plotForm.register('lng')} step="0.0001" />
-          <button className="rounded-xl bg-brand px-4 py-2 font-medium text-on-brand disabled:opacity-50 sm:col-span-4" disabled={plotForm.formState.isSubmitting}>{t('farmer.add_plot')}</button>
+          <button className="rounded-xl bg-brand px-4 py-2 font-medium text-on-brand disabled:opacity-50 sm:col-span-5" disabled={plotForm.formState.isSubmitting}>{t('farmer.add_plot')}</button>
         </form>
       </SetupCard>
       <SetupCard title={t('farmer.id_title')}>
@@ -114,8 +114,8 @@ function VillageSelect({ label, options, registration }: { label: string; option
   const filteredVillages = options.filter(v => (stateMap[v.district] || 'Other') === selectedState)
 
   return (
-    <div className="space-y-3">
-      <label className="text-sm text-copy-primary">
+    <>
+      <label className="text-sm text-copy-primary flex flex-col">
         State
         <select 
           className="mt-1 w-full rounded-xl border border-surface-border bg-surface p-2" 
@@ -130,7 +130,7 @@ function VillageSelect({ label, options, registration }: { label: string; option
         </select>
       </label>
       
-      <label className="text-sm text-copy-primary">
+      <label className="text-sm text-copy-primary flex flex-col">
         {label}
         <select 
           className="mt-1 w-full rounded-xl border border-surface-border bg-surface p-2 disabled:opacity-50" 
@@ -143,10 +143,10 @@ function VillageSelect({ label, options, registration }: { label: string; option
           ))}
         </select>
       </label>
-    </div>
+    </>
   )
 }
 
 function NumberField({ label, registration, step }: { label: string; registration: UseFormRegisterReturn; step: string }) {
-  return <label className="text-sm text-copy-primary">{label}<input className="mt-1 w-full rounded-xl border border-surface-border p-2" step={step} type="number" {...registration} /></label>
+  return <label className="text-sm text-copy-primary flex flex-col">{label}<input className="mt-1 w-full rounded-xl border border-surface-border p-2" step={step} type="number" {...registration} /></label>
 }
