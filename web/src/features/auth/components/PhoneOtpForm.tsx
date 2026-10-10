@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { signInWithOtp, verifyOtp } from "../api"
+import { signInWithOtp, verifyOtp, signInDevUser } from "../api"
 import { getCaptchaSiteKey } from '../captcha'
 import { phoneSchema, otpSchema } from "../schemas"
 import { Turnstile } from '@marsidev/react-turnstile'
@@ -100,6 +100,23 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
         >
           {phoneForm.formState.isSubmitting ? t('auth.verifying') : t('auth.send_otp')}
         </button>
+
+        {import.meta.env.DEV && (
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await signInDevUser();
+                onSuccess();
+              } catch (err: any) {
+                setError(err.message || 'Dev login failed');
+              }
+            }}
+            className="w-full mt-2 bg-slate-200 text-slate-800 rounded-xl py-2 font-medium"
+          >
+            [DEV] Bypass OTP
+          </button>
+        )}
       </form>
     )
   }
