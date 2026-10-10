@@ -19,6 +19,7 @@ This tracker records verified evidence only. Earlier completion claims were inde
 - [x] Refreshed login, role-picker container, protected header, language switch, and dashboard heading to use the shared editorial treatment.
 - [x] Added English and Punjabi strings for all new landing, navigation, login, language, and OTP-resend UI.
 - [x] Verified static quality with `cd web && npm run typecheck && npm run lint && npm run test && npm run build` (5 Vitest tests passed) on 2026-10-10.
+- [x] Local integration launch on 2026-10-10: FastAPI served `GET /api/v1/health` as `{"data":"ok"}` on port 8000; Vite served `/`, `/login`, and `/app` as HTTP 200 on port 5173. API security headers were present. Web typecheck/lint/test/build passed; API Ruff/mypy/pytest passed (6 tests).
 - [ ] Browser visual and live authentication-flow QA remain unverified: the controlled browser runtime was unavailable and real OTP/provider credentials are still required.
 
 ## Recovery Decisions
