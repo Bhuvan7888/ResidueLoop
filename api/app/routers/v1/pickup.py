@@ -1,3 +1,4 @@
+from typing import Any
 from fastapi import APIRouter, Depends, BackgroundTasks
 from pydantic import BaseModel
 from typing import Literal
@@ -18,7 +19,7 @@ async def update_weight(
     payload: WeightUpdate,
     background_tasks: BackgroundTasks,
     user_id: str = Depends(require_role(["buyer"]))
-):
+) -> dict[str, Any]:
     listing_id = await update_pickup_weight(user_id, pickup_id, payload.actual_tonnes)
     
     # Queue background verification job
@@ -30,6 +31,6 @@ async def update_payment(
     pickup_id: str,
     payload: PaymentUpdate,
     user_id: str = Depends(require_role(["farmer"]))
-):
+) -> dict[str, Any]:
     await update_pickup_payment(user_id, pickup_id, payload.payment_status)
     return {"data": "success"}

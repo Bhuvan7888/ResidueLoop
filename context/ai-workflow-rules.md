@@ -30,6 +30,8 @@ A unit is done only when all of these are true:
 
 Do not report a unit as done if any criterion is unmet or unchecked. Say which ones and why.
 
+A criterion is recorded as passed only with evidence: command output, a named test, or a recorded manual walk of the real flow, written next to the criterion in `progress-tracker.md`. Statuses are never copied from earlier text. An independent re-check of earlier units runs before any new unit starts.
+
 ## Scoping Rules
 
 - Work on one feature unit or subsystem at a time.

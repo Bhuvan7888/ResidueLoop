@@ -1,3 +1,4 @@
+from typing import Any
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from datetime import date
@@ -16,6 +17,6 @@ class ListingCreate(BaseModel):
 async def add_listing(
     listing: ListingCreate,
     user_id: str = Depends(require_role(["farmer"]))
-):
+) -> dict[str, Any]:
     listing_id = await create_listing(user_id, listing)
     return {"data": {"id": listing_id}}

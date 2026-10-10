@@ -1,88 +1,119 @@
 # Progress Tracker
 
-Update this file whenever the current phase, active feature, or implementation state changes.
+This tracker records verified evidence only. Earlier completion claims were independently re-checked on 2026-10-10 and are not carried forward without evidence.
 
 ## Current Phase
 
-- Phase 2: WhatsApp & Heatmap. In Progress (starting Unit 09).
+- Recovery Phase 1: Secrets, CI, and reality report — complete pending human credential rotation and history rewrite.
+- Recovery Phase 2 is gated: do not reset Supabase until the hosted project's data state is confirmed.
 
 ## Current Goal
 
-- Begin WhatsApp synchronization.
+- Confirm the hosted Supabase project contains no real data before the one-time migration reset (D4).
 
-## Completed
+## Recovery Decisions
 
-- Planning: project plan v2 and the context files.
-- Unit 01: project foundation (`featureSpecs/01-foundation.md`).
-- Unit 02: auth and roles (`featureSpecs/02-auth-and-roles.md`).
-- Unit 03: farmer profile and ID verification (`featureSpecs/03-farmer-profile-and-id.md`).
-- Unit 04: buyers and listings (`featureSpecs/04-buyers-and-listings.md`).
-- Unit 05: matching and pooling (`featureSpecs/05-matching-and-pooling.md`).
-- Unit 06: pickup and payment status (`featureSpecs/06-pickup-and-payment-status.md`).
-- Unit 07: satellite verification (`featureSpecs/07-satellite-verification.md`).
-- Unit 08: charity (`featureSpecs/08-charity.md`).
-- Unit 11: security hardening (`featureSpecs/11-security-hardening.md`).
-- Phase 1: Web application completed.
-- Unit 09: WhatsApp synchronization (`featureSpecs/09-whatsapp-sync.md`).
+- D1. FastAPI under `/api/v1` is the only mutation boundary. The web app uses one token-aware API client and no Supabase Edge Functions.
+- D2. Browser reads use TanStack Query feature hooks through FastAPI or SELECT-only Supabase RLS. Components do not fetch in `useEffect`.
+- D3. Client database writes are disabled. `POST /api/v1/profiles` accepts only farmer, buyer, and donor. NGO profiles are seeded and roles are immutable.
+- D4. The migrations may be repaired in place once because they were never applied to real data. A `supabase db reset` happens only after the hosted project is confirmed free of real data.
+- D5. A ready pool creates one pickup row per listing; the pool buyer records weight and the owning farmer records payment status.
+- D6. Every service changed during recovery receives a repository; services do not query the database directly.
 
-## In Progress
+## Verified Recovery Evidence
 
-- Unit 10: Buyer Heatmap (`featureSpecs/10-buyer-heatmap.md`).
+- F1 confirmed: `git ls-files` found tracked `api/.env` and `web/.env`; gitleaks found 13 working-tree and 12 historical findings in environment files. Remediation is in progress; historical rewriting requires human approval.
+- F14 confirmed: web had no `typecheck` or `test` scripts; `poetry run pytest` failed without `PYTHONPATH`; mypy package discovery hid 41 strict typing failures; ruff had five errors.
+- F15 confirmed: Phase 1, Unit 09, and Unit 10 were recorded as complete/in progress without end-to-end evidence.
+- 2026-10-10 local checks after Phase 1 edits: `web npm run typecheck`, `test`, `lint`, and `build` pass (5 Vitest tests); `api poetry run ruff check .`, `mypy .`, and `pytest -q` pass (6 tests); `curl /api/v1/health` returns `{"data":"ok"}`; web root returns HTTP 200. `npm audit --audit-level=high` reports 0 vulnerabilities.
+- Database, RLS, and pgTAP checks are blocked: Supabase CLI is not installed yet, and the D4 hosted-data gate has not been cleared.
+
+## Independent Acceptance Re-check
+
+Status terms: **verified** has recorded command/test/manual evidence; **partial** has an implementation fragment but lacks the required proof; **not verified** has no evidence or is contradicted by code.
+
+### Unit 01 — Foundation: partial
+
+- [ ] Web shell/token-only styling — startup HTTP 200 is verified; visual/token audit is not.
+- [ ] Punjabi font rendering — not verified.
+- [x] API health success shape — `curl http://127.0.0.1:8000/api/v1/health` returned `{"data":"ok"}` on 2026-10-10.
+- [ ] Required-setting startup failure — not tested.
+- [ ] Host and CORS rejection — not tested.
+- [ ] Required security headers — not tested against the complete checklist.
+- [ ] Clean database reset and PostGIS — blocked on Supabase CLI/D4 gate.
+- [ ] Clean-checkout CI and no committed secret — historical secrets remain; not verified.
+- [ ] One documented start/test/lint/typecheck command — scripts are being repaired; README is not yet verified.
+
+### Unit 02 — Auth and roles: not verified
+
+- [ ] Fixed OTP sign-in; wrong/expired/resend behavior; new-role redirect; seeded NGO redirect; cross-role route denial; JWT rejection; Indian-number validation; CAPTCHA rejection; no service-role bundle — no real auth-provider or role-flow evidence exists. The UI has an OTP form, but this is insufficient proof.
+
+### Unit 03 — Farmer profile and ID: not verified
+
+- [ ] Multiple plots; private encrypted upload/path-only persistence; invalid/oversize upload rejection; minimised ID data; mocked review/rejection/resubmission; direct RLS isolation; complete English/Punjabi strings — no end-to-end evidence exists. The farmer write services remain stubs.
+
+### Unit 04 — Buyers and listings: not verified
+
+- [ ] Buyer profile/demand CRUD; verified listing with estimate; unverified-listing rejection in UI/API; listing ownership; config-backed estimate — no end-to-end evidence exists. Buyer and listing write services are stubs.
+
+### Unit 05 — Matching and pooling: not verified
+
+- [ ] Deterministic offer; accept/decline; live pool progress; ready-pool date/notifications; fixture tests; no-network matching — no evidence exists. Pickup creation is absent and matching is not invoked by listing creation.
+
+### Unit 06 — Pickup and payment: not verified
+
+- [ ] Buyer-only weights; tested amount due; farmer-only payment update; buyer live status; no money movement — no end-to-end or RLS evidence exists. Pickup creation is absent and an update references a missing schema field.
+
+### Unit 07 — Satellite verification: partial
+
+- [x] Three verdict result branches — `api/tests/test_verification.py` passed 3 fixture-style tests on 2026-10-10.
+- [ ] Inconclusive recheck scheduling — not tested and not implemented.
+- [ ] Summary-only storage/no imagery — not verified against a real database.
+- [x] All three verdict outcomes have tests — named tests passed as above.
+- [ ] Handler queues work only — not verified by a route test.
+
+### Unit 08 — Charity: not verified
+
+- [ ] Donation/history; support request visibility; NGO approval/disbursement/ledger; donor verification notification; village-only location; “likely influence” language; no money movement — no end-to-end evidence exists. Allocation and concurrency rules are absent.
+
+### Unit 09 — WhatsApp: not verified
+
+- [ ] Same listing service/source; message persistence; database-backed questions; forged-signature rejection; timeline/buyer source tag; safe parse failure — no sandbox or route test exists. Static review shows only two intents and a bypass of the normal listing service.
+
+### Unit 10 — Buyer heatmap: not started
+
+- [ ] Demand/supply layers; labelled unfilled zones; no individual plots; buyer-only access — no implementation or verification evidence exists.
+
+### Unit 11 — Security hardening: partial
+
+- [ ] Complete access-control/404 matrix; dedicated rate limits; hostile Host/origin/body handling; outbound allowlist; complete headers; DNS/registrar checks; clean production bundle; both dependency audits; unit checklist — not verified.
+- [x] Oversized request rejection is partially covered by `api/tests/test_security.py::test_oversized_body`, which passed on 2026-10-10; it is not a complete hardening verification.
 
 ## Next Up
 
-Phase 2:
-
-10. `10-buyer-heatmap.md`
+1. Finish and commit Recovery Phase 1.
+2. Confirm whether the hosted Supabase project contains any real data before running `supabase db reset` (D4 gate).
+3. Recovery Phase 2: repair migrations and replace client write RLS with SELECT-only access.
 
 ## Inputs Needed From User
 
-The build continues with fallbacks for every item. Ask the user for these at the end of the unit that needs them and in the final report. Values go in the env files, never in chat.
-
-| Input                                                      | Needed by | Used for                            | Where to get it                              | Env file and variable                                   | Status |
-| ---------------------------------------------------------- | --------- | ----------------------------------- | -------------------------------------------- | ------------------------------------------------------- | ------ |
-| Supabase project: URL, anon key, service role key, DB URL, JWT secret | Unit 01 | Database, auth, storage             | Supabase dashboard, Project Settings         | `web/.env.local`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. `api/.env`: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `SUPABASE_JWT_SECRET` | Provided |
-| Supabase phone provider with test numbers and fixed OTPs   | Unit 02   | OTP sign-in for the demo            | Supabase dashboard, Authentication           | Dashboard setting                                       | Provided |
-| CAPTCHA site key and secret (Turnstile or hCaptcha)        | Unit 02   | OTP abuse protection                | Cloudflare or hCaptcha dashboard             | `web/.env.local`: `VITE_CAPTCHA_SITE_KEY`. Secret in the Supabase dashboard | Provided |
-| MapTiler key                                               | Unit 03   | Basemap tiles                       | MapTiler account                             | `web/.env.local`: `VITE_MAPTILER_KEY`                   | Provided |
-| NASA FIRMS MAP_KEY                                         | Unit 07   | Fire detections                     | FIRMS website                                | `api/.env`: `NASA_FIRMS_MAP_KEY`                        | Provided |
-| Copernicus Data Space OAuth client (or Earth Engine)       | Unit 07   | Sentinel-2 imagery                  | Copernicus Data Space dashboard              | `api/.env`: `CDSE_CLIENT_ID`, `CDSE_CLIENT_SECRET`      | Provided |
-| Google Cloud Translation API key (optional)                | Any unit  | Dev-time Punjabi draft or cross-check, not shipped | Google Cloud console          | `api/.env` or a local-only script env: `GOOGLE_TRANSLATE_API_KEY` | Optional |
-| WhatsApp provider (Twilio sandbox or Meta test number)     | Unit 09   | Two-way WhatsApp                    | Twilio or Meta for Developers                | `api/.env`: provider variables                          | Phase 2 |
-| LLM API key                                                | Unit 09   | WhatsApp message parsing            | LLM provider console                         | `api/.env`: `LLM_API_KEY`                               | Provided |
+| Input | Needed by | Used for | Where to get it | Env file and variable | Status |
+| --- | --- | --- | --- | --- |
+| Rotated Supabase URL, anon key, service-role key, DB URL, and JWT secret | Recovery Phases 1–4 | Local API/database/auth | Supabase Project Settings | `web/.env.local`, `api/.env` | Required: previously committed values must be rotated |
+| Rotated NASA FIRMS, Copernicus, and LLM credentials | Recovery Phases 4–5 | Verification and WhatsApp | Respective provider dashboards | `api/.env` | Required: previously committed values must be rotated |
+| Hosted project data confirmation | Recovery Phase 2 | Authorise/reset decision under D4 | Supabase dashboard/project owner | N/A | Required before any reset |
+| OTP test numbers/fixed codes and CAPTCHA dashboard configuration | Unit 02 | Real auth-flow verification | Supabase/Turnstile dashboards | Dashboard settings and `web/.env.local` | Required for verification |
+| MapTiler key | Units 03 and 10 | Map validation | MapTiler | `web/.env.local` | Optional during plain-map fallback |
+| Twilio/Meta sandbox and WhatsApp signing secret | Unit 09 | Webhook verification | Provider dashboard | `api/.env` | Required for live provider verification |
 
 ## Open Questions
 
-- Role selection: is choosing Farmer, Buyer, or Donor at first sign-in enough, or should buyers be approved before they can see farmers' listings?
-- Can an unverified farmer list at all, or browse only? (Current spec: browse only.)
-- Pool cutoff: what happens if a pool does not reach the minimum load before the sowing window closes?
-- Verification thresholds: default NBR drop threshold and verification window length (harvest date to sowing date). Both are config values and need validating.
-- Who sets the price per tonne: the buyer profile value, or per offer? (Current spec: the buyer profile value.)
-- Hindi UI: in Phase 1, or later? (Current spec: English and Punjabi only.)
-- Platform fee on donations: charge one, or full pass-through to NGOs?
-- Straw per acre (2 to 3 tonnes) and minimum truckload (8 to 10 tonnes) need validating with a real farmer and buyer.
-- ID document retention: delete after review (default) or keep for a set period?
-- Licensed fonts: GT Alpina and SAA Series A, or stay on the free stand-ins (Fraunces, Inter)?
-- Hosting and DNS: which registrar, DNS provider, and CDN or WAF in front of the API?
-- Production SMS provider for OTP (Indian DLT-compliant) and ID verification partner are undecided.
+- Does the hosted Supabase project contain any real user, plot, document, listing, donation, or payment-status data? This must be answered before D4 reset work.
+- What should happen when a pool misses its minimum load before the sowing window closes?
+- Confirm ID-document retention period, production SMS provider, hosting/DNS/WAF, and licensed font choice.
 
-## Architecture Decisions
+## Needs Human
 
-- Database is Supabase Postgres with PostGIS. Schema changes only through migrations in `supabase/migrations`.
-- Authentication is Supabase Auth with phone OTP. Hackathon build uses Supabase test phone numbers and fixed OTPs (the UI takes 10 digits and prepends +91).
-- ID documents go in a private Supabase Storage bucket. Only ID type, last four digits, and status are stored in the database.
-- No payment gateway. Payment status is recorded by the farmer. Donations are recorded in test mode.
-- No digital certificate. Verification is shown as a status inside the app.
-- No district officer, panchayat, or baler operator login. Balers are seeded service providers. The buyer enters weighed tonnes at pickup.
-- `pickups` is one row per farmer listing in a pool, because weights and payment status are per farmer.
-- No route optimisation. Pickup is one date per pool.
-- Design follows divinefarmer.com: light, cream and mustard, serif headings, flat surfaces. Replaces the earlier dark look.
-- Background jobs run as a second process of the `api` package using APScheduler so services are not duplicated (Redis cannot run locally in the hackathon environment).
-- Security rules live in `security-context.md` and are applied per unit, with a final hardening unit.
-- Mocked in the hackathon build: ID review (auto-approve), payments, and OTP delivery. Satellite integrations (NASA FIRMS and Sentinel CDSE) and ID storage are fully integrated.
-
-## Session Notes
-
-- Hackathon timeline: Thu Oct 8 (define and de-risk), Fri Oct 9 (core end to end), Sat Oct 10 (verification and charity), Sun Oct 11 (Phase 2 slice if time, polish, pitch).
-- Six credentials unlock Phase 1: NASA FIRMS key, Copernicus or Earth Engine credential, Supabase project (URL, anon key, service role key, database URL), MapTiler key, Supabase test phone numbers, and a JWT-verification secret.
-- Record a backup video of the full flow on Saturday night.
+- Rotate every credential that was present in tracked environment files.
+- Rewrite remote Git history after rotation; do not reset the hosted database until its data state is confirmed.
+- Configure DNS, registrar lock, DNSSEC/CAA, Supabase OTP settings, and provider dashboards.

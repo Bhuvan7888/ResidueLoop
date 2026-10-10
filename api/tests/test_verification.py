@@ -1,11 +1,12 @@
 import pytest
 from unittest.mock import patch, MagicMock
+from collections.abc import Generator
 from app.services.verification_service import run_plot_verification
 
 import os
 
 @pytest.fixture(autouse=True)
-def mock_env():
+def mock_env() -> Generator[None, None, None]:
     with patch.dict(os.environ, {
         "SUPABASE_URL": "http://mock",
         "SUPABASE_SERVICE_ROLE_KEY": "mock",
@@ -21,7 +22,9 @@ def mock_env():
 @patch("app.services.verification_service.get_supabase_client")
 @patch("app.integrations.firms.FirmsClient.get_fire_hits")
 @patch("app.integrations.sentinel.SentinelClient.get_nbr_change")
-async def test_run_plot_verification_fire_detected(mock_get_nbr, mock_get_firms, mock_get_supabase):
+async def test_run_plot_verification_fire_detected(
+    mock_get_nbr: MagicMock, mock_get_firms: MagicMock, mock_get_supabase: MagicMock
+) -> None:
     mock_client = MagicMock()
     mock_get_supabase.return_value = mock_client
     
@@ -45,7 +48,9 @@ async def test_run_plot_verification_fire_detected(mock_get_nbr, mock_get_firms,
 @patch("app.services.verification_service.get_supabase_client")
 @patch("app.integrations.firms.FirmsClient.get_fire_hits")
 @patch("app.integrations.sentinel.SentinelClient.get_nbr_change")
-async def test_run_plot_verification_verified(mock_get_nbr, mock_get_firms, mock_get_supabase):
+async def test_run_plot_verification_verified(
+    mock_get_nbr: MagicMock, mock_get_firms: MagicMock, mock_get_supabase: MagicMock
+) -> None:
     mock_client = MagicMock()
     mock_get_supabase.return_value = mock_client
     
@@ -69,7 +74,9 @@ async def test_run_plot_verification_verified(mock_get_nbr, mock_get_firms, mock
 @patch("app.services.verification_service.get_supabase_client")
 @patch("app.integrations.firms.FirmsClient.get_fire_hits")
 @patch("app.integrations.sentinel.SentinelClient.get_nbr_change")
-async def test_run_plot_verification_inconclusive(mock_get_nbr, mock_get_firms, mock_get_supabase):
+async def test_run_plot_verification_inconclusive(
+    mock_get_nbr: MagicMock, mock_get_firms: MagicMock, mock_get_supabase: MagicMock
+) -> None:
     mock_client = MagicMock()
     mock_get_supabase.return_value = mock_client
     

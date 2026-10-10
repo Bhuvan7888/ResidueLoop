@@ -18,7 +18,7 @@ async def update_pickup_weight(user_id: str, pickup_id: str, actual_tonnes: floa
         "completed_at": "now()"
     }).eq("id", pickup_id).execute()
     
-    return pickup_res.data["listing_id"]
+    return str(pickup_res.data["listing_id"])
 
 async def update_pickup_payment(user_id: str, pickup_id: str, payment_status: str) -> None:
     client = get_supabase_client()

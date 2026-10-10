@@ -1,3 +1,4 @@
+from typing import Any
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from pydantic import BaseModel
 from app.core.security import require_role
@@ -15,7 +16,7 @@ class PlotCreate(BaseModel):
 async def add_plot(
     plot: PlotCreate,
     user_id: str = Depends(require_role(["farmer"]))
-):
+) -> dict[str, Any]:
     await create_plot(user_id, plot)
     return {"data": "success"}
 
@@ -25,7 +26,7 @@ async def upload_id(
     id_last4: str = Form(...),
     file: UploadFile = File(...),
     user_id: str = Depends(require_role(["farmer"]))
-):
+) -> dict[str, Any]:
     # 5MB limit check is usually done in middleware or here
     file.file.seek(0, 2)
     file_size = file.file.tell()

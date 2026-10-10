@@ -3,7 +3,7 @@ from app.main import app
 
 client = TestClient(app)
 
-def test_oversized_body():
+def test_oversized_body() -> None:
     # Typically Starlette/FastAPI doesn't enforce global body size limits strictly unless configured,
     # but we can simulate a large request and see if we added a middleware.
     # Unit 11 spec asks for oversized body rejection.
@@ -11,12 +11,12 @@ def test_oversized_body():
     response = client.post("/api/v1/auth/verify-otp", json=large_body)
     assert response.status_code == 413
 
-def test_idor_wrong_user():
+def test_idor_wrong_user() -> None:
     # If a user tries to access a pickup or listing they don't own.
     # The routes already implement this in endpoints. We'll just verify the pattern.
     pass
 
-def test_rate_limits():
+def test_rate_limits() -> None:
     # Make multiple requests to see if we get a 429
     for _ in range(5):
         client.get("/health")

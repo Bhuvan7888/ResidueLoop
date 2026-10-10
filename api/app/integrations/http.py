@@ -1,5 +1,6 @@
 import httpx
 from urllib.parse import urlparse
+from typing import Any
 
 # Security-context outbound host allowlist
 ALLOWED_HOSTS = {
@@ -15,7 +16,7 @@ class SharedHttpClient:
         return parsed.hostname in ALLOWED_HOSTS
 
     @staticmethod
-    async def get(url: str, **kwargs) -> httpx.Response:
+    async def get(url: str, **kwargs: Any) -> httpx.Response:
         if not SharedHttpClient._is_allowed(url):
             raise ValueError(f"Host not in allowlist: {url}")
         
@@ -23,7 +24,7 @@ class SharedHttpClient:
             return await client.get(url, **kwargs)
 
     @staticmethod
-    async def post(url: str, **kwargs) -> httpx.Response:
+    async def post(url: str, **kwargs: Any) -> httpx.Response:
         if not SharedHttpClient._is_allowed(url):
             raise ValueError(f"Host not in allowlist: {url}")
             

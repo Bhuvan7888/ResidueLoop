@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import Callable, Awaitable
+from typing import Awaitable, Callable
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 import time
@@ -49,7 +49,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 # Simple in-memory rate limiter
 RATE_LIMIT_REQUESTS = 100
 RATE_LIMIT_WINDOW = 60
-request_counts = defaultdict(list)
+request_counts: defaultdict[str, list[float]] = defaultdict(list)
 
 MAX_BODY_SIZE = 1 * 1024 * 1024  # 1MB limit
 

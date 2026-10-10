@@ -1,7 +1,8 @@
 from app.core.security import get_supabase_client
 from fastapi import HTTPException
+from typing import Any, cast
 
-async def get_ranked_villages(target_lat: float, target_lon: float):
+async def get_ranked_villages(target_lat: float, target_lon: float) -> list[dict[str, Any]]:
     client = get_supabase_client()
     res = client.table("villages").select("*").execute()
     villages = res.data
@@ -19,7 +20,12 @@ async def get_ranked_villages(target_lat: float, target_lon: float):
         })
     return ranked
 
-async def create_donation(donor_id: str, ngo_id: str, amount: float, target_village_id: str = None):
+async def create_donation(
+    donor_id: str,
+    ngo_id: str,
+    amount: float,
+    target_village_id: str | None = None,
+) -> dict[str, Any]:
     client = get_supabase_client()
     res = client.table("donations").insert({
         "donor_id": donor_id,
@@ -27,9 +33,11 @@ async def create_donation(donor_id: str, ngo_id: str, amount: float, target_vill
         "amount": amount,
         "target_village_id": target_village_id
     }).execute()
-    return res.data[0]
+    return cast(dict[str, Any], res.data[0])
 
-async def create_assistance_request(farmer_id: str, ngo_id: str, listing_id: str, amount: float, purpose: str):
+async def create_assistance_request(
+    farmer_id: str, ngo_id: str, listing_id: str, amount: float, purpose: str
+) -> dict[str, Any]:
     client = get_supabase_client()
     res = client.table("assistance_requests").insert({
         "farmer_id": farmer_id,
@@ -38,9 +46,9 @@ async def create_assistance_request(farmer_id: str, ngo_id: str, listing_id: str
         "amount_requested": amount,
         "purpose": purpose
     }).execute()
-    return res.data[0]
+    return cast(dict[str, Any], res.data[0])
 
-async def update_request_status(ngo_id: str, request_id: str, status: str):
+async def update_request_status(ngo_id: str, request_id: str, status: str) -> None:
     client = get_supabase_client()
     res = client.table("assistance_requests").select("ngo_id").eq("id", request_id).single().execute()
     if res.data["ngo_id"] != ngo_id:
@@ -48,7 +56,9 @@ async def update_request_status(ngo_id: str, request_id: str, status: str):
         
     client.table("assistance_requests").update({"status": status}).eq("id", request_id).execute()
 
-async def create_disbursement(ngo_id: str, request_id: str, payee_name: str, amount: float):
+async def create_disbursement(
+    ngo_id: str, request_id: str, payee_name: str, amount: float
+) -> dict[str, Any]:
     client = get_supabase_client()
     # verify ownership
     res = client.table("assistance_requests").select("ngo_id, status").eq("id", request_id).single().execute()
@@ -63,4 +73,4 @@ async def create_disbursement(ngo_id: str, request_id: str, payee_name: str, amo
         "payee_name": payee_name,
         "amount": amount
     }).execute()
-    return disb_res.data[0]
+    return cast(dict[str, Any], disb_res.data[0])

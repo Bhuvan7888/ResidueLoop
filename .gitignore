@@ -1,0 +1,11 @@
+# Local environment files may contain credentials. Keep only sanitized templates.
+.env
+.env.*
+!.env.example
+
+# OS and generated artifacts
+.DS_Store
+**/__pycache__/
+**/*.py[cod]
+node_modules/
+dist/

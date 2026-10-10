@@ -38,7 +38,7 @@ Rules:
 
 ## System Boundaries
 
-- `web/src` — React UI: pages, components, hooks, i18n, Supabase client. No business rules.
+- `web/src` — React UI: pages, components, hooks, i18n, one API client, and read-only Supabase access under RLS. All mutations go to FastAPI. No business rules.
 - `api/app` — FastAPI app in layers (router, service, repository). Routers verify the JWT, validate input, and call services. Services hold business rules. Repositories are the only database access. `integrations/` holds the shared outbound HTTP client and third-party adapters.
 - `api/app/jobs` — Long-running background jobs: satellite verification, data ingest, scheduled rechecks. Runs as a second process of the same package and reuses its services and repositories.
 - `supabase` — Database migrations, row level security policies, seed data, and local config. This is the only place schema changes are made.
@@ -57,7 +57,8 @@ Rules:
 
 - Every user has one row in `profiles` with `id = auth.users.id` and a `role`: `farmer`, `buyer`, `donor`, or `ngo`.
 - Farmer, buyer, and donor roles are chosen once at first sign-in. NGO profiles are created by seed data and matched by phone number.
-- Row level security is enabled on every table. Policies use `auth.uid()`.
+- Row level security is enabled on every table. Browser access is SELECT-only and policies use `auth.uid()`.
+- The API is the sole mutation boundary. It uses the service role after checking the caller's role and ownership.
 - The API verifies the Supabase JWT on every request and applies role and ownership checks before any mutation.
 - Cross-user operations (matching, pooling, verification writes, notifications) run in the API or its jobs process with the service role.
 
@@ -163,3 +164,7 @@ Rules:
 11. Schema changes happen only through migrations in `supabase/migrations`.
 12. The rules in `security-context.md` apply to every unit. No unit is done until its security checklist passes.
 13. Business logic exists once, in services. Routers, jobs, and the WhatsApp webhook all call the same services.
+14. The web app uses `web/src/lib/api-client.ts` and `VITE_API_URL` for every mutation. Supabase Edge Functions are not used.
+15. Client-side database writes are disabled. Profiles can be created only by `POST /api/v1/profiles` for farmer, buyer, or donor; NGO profiles are seeded only and roles are immutable.
+16. The current migration repair is a one-time exception: migrations may be fixed in place because they were never applied to real data. After the reset, all schema changes use new migrations.
+17. A ready pool creates one pickup per listing. Only its buyer records weight, and only the listing's farmer records payment status.

@@ -81,6 +81,8 @@ Write the least code that meets the acceptance criteria, in the place where a re
 ## API Conventions
 
 - Routes are versioned under `/api/v1` and named by resource (`/listings`, `/pools/{id}/pickups`). Use the correct HTTP verb and status code.
+- All web mutations use the shared FastAPI client. Do not use Supabase Edge Functions or client-side database writes.
+- Direct browser reads are performed only through feature hooks backed by TanStack Query; components never fetch in `useEffect`.
 - Validate and parse request input before any logic runs. Then authenticate, then authorise by role and ownership, then act.
 - Consistent response shapes: `{ "data": ... }` on success and `{ "error": { "code": "...", "message": "..." } }` on failure. List responses add `{ "page": { "next": ... } }`.
 - Error codes are a fixed enum shared with the web app. Messages never expose internals.

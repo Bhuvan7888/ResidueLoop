@@ -2,7 +2,7 @@ from app.core.security import get_supabase_client
 from fastapi import HTTPException
 import uuid
 
-async def create_listing(user_id: str, listing_data) -> str:
+async def create_listing(user_id: str, listing_data: object) -> str:
     client = get_supabase_client()
     
     # 1. Check if farmer is verified

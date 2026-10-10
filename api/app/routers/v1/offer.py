@@ -1,3 +1,4 @@
+from typing import Any
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from app.core.security import require_role
@@ -13,7 +14,7 @@ async def handle_offer_action(
     offer_id: str,
     payload: OfferAction,
     user_id: str = Depends(require_role(["farmer"]))
-):
+) -> dict[str, Any]:
     if payload.action == "accept":
         await accept_offer(user_id, offer_id)
     elif payload.action == "decline":
