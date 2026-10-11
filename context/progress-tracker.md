@@ -114,6 +114,16 @@ This tracker records verified evidence only. Earlier completion claims were inde
   - Added `id="offers-section"` and `scroll-mt-6` to Section 2 in `FarmerDashboard.tsx` for smooth scrolling navigation.
   - Maintained 100% key and semantic parity across `en.json`, `hi.json`, and `pa.json` (781 keys each, 0 diffs).
   - Verified static quality: `npm run typecheck` (0 errors), `npm test` (17 tests passed), `npm run lint` (0 errors), `npm run build` (clean production bundle), `poetry run pytest` (34 tests passed).
+- [x] Revamped Donor Portal for High-Impact Emotional Engagement & Clean Air Agency (2026-10-11):
+  - Created Inspirational Atmosphere Hero: Added "Every Rupee Clears the Sky" banner, 4 aggregate environmental counters (Farmland at Burn Risk, Toxic PM2.5 Preventable, Potential CO2 Averted, &lt;24h Baler Deployment Speed), standard ₹1,300/acre machine rate transparency guarantee, and quick one-tap rescue presets (`₹500`, `₹1,300`, `₹2,600`, `₹6,500`).
+  - Added 4-Tab Task-Driven Navigation:
+    1. 🌾 `Urgent Field Rescues`: Live field campaigns with 48h wheat sowing burn-threat timers, farmer/acreage profiles, dynamic progress bars, and 1-click rescue triggers.
+    2. 🧮 `Live Impact Simulator`: Interactive slider & preset calculator dynamically computing exact acres cleared, tonnes of straw diverted, kg of toxic PM2.5 stopped, downwind citizens shielded, and clean air hours funded.
+    3. 🗺️ `Downwind Air Shield`: Meteorological trajectory radar for target cities (Delhi NCR, Chandigarh, Ludhiana, Amritsar, Bathinda, Patiala) with exposure indices and direct village funding.
+    4. 🏅 `My Impact & Honours`: Personal scoreboard and official "Clean Air Guardian Impact Certificate" with verifiable ID and 1-click WhatsApp/Social sharing to celebrate citizen contribution.
+  - Upgraded Stripe Dummy Gateway modal with real-time impact equivalency feedback (`₹X funds Y acres and stops Z tonnes CO2`) and automated NGO call telemetry.
+  - Attained 100% key parity across `en.json`, `hi.json`, and `pa.json` (815 keys each, 0 diffs).
+  - Verified static quality: `npm run typecheck` (0 errors), `npm test` (17 tests passed), `npm run lint` (0 errors), `npm run build` (built in 586ms), `poetry run pytest` (34 tests passed).
 
 ## Recovery Decisions
 
