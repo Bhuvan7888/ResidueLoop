@@ -505,6 +505,8 @@
     "sort_price": "💰 Lowest Price",
     "sort_tonnes": "🌾 Highest Tonnes",
     "sort_date": "📅 Harvest Date",
+    "loading_matching_farmers": "Connecting to nearby farmer network & live crop yields...",
+    "loading_subtext": "Scanning verified paddy plots and active stubble harvesting schedules",
     "no_matching_farmers": "No farmer listings found matching your current radius or filter.",
     "try_expand_radius": "Try expanding the radius to < 60 km or resetting straw form filters.",
     "reset_filters": "Reset Filters",

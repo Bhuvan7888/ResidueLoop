@@ -66,7 +66,7 @@ async def get_matched_deals(
         "id, status, price_per_tonne, pickup_start, pickup_end, buyer_id, baler_id, listing_id, pool_id, created_at, updated_at, "
         "buyers(org_name, type, profile_id), "
         "balers(id, name), "
-        "listings(id, farmer_id, est_tonnes, stubble_form, combine_sms_used, harvest_date, plots(farmer_id, acres, village_id, villages(name, district)))"
+        "listings(id, farmer_id, est_tonnes, combine_sms_used, harvest_date, plots(farmer_id, acres, village_id, villages(name, district)))"
     )
 
     if status and status != "all":
@@ -115,6 +115,19 @@ async def get_matched_deals(
         except Exception:
             pass
 
+    # Batch-fetch latest message previews across all deals
+    deal_intents = [f"deal_chat:{o['id']}" for o, _, _, _, _ in filtered_items]
+    latest_msgs: dict[str, dict[str, Any]] = {}
+    if deal_intents:
+        try:
+            m_res = client.table("messages").select("raw_text, created_at, parsed_json, parsed_intent").in_("parsed_intent", deal_intents).order("created_at", desc=True).execute()
+            for m in (m_res.data or []):
+                intent = m.get("parsed_intent")
+                if intent and intent not in latest_msgs:
+                    latest_msgs[intent] = m
+        except Exception:
+            pass
+
     # Format structured deal list
     deals = []
     for o, l, plot, farmer_id, buyer_id in filtered_items:
@@ -136,17 +149,12 @@ async def get_matched_deals(
         if isinstance(baler_data, list):
             baler_data = baler_data[0] if baler_data else {}
 
-        # Fetch latest message preview if exists
+        latest_m = latest_msgs.get(f"deal_chat:{o['id']}")
         last_msg_text = None
         last_msg_time = None
-        try:
-            m_res = client.table("messages").select("raw_text, created_at, parsed_json").eq("parsed_intent", f"deal_chat:{o['id']}").order("created_at", desc=True).limit(1).execute()
-            if m_res.data:
-                latest_m = m_res.data[0]
-                last_msg_text = latest_m.get("raw_text") or (latest_m.get("parsed_json") or {}).get("text")
-                last_msg_time = latest_m.get("created_at")
-        except Exception:
-            pass
+        if latest_m:
+            last_msg_text = latest_m.get("raw_text") or (latest_m.get("parsed_json") or {}).get("text")
+            last_msg_time = latest_m.get("created_at")
 
         deal = {
             "id": o["id"],
@@ -200,7 +208,7 @@ async def get_single_deal(offer_id: str) -> dict[str, Any]:
         "id, status, price_per_tonne, pickup_start, pickup_end, buyer_id, baler_id, listing_id, pool_id, created_at, updated_at, "
         "buyers(org_name, type, profile_id), "
         "balers(id, name), "
-        "listings(id, farmer_id, est_tonnes, stubble_form, combine_sms_used, harvest_date, plots(farmer_id, acres, village_id, villages(name, district)))"
+        "listings(id, farmer_id, est_tonnes, combine_sms_used, harvest_date, plots(farmer_id, acres, village_id, villages(name, district)))"
     ).eq("id", offer_id).single().execute()
 
     if not res.data:

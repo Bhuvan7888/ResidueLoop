@@ -21,6 +21,7 @@ import type { ListingWithAdvice } from './BuyerProcurementAdvisor'
 interface NearestFarmersMatchingProps {
   listings: ListingWithAdvice[]
   demandPosts: DemandPostItem[]
+  isLoading?: boolean
   onReload: () => void
   onFocusVillageOnMap?: (villageName: string) => void
   onOpenSatelliteAudit?: (listing: ListingWithAdvice) => void
@@ -30,6 +31,7 @@ interface NearestFarmersMatchingProps {
 export function NearestFarmersMatching({
   listings,
   demandPosts,
+  isLoading = false,
   onReload,
   onFocusVillageOnMap,
   onOpenSatelliteAudit,
@@ -510,7 +512,17 @@ export function NearestFarmersMatching({
       </div>
 
       {/* Nearest Farmers Card Grid */}
-      {processedListings.length === 0 ? (
+      {isLoading && processedListings.length === 0 ? (
+        <div className="p-12 text-center bg-bg-subtle/30 border border-surface-border rounded-2xl space-y-3">
+          <div className="inline-block w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+          <p className="text-copy-primary text-sm font-semibold">
+            {t('buyer.loading_matching_farmers', 'Connecting to nearby farmer network & live crop yields...')}
+          </p>
+          <p className="text-xs text-copy-muted">
+            {t('buyer.loading_subtext', 'Scanning verified paddy plots and active stubble harvesting schedules')}
+          </p>
+        </div>
+      ) : processedListings.length === 0 ? (
         <div className="p-8 text-center bg-bg-subtle/30 border border-surface-border rounded-2xl space-y-2">
           <p className="text-copy-secondary text-sm font-medium">
             {t('buyer.no_matching_farmers', 'No farmer listings found matching your current radius or filter.')}

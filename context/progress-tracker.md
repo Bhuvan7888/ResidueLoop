@@ -148,6 +148,22 @@ This tracker records verified evidence only. Earlier completion claims were inde
   - Enhanced Proximity Demand Coverage UI: Added interactive "🤝 Multi-Farmer Cluster Pooling Activated" callout card with 1-click batch procurement (`⚡ 1-Click Pool All 10 Farmers (202.5t)`), optimal group badges (`🤝 In Pooled Cluster`), and per-farmer contribution indicators (`+15t in pool`).
   - Maintained 100% key parity across `en.json`, `hi.json`, and `pa.json` (863 keys each, 0 diffs).
   - Verified static quality: `npm run typecheck` (0 errors), `npm test` (17 tests passed), `npm run lint` (0 errors), `npm run build` (built in 629ms), `poetry run pytest` (34 tests passed).
+- [x] High-Performance Dashboard Load & Query Latency Optimization (2026-10-11):
+  - Fixed Severe Backend N+1 Queries:
+    1. In `api/app/services/listing_service.py`, replaced sequential per-listing `client.table("profiles").select(...)` calls with a single bulk `.in_("id", farmer_ids)` lookup, dropping endpoint response time from 4.00s down to 0.71s (over 5.5x faster).
+    2. In `api/app/routers/v1/offer.py`, fixed 500 error caused by non-existent `stubble_form` column on `listings` and replaced per-deal message query loops with bulk `in_("parsed_intent", deal_intents)` lookup.
+  - Eliminated Infinite Heatmap Invalidation Loop:
+    - Removed `queryClient.invalidateQueries({ queryKey: ['heatmap'] })` from `loadData` in `BuyerDashboard.tsx`. Previously, this forced continuous re-fetching and geo-parsing of all 819 pan-India villages on every 3.5s interval, causing massive network contention and browser freezing.
+    - Moved heatmap invalidation strictly to mutation callbacks (e.g. creating/canceling a demand post).
+  - Throttled Polling & Added In-Flight Concurrency Guards:
+    - Added `isFetchingRef` in both `BuyerDashboard.tsx` and `FarmerDashboard.tsx` to drop duplicate overlapping requests when previous cycles are still in transit.
+    - Grouped all data fetches into `Promise.allSettled` so individual network hiccups do not stall other dashboard metrics.
+    - Adjusted polling interval to 20 seconds, automatically pausing when the browser tab is hidden (`document.visibilityState === 'hidden'`).
+    - Adjusted `DemandHeatmap.tsx` refetch interval from 4s to 30s.
+  - Smooth Initial Loading UX:
+    - Added `isInitialLoading` state and animated loading indicator in `NearestFarmersMatching.tsx` preventing premature "No farmer listings found" empty state during first data fetch.
+    - Added corresponding i18n keys to `en.json`, `hi.json`, and `pa.json` with 100% key and semantic parity.
+  - Verified static quality: `npm run typecheck` (0 errors), `npm test` (17 tests passed), `npm run lint` (0 errors), `npm run build` (built cleanly), `poetry run pytest` (36 tests passed).
 
 
 

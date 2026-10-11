@@ -32,12 +32,12 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
     unfilled: true,
   })
 
-  // Live polling every 4 seconds to guarantee immediate sync when farmers submit requests
+  // Live polling every 30 seconds with manual instant refresh option
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ['heatmap'],
     queryFn: getVillageHeatmap,
-    refetchInterval: 4000,
-    staleTime: 3000,
+    refetchInterval: 30000,
+    staleTime: 15000,
   })
 
   const villages = useMemo(() => data ?? [], [data])

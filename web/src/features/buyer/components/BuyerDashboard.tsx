@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import {
@@ -78,24 +78,56 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
   const [selectedChatOfferId, setSelectedChatOfferId] = useState<string | null>(null)
   const [demandPosts, setDemandPosts] = useState<DemandPostItem[]>([])
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
+  const isFetchingRef = useRef(false)
 
-  const loadData = useCallback(() => {
-    getPickups().then(setPickups).catch(console.error)
-    getListings()
-      .then((data) => setListings((data as unknown as ListingWithAdvice[]) || []))
-      .catch(console.error)
-    getPools().then((data) => setPools((data as unknown as Pool[]) || [])).catch(console.error)
-    getMatchedDeals({ userId, role: 'buyer' }).then((data) => setMatchedDeals(data || [])).catch(console.error)
-    getDemandPosts().then((data) => setDemandPosts((data as unknown as DemandPostItem[]) || [])).catch(console.error)
-    queryClient.invalidateQueries({ queryKey: ['heatmap'] })
-    if (userId) {
-      getNotifications(userId).then(setNotifications).catch(console.error)
+  const loadData = useCallback(async () => {
+    if (isFetchingRef.current) return
+    isFetchingRef.current = true
+
+    try {
+      const [pickupsRes, listingsRes, poolsRes, dealsRes, demandRes, notifsRes] = await Promise.allSettled([
+        getPickups(),
+        getListings(),
+        getPools(),
+        getMatchedDeals({ userId, role: 'buyer' }),
+        getDemandPosts(),
+        userId ? getNotifications(userId) : Promise.resolve([]),
+      ])
+
+      if (pickupsRes.status === 'fulfilled' && pickupsRes.value) {
+        setPickups(pickupsRes.value)
+      }
+      if (listingsRes.status === 'fulfilled' && listingsRes.value) {
+        setListings((listingsRes.value as unknown as ListingWithAdvice[]) || [])
+      }
+      if (poolsRes.status === 'fulfilled' && poolsRes.value) {
+        setPools((poolsRes.value as unknown as Pool[]) || [])
+      }
+      if (dealsRes.status === 'fulfilled' && dealsRes.value) {
+        setMatchedDeals(dealsRes.value || [])
+      }
+      if (demandRes.status === 'fulfilled' && demandRes.value) {
+        setDemandPosts((demandRes.value as unknown as DemandPostItem[]) || [])
+      }
+      if (notifsRes.status === 'fulfilled' && notifsRes.value) {
+        setNotifications(notifsRes.value || [])
+      }
+    } catch (err) {
+      console.error('Error fetching buyer dashboard data:', err)
+    } finally {
+      isFetchingRef.current = false
+      setIsInitialLoading(false)
     }
-  }, [userId, queryClient])
+  }, [userId])
 
   useEffect(() => {
     loadData()
-    const interval = setInterval(loadData, 3500)
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        loadData()
+      }
+    }, 20000)
     return () => clearInterval(interval)
   }, [loadData])
 
@@ -194,6 +226,7 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
         <DemandPostForm
           onSubmit={async (data) => {
             await createDemandPost(data)
+            await queryClient.invalidateQueries({ queryKey: ['heatmap'] })
             loadData()
             setView('dashboard')
             setActiveTab('sourcing')
@@ -410,6 +443,7 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
               <NearestFarmersMatching
                 listings={listings}
                 demandPosts={demandPosts}
+                isLoading={isInitialLoading}
                 onReload={loadData}
                 onFocusVillageOnMap={(vName) => {
                   setSelectedVillageFilter(vName)
@@ -762,6 +796,7 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
                           onClick={async () => {
                             const nextStatus = dp.status === 'cancelled' ? 'open' : 'cancelled'
                             await updateDemandPost(dp.id, { status: nextStatus })
+                            await queryClient.invalidateQueries({ queryKey: ['heatmap'] })
                             loadData()
                           }}
                           className="text-xs px-3 py-1.5 border border-surface-border rounded-xl text-copy-secondary hover:text-copy-primary hover:bg-bg-subtle transition-colors cursor-pointer"

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { NewListingForm } from '@/features/listing/components/NewListingForm'
@@ -213,22 +213,58 @@ export function FarmerDashboard({ userId }: { userId: string }) {
   const [messages, setMessages] = useState<{ id: string; direction: string; raw_text: string; created_at: string }[]>([])
   const [notifications, setNotifications] = useState<{ id: string; message: string; created_at: string }[]>([])
   const [actionMsg, setActionMsg] = useState<string | null>(null)
+  const isFetchingRef = useRef(false)
 
-  const reloadData = useCallback(() => {
-    getOffers().then((data) => setOffers((data as unknown as typeof offers) || [])).catch(console.error)
-    getMatchedDeals({ userId, role: 'farmer' }).then((data) => setMatchedDeals(data || [])).catch(console.error)
-    getPickups().then(setPickups).catch(console.error)
-    getPools().then((data) => setPools((data as unknown as PoolData[]) || [])).catch(console.error)
-    getListings(userId).then(setListings).catch(console.error)
-    getMessages(userId).then(setMessages).catch(console.error)
-    if (userId) {
-      getNotifications(userId).then(setNotifications).catch(console.error)
+  const reloadData = useCallback(async () => {
+    if (isFetchingRef.current) return
+    isFetchingRef.current = true
+
+    try {
+      const [offersRes, dealsRes, pickupsRes, poolsRes, listingsRes, messagesRes, notifsRes] = await Promise.allSettled([
+        getOffers(),
+        getMatchedDeals({ userId, role: 'farmer' }),
+        getPickups(),
+        getPools(),
+        getListings(userId),
+        getMessages(userId),
+        userId ? getNotifications(userId) : Promise.resolve([]),
+      ])
+
+      if (offersRes.status === 'fulfilled' && offersRes.value) {
+        setOffers((offersRes.value as unknown as typeof offers) || [])
+      }
+      if (dealsRes.status === 'fulfilled' && dealsRes.value) {
+        setMatchedDeals(dealsRes.value || [])
+      }
+      if (pickupsRes.status === 'fulfilled' && pickupsRes.value) {
+        setPickups(pickupsRes.value)
+      }
+      if (poolsRes.status === 'fulfilled' && poolsRes.value) {
+        setPools((poolsRes.value as unknown as PoolData[]) || [])
+      }
+      if (listingsRes.status === 'fulfilled' && listingsRes.value) {
+        setListings(listingsRes.value)
+      }
+      if (messagesRes.status === 'fulfilled' && messagesRes.value) {
+        setMessages(messagesRes.value)
+      }
+      if (notifsRes.status === 'fulfilled' && notifsRes.value) {
+        setNotifications(notifsRes.value)
+      }
+    } catch (err) {
+      console.error('Error reloading farmer dashboard data:', err)
+    } finally {
+      isFetchingRef.current = false
     }
   }, [userId])
 
   useEffect(() => {
     reloadData()
-    const interval = setInterval(reloadData, 3500)
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        reloadData()
+      }
+    }, 20000)
     return () => clearInterval(interval)
   }, [reloadData])
 

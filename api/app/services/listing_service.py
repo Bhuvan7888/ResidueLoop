@@ -107,16 +107,27 @@ async def get_all_listings(farmer_id: str | None = None, status_filter: str | No
         },
     }
 
+    # Batch-fetch profiles for all farmer_ids to eliminate N+1 queries
+    farmer_ids = list({str(l.get("farmer_id")) for l in listings if l.get("farmer_id")})
+    profiles_by_id: dict[str, dict[str, Any]] = {}
+    if farmer_ids:
+        try:
+            prof_resp = client.table("profiles").select("id, name, phone").in_("id", farmer_ids).execute()
+            for p in (prof_resp.data or []):
+                profiles_by_id[str(p.get("id"))] = p
+        except Exception:
+            pass
+
     # Enhance with farmer profile name and buyer procurement intelligence
     for listing_item in listings:
-        f_id = listing_item.get("farmer_id")
-        if f_id:
-            try:
-                prof = client.table("profiles").select("name, phone").eq("id", f_id).limit(1).execute()
-                listing_item["farmer_name"] = prof.data[0]["name"] if prof.data else "Local Farmer"
-                listing_item["farmer_phone"] = prof.data[0]["phone"] if prof.data else None
-            except Exception:
-                listing_item["farmer_name"] = "Local Farmer"
+        f_id = str(listing_item.get("farmer_id") or "")
+        prof = profiles_by_id.get(f_id)
+        if prof:
+            listing_item["farmer_name"] = prof.get("name") or "Local Farmer"
+            listing_item["farmer_phone"] = prof.get("phone")
+        else:
+            listing_item["farmer_name"] = "Local Farmer"
+            listing_item["farmer_phone"] = None
 
         # Parse structured metadata from source column
         raw_source = listing_item.get("source") or "web"
