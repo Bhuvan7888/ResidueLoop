@@ -82,6 +82,8 @@ app.add_middleware(
         "https://residueloop.in",
         "https://www.residueloop.in",
     ],
+    # Supports free Vercel production and preview deployments without opening CORS to every origin.
+    allow_origin_regex=r"^https://[a-z0-9-]+\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

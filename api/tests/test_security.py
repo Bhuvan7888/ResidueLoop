@@ -29,6 +29,31 @@ def test_allows_production_web_origin() -> None:
 
     assert response.headers["access-control-allow-origin"] == "https://residueloop.in"
 
+
+def test_allows_vercel_deployment_origin() -> None:
+    origin = "https://residueloop-git-main-example.vercel.app"
+    response = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": origin,
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+
+    assert response.headers["access-control-allow-origin"] == origin
+
+
+def test_rejects_unrelated_browser_origin() -> None:
+    response = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": "https://untrusted.example",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+
+    assert response.status_code == 400
+
 def test_idor_wrong_user() -> None:
     # If a user tries to access a pickup or listing they don't own.
     # The routes already implement this in endpoints. We'll just verify the pattern.
