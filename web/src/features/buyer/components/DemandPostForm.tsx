@@ -3,7 +3,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
+import { MapPin, Building2 } from 'lucide-react'
 import { STUBBLE_MARKET_TIERS, INTENDED_PURPOSES } from '@/features/listing/marketTiers'
+import { INDUSTRIAL_HUBS } from '../distance'
 
 const demandPostSchema = z.object({
   tonnesNeeded: z.number().min(1, 'Tonnes needed must be positive'),
@@ -23,6 +25,13 @@ interface DemandPostFormProps {
 export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
   const { t } = useTranslation()
   const [error, setError] = useState<string | null>(null)
+
+  // Factory Location state
+  const [selectedHubId, setSelectedHubId] = useState<string>('moga_focal_point')
+  const [isCustomLocation, setIsCustomLocation] = useState<boolean>(false)
+  const [customLat, setCustomLat] = useState<number>(30.82)
+  const [customLng, setCustomLng] = useState<number>(75.17)
+  const [customPlantName, setCustomPlantName] = useState<string>('')
 
   const form = useForm<z.infer<typeof demandPostSchema>>({
     resolver: zodResolver(demandPostSchema),
@@ -55,13 +64,16 @@ export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
     }
   }
 
+  const selectedHub = INDUSTRIAL_HUBS.find((h) => h.id === selectedHubId) || INDUSTRIAL_HUBS[0]
+  const finalLat = isCustomLocation ? customLat : selectedHub.lat
+  const finalLng = isCustomLocation ? customLng : selectedHub.lng
+
   const totalContractValue = (tonnesNeeded || 0) * (pricePerTonne || 0)
 
   const handleSubmit = async (values: z.infer<typeof demandPostSchema>) => {
     setError(null)
     try {
-      // Punjab industrial center coordinates (e.g. Moga/Ludhiana)
-      await onSubmit({ ...values, lat: 30.9, lng: 75.8 })
+      await onSubmit({ ...values, lat: finalLat, lng: finalLng })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to save demand post')
     }
@@ -151,11 +163,111 @@ export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
         </div>
       </div>
 
+      {/* Step 3: Factory / Plant Location */}
+      <div className="bg-surface border border-surface-border rounded-2xl p-5 space-y-4 shadow-xs">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-bold text-copy-primary flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-brand" />
+              <span>{t('buyer.factory_location_title', '3. Your Factory / Processing Plant Location')}</span>
+            </h3>
+            <p className="text-xs text-copy-secondary mt-0.5">
+              {t(
+                'buyer.factory_location_desc',
+                'We calculate road and field distances from this facility to show you the nearest available farmers.'
+              )}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsCustomLocation(!isCustomLocation)}
+            className="text-xs text-brand font-semibold hover:underline cursor-pointer"
+          >
+            {isCustomLocation
+              ? t('buyer.select_from_clusters', '← Pick from Industrial Clusters')
+              : t('buyer.custom_gps', '+ Custom GPS Coordinates')}
+          </button>
+        </div>
+
+        {!isCustomLocation ? (
+          <div className="space-y-3">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-copy-secondary">
+              {t('buyer.select_industrial_cluster', 'Select Regional Industrial Hub / District')}
+            </label>
+            <select
+              value={selectedHubId}
+              onChange={(e) => setSelectedHubId(e.target.value)}
+              className="w-full rounded-xl border border-surface-border p-2.5 text-sm bg-base focus:ring-2 focus:ring-accent-primary outline-none cursor-pointer"
+            >
+              {INDUSTRIAL_HUBS.map((hub) => (
+                <option key={hub.id} value={hub.id}>
+                  {hub.name} ({hub.district}, {hub.state})
+                </option>
+              ))}
+            </select>
+
+            <div className="p-3 bg-brand/5 border border-brand/20 rounded-xl flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-brand shrink-0" />
+                <div>
+                  <span className="font-bold text-copy-primary block">{selectedHub.name}</span>
+                  <span className="text-[11px] text-copy-secondary">{selectedHub.description}</span>
+                </div>
+              </div>
+              <div className="text-right font-mono text-[11px] text-copy-muted font-medium shrink-0 pl-2">
+                {selectedHub.lat.toFixed(2)}°N, {selectedHub.lng.toFixed(2)}°E
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-copy-secondary mb-1">
+                {t('buyer.plant_name_label', 'Plant / Boiler Facility Name')}
+              </label>
+              <input
+                type="text"
+                value={customPlantName}
+                onChange={(e) => setCustomPlantName(e.target.value)}
+                placeholder="e.g. Moga Agro Pellet Plant #2"
+                className="w-full rounded-xl border border-surface-border p-2.5 text-sm bg-base focus:ring-2 focus:ring-accent-primary outline-none"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-copy-secondary mb-1">
+                  {t('buyer.latitude', 'Latitude')}
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  value={customLat}
+                  onChange={(e) => setCustomLat(parseFloat(e.target.value) || 0)}
+                  className="w-full rounded-xl border border-surface-border p-2.5 text-sm bg-base focus:ring-2 focus:ring-accent-primary outline-none font-mono"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-copy-secondary mb-1">
+                  {t('buyer.longitude', 'Longitude')}
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  value={customLng}
+                  onChange={(e) => setCustomLng(parseFloat(e.target.value) || 0)}
+                  className="w-full rounded-xl border border-surface-border p-2.5 text-sm bg-base focus:ring-2 focus:ring-accent-primary outline-none font-mono"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Volume & Price Tender */}
       <div className="bg-surface border border-surface-border rounded-2xl p-5 space-y-4 shadow-xs">
         <div>
           <h3 className="text-base font-bold text-copy-primary flex items-center gap-2">
-            <span>⚖️</span> {t('buyer.demand_step3', '3. Volume and Offer Price')}
+            <span>⚖️</span> {t('buyer.demand_step4', '4. Volume and Offer Price')}
           </h3>
           <p className="text-xs text-copy-secondary mt-0.5">
             {t('buyer.demand_step3_desc', 'Set your target volume and offer price per tonne based on regional Punjab market benchmarks.')}

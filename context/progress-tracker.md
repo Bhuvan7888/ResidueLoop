@@ -70,6 +70,14 @@ This tracker records verified evidence only. Earlier completion claims were inde
   - Added warm, inviting empty states with illustrations and a direct `+ Sell My Stubble Now` CTA.
   - Retained 100% key and semantic parity across `en.json`, `hi.json`, and `pa.json` (589 keys each).
   - Verified static quality: `npm run typecheck` (0 errors), `npm test` (13 tests passed), `npm run lint` (0 errors), `npm run build` (built in 595ms).
+- [x] Implemented Buyer Factory Demand Proximity & Nearest Farmers Matching (2026-10-11):
+  - Added factory/plant location selection in `DemandPostForm.tsx` and `BuyerProfileForm.tsx` with regional industrial hubs (Moga Focal Point, Ludhiana, Khanna, Sangrur, Karnal, Patiala, etc.) and custom GPS coordinate inputs.
+  - Attached lat/lng coordinates in `listing_service.py` directly from village PostGIS geometries and added `GET /api/v1/buyers/demand` router endpoint in `api/app/routers/v1/buyer.py`.
+  - Implemented `NearestFarmersMatching.tsx` on `BuyerDashboard.tsx` computing real-time Haversine road/field distance from the buyer's factory to each farmer's plot.
+  - Added visual cumulative demand progress bar calculating how many nearest farmers fulfill 100% of the factory's tonnage requirement.
+  - Displayed distance badges (`⚡ X km away`), pricing vs tender benchmark, ready harvest dates, and 1-click `+ Procure / Send Purchase Offer` CTA directly matching listings.
+  - Maintained 100% key parity across `en.json`, `hi.json`, and `pa.json` (661 keys each, 0 diffs).
+  - Verified static quality: `npm run typecheck` (0 errors), `npm test` (13 tests passed), `npm run lint` (0 errors), `npm run build` (built in 647ms), `poetry run pytest` (29 tests passed).
 
 ## Recovery Decisions
 

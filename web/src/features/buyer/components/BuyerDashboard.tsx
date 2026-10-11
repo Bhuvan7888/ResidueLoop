@@ -3,7 +3,13 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { BuyerProfileForm } from './BuyerProfileForm'
 import { DemandPostForm } from './DemandPostForm'
-import { createBuyerProfile, createDemandPost, getDemandPosts, updateDemandPost } from '../api'
+import {
+  createBuyerProfile,
+  createDemandPost,
+  getDemandPosts,
+  updateDemandPost,
+  type DemandPostItem,
+} from '../api'
 import { getPickups, updatePickupWeight } from '@/features/pickup/api'
 import { PickupCard } from '@/features/pickup/components/PickupCard'
 import { getListings } from '@/features/listing/api'
@@ -14,6 +20,7 @@ import { getNotifications } from '@/features/charity/api'
 import { PoolProgress } from '@/features/matching/components/PoolProgress'
 import { DemandHeatmap } from '@/features/heatmap/components/DemandHeatmap'
 import { BuyerProcurementAdvisor, type ListingWithAdvice } from './BuyerProcurementAdvisor'
+import { NearestFarmersMatching } from './NearestFarmersMatching'
 import { SatelliteAuditModal } from '@/features/verification/components/SatelliteAuditModal'
 
 interface Pool {
@@ -30,16 +37,6 @@ interface NotificationItem {
   id: string
   message: string
   created_at: string
-}
-
-interface DemandPostItem {
-  id: string
-  tonnes_needed: number
-  price_per_tonne: number
-  date_from: string
-  date_to: string
-  status?: string
-  created_at?: string
 }
 
 export function BuyerDashboard({ userId }: { userId?: string }) {
@@ -181,6 +178,31 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
               selectedVillageName={selectedVillageFilter}
             />
           </div>
+
+          {/* Section: Nearest Farmers Meeting Factory Demand */}
+          <NearestFarmersMatching
+            listings={listings}
+            demandPosts={demandPosts}
+            onReload={loadData}
+            onFocusVillageOnMap={(vName) => {
+              setSelectedVillageFilter(vName)
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
+            onOpenSatelliteAudit={(listing) => {
+              setAuditModal({
+                isOpen: true,
+                villageName:
+                  listing.village_name ||
+                  listing.plots?.villages?.name ||
+                  'Regional Village Pool',
+                district:
+                  listing.district ||
+                  listing.plots?.villages?.district ||
+                  'Punjab',
+              })
+            }}
+            onCreateDemandClick={() => setView('demand')}
+          />
 
           {/* Section: Active Stubble Contracts & Direct Farmer Chat */}
           <div className="space-y-4">
@@ -331,6 +353,11 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
                       </div>
                       <p className="text-xs text-copy-secondary mt-1">
                         {t('buyer.window', 'Window:')} {dp.date_from} {t('common.to', 'to')} {dp.date_to}
+                        {dp.lat && dp.lng && (
+                          <span className="ml-2 font-mono text-[11px] text-copy-muted">
+                            • 📍 ({dp.lat.toFixed(2)}°N, {dp.lng.toFixed(2)}°E)
+                          </span>
+                        )}
                       </p>
                     </div>
                     <div>

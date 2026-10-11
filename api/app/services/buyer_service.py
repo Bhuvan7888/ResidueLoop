@@ -92,3 +92,20 @@ async def procure_listing_direct(user_id: str, listing_id: str, offer_price: flo
         pass
 
     return offer_res.data[0] if offer_res.data else {"status": "success"}
+
+
+async def get_demand_posts_for_buyer(user_id: str) -> list[dict[str, Any]]:
+    client = get_supabase_client()
+    resp = client.table("demand_posts").select("*").eq("buyer_id", user_id).order("created_at", desc=True).execute()
+    posts = resp.data or []
+    for p in posts:
+        loc = p.get("location") or {}
+        coords = loc.get("coordinates") if isinstance(loc, dict) else None
+        if coords and len(coords) >= 2:
+            p["lng"] = float(coords[0])
+            p["lat"] = float(coords[1])
+        else:
+            p["lat"] = 30.9
+            p["lng"] = 75.8
+    return posts
+

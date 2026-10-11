@@ -1,10 +1,23 @@
 from typing import Any, Optional
 from fastapi import APIRouter, Depends
 from app.core.security import require_role
-from app.services.buyer_service import create_buyer_profile, create_demand_post, update_demand_post, procure_listing_direct
+from app.services.buyer_service import (
+    create_buyer_profile,
+    create_demand_post,
+    update_demand_post,
+    procure_listing_direct,
+    get_demand_posts_for_buyer,
+)
 from app.schemas.market import BuyerProfileCreate, DemandPostCreate, DemandPostUpdate
 
 router = APIRouter(prefix="/buyers", tags=["buyers"])
+
+@router.get("/demand")
+async def list_demand_posts(
+    user_id: str = Depends(require_role(["buyer"]))
+) -> dict[str, Any]:
+    items = await get_demand_posts_for_buyer(user_id)
+    return {"data": items}
 
 @router.post("/profile")
 async def create_profile(

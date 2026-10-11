@@ -172,6 +172,16 @@ async def get_all_listings(farmer_id: str | None = None, status_filter: str | No
         listing_item["district"] = village.get("district", "Punjab")
         listing_item["acres"] = float(plot.get("acres") or round(tonnes / 2.5, 1))
 
+        # Coordinates from village PostGIS geometry
+        geom = village.get("geometry") or {}
+        coords = geom.get("coordinates") if isinstance(geom, dict) else None
+        if coords and len(coords) >= 2:
+            listing_item["lng"] = float(coords[0])
+            listing_item["lat"] = float(coords[1])
+        else:
+            listing_item["lng"] = 75.17
+            listing_item["lat"] = 30.82
+
         # Procurement evaluation matching market source & form
         current_status = listing_item.get("status", "open")
 
