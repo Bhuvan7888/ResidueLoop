@@ -26,7 +26,7 @@ app = FastAPI(
 # Baseline Security Middleware
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["residueloop.in", "www.residueloop.in", "localhost", "127.0.0.1", "testserver"],
+    allowed_hosts=["residueloop.in", "www.residueloop.in"],
 )
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
