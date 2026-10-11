@@ -127,6 +127,11 @@ async def get_all_listings(farmer_id: str | None = None, status_filter: str | No
             except Exception:
                 pass
 
+        if meta.get("farmer_name"):
+            listing_item["farmer_name"] = meta["farmer_name"]
+            if meta.get("farmer_phone"):
+                listing_item["farmer_phone"] = meta["farmer_phone"]
+
         combine_sms = bool(listing_item.get("combine_sms_used"))
         quality_grade = meta.get("quality_grade") or ("grade_a_sms" if combine_sms else "grade_b")
         stubble_form = meta.get("stubble_form") or ("delivered_bales" if combine_sms else "farm_gate_loose")
