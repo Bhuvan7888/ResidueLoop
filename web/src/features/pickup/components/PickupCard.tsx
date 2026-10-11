@@ -54,7 +54,7 @@ export function PickupCard({ pickup, mode, onUpdateWeight, onUpdatePayment }: Pi
             <p className="font-bold">{t('pickup.flagged_title', 'PAYMENT FLAGGED: NOT RECEIVED')}</p>
             <p className="text-[11px] opacity-90 mt-0.5">
               {mode === 'buyer'
-                ? 'The farmer reported this payment as not received! Please disburse cash or bank transfer immediately.'
+                ? t('pickup.flagged_desc_buyer', 'The farmer reported this payment as not received! Please disburse cash or bank transfer immediately.')
                 : t('pickup.flagged_desc_farmer', 'You flagged this payment as not received. The buyer has been alerted to disburse immediately.')}
             </p>
           </div>

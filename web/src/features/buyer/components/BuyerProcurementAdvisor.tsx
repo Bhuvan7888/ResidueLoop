@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   CheckCircle2,
   AlertTriangle,
@@ -74,6 +75,7 @@ export function BuyerProcurementAdvisor({
   onClearVillageFilter,
   onOpenSatelliteAudit,
 }: BuyerProcurementAdvisorProps) {
+  const { t } = useTranslation()
   const [filterTab, setFilterTab] = useState<'all' | 'buy' | 'caution' | 'avoid'>('all')
   const [purposeFilter, setPurposeFilter] = useState<string>('all')
   const [sortBy, setSortBy] = useState<'recommended' | 'price_low' | 'tonnes_high' | 'date'>('recommended')
@@ -198,11 +200,11 @@ export function BuyerProcurementAdvisor({
           <div className="flex items-center gap-2">
             <span className="text-xl">📋</span>
             <h3 className="text-lg font-bold text-copy-primary font-display">
-              Smart Procurement Advisor: What to Buy vs What Not to Buy
+              {t('advisor.title', 'Smart Procurement Advisor: What to Buy vs What Not to Buy')}
             </h3>
           </div>
           <p className="text-xs text-copy-secondary mt-0.5">
-            Automated quality grading based on combine SMS, stubble form, moisture, and intended end-use compatibility.
+            {t('advisor.subtitle', 'Automated quality grading based on combine SMS, stubble form, moisture, and intended end-use compatibility.')}
           </p>
         </div>
 
@@ -213,12 +215,12 @@ export function BuyerProcurementAdvisor({
             className="text-xs px-3 py-1.5 rounded-xl border border-brand bg-brand/10 text-brand-text font-semibold hover:bg-brand/20 transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <span>💰</span>
-            <span>{showPriceIndexGuide ? 'Hide Price Index' : 'View Market Price Index'}</span>
+            <span>{showPriceIndexGuide ? t('advisor.hide_price_index', 'Hide Price Index') : t('advisor.view_price_index', 'View Market Price Index')}</span>
           </button>
 
           {selectedVillageFilter && (
             <div className="flex items-center gap-2 bg-brand/15 border border-brand text-brand px-3 py-1 rounded-xl text-xs font-semibold">
-              <span>Filtered: {selectedVillageFilter}</span>
+              <span>{t('advisor.filtered_by', 'Filtered:')} {selectedVillageFilter}</span>
               <button
                 onClick={onClearVillageFilter}
                 className="text-xs hover:opacity-80 underline cursor-pointer ml-1"
@@ -235,10 +237,10 @@ export function BuyerProcurementAdvisor({
         <div className="bg-surface border border-surface-border rounded-2xl p-4 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-bold uppercase tracking-wider text-copy-primary flex items-center gap-2">
-              <span>📊</span> Punjab Stubble Market Benchmark Rates by Source & Form
+              <span>📊</span> {t('advisor.benchmark_rates_title', 'Punjab Stubble Market Benchmark Rates by Source & Form')}
             </h4>
             <span className="text-[10px] text-copy-muted font-medium">
-              Source: BiofuelCircle, NDTV/ET Ground Rates, CEEW, NTPC Tenders & IndiaMART (2026)
+              {t('advisor.benchmark_source', 'Source: BiofuelCircle, NDTV/ET Ground Rates, CEEW, NTPC Tenders & IndiaMART (2026)')}
             </span>
           </div>
 
@@ -293,7 +295,7 @@ export function BuyerProcurementAdvisor({
                   : 'text-copy-secondary hover:text-copy-primary'
               }`}
             >
-              All Lots ({counts.all})
+              {t('advisor.tab_all', { count: counts.all, defaultValue: `All (${counts.all})` })}
             </button>
             <button
               onClick={() => setFilterTab('buy')}
@@ -303,8 +305,7 @@ export function BuyerProcurementAdvisor({
                   : 'text-state-success hover:bg-state-success-dim'
               }`}
             >
-              <span>✓ Recommended</span>
-              <span className="text-[10px] opacity-90">({counts.buy})</span>
+              <span>{t('advisor.tab_buy', { count: counts.buy, defaultValue: `✓ Recommended (${counts.buy})` })}</span>
             </button>
             <button
               onClick={() => setFilterTab('caution')}
@@ -314,8 +315,7 @@ export function BuyerProcurementAdvisor({
                   : 'text-state-warning hover:bg-state-warning-dim'
               }`}
             >
-              <span>⚠ Caution</span>
-              <span className="text-[10px] opacity-90">({counts.caution})</span>
+              <span>{t('advisor.tab_caution', { count: counts.caution, defaultValue: `⚠️ Caution (${counts.caution})` })}</span>
             </button>
             <button
               onClick={() => setFilterTab('avoid')}
@@ -325,8 +325,7 @@ export function BuyerProcurementAdvisor({
                   : 'text-copy-muted hover:bg-bg-subtle'
               }`}
             >
-              <span>✕ Avoid/Locked</span>
-              <span className="text-[10px] opacity-90">({counts.avoid})</span>
+              <span>{t('advisor.tab_avoid', { count: counts.avoid, defaultValue: `✕ Avoid (${counts.avoid})` })}</span>
             </button>
           </div>
 
@@ -336,7 +335,7 @@ export function BuyerProcurementAdvisor({
               <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-copy-muted" />
               <input
                 type="text"
-                placeholder="Search village, farmer, form..."
+                placeholder={t('advisor.search_placeholder', 'Search farmer, village, or stubble form...')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-surface-border bg-surface text-copy-primary focus:ring-2 focus:ring-brand outline-none"
@@ -350,10 +349,10 @@ export function BuyerProcurementAdvisor({
                 onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                 className="bg-transparent text-xs text-copy-primary font-medium outline-none cursor-pointer"
               >
-                <option value="recommended">Sort: Recommended</option>
-                <option value="price_low">Sort: Lowest Price</option>
-                <option value="tonnes_high">Sort: Highest Tonnes</option>
-                <option value="date">Sort: Earliest Harvest</option>
+                <option value="recommended">{t('advisor.sort_recommended', 'Recommended First')}</option>
+                <option value="price_low">{t('advisor.sort_price_low', 'Lowest Price First')}</option>
+                <option value="tonnes_high">{t('advisor.sort_tonnes_high', 'Highest Volume (Tonnes)')}</option>
+                <option value="date">{t('advisor.sort_date', 'Nearest Harvest Date')}</option>
               </select>
             </div>
           </div>
@@ -362,7 +361,7 @@ export function BuyerProcurementAdvisor({
         {/* Industry / Purpose Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
           <span className="text-copy-muted text-[11px] font-semibold flex items-center gap-1 shrink-0">
-            <Filter className="w-3 h-3" /> Industry Match:
+            <Filter className="w-3 h-3" /> {t('advisor.industry_match', 'Industry Match:')}
           </span>
           <button
             onClick={() => setPurposeFilter('all')}
@@ -372,7 +371,7 @@ export function BuyerProcurementAdvisor({
                 : 'bg-bg-subtle border border-surface-border text-copy-secondary hover:bg-surface'
             }`}
           >
-            All Uses
+            {t('advisor.all_uses', 'All Uses')}
           </button>
           <button
             onClick={() => setPurposeFilter('cattle_feed')}
@@ -382,7 +381,7 @@ export function BuyerProcurementAdvisor({
                 : 'bg-bg-subtle border border-surface-border text-copy-secondary hover:bg-surface'
             }`}
           >
-            <span>🐄</span> Cattle Feed & Dairy (₹4,800–₹8,500/t)
+            <span>🐄</span> {t('advisor.cat_cattle', 'Cattle Feed & Dairy (₹4,800–₹8,500/t)')}
           </button>
           <button
             onClick={() => setPurposeFilter('paper_packaging')}
@@ -392,7 +391,7 @@ export function BuyerProcurementAdvisor({
                 : 'bg-bg-subtle border border-surface-border text-copy-secondary hover:bg-surface'
             }`}
           >
-            <span>📦</span> Paper Mills & Delivered Bales (₹1,330–₹3,000/t)
+            <span>📦</span> {t('advisor.cat_paper', 'Paper Mills & Delivered Bales (₹1,330–₹3,000/t)')}
           </button>
           <button
             onClick={() => setPurposeFilter('thermal_power')}
@@ -402,7 +401,7 @@ export function BuyerProcurementAdvisor({
                 : 'bg-bg-subtle border border-surface-border text-copy-secondary hover:bg-surface'
             }`}
           >
-            <span>⚡</span> Power Plants & NTPC (₹4,320–₹5,500/t)
+            <span>⚡</span> {t('advisor.cat_power', 'Power Plants & NTPC (₹4,320–₹5,500/t)')}
           </button>
           <button
             onClick={() => setPurposeFilter('brick_kiln')}
@@ -412,7 +411,7 @@ export function BuyerProcurementAdvisor({
                 : 'bg-bg-subtle border border-surface-border text-copy-secondary hover:bg-surface'
             }`}
           >
-            <span>🧱</span> Brick Kilns & Furnaces (₹600–₹1,400/t)
+            <span>🧱</span> {t('advisor.cat_kiln', 'Brick Kilns & Furnaces (₹600–₹1,400/t)')}
           </button>
           <button
             onClick={() => setPurposeFilter('farm_gate_loose')}
@@ -422,7 +421,7 @@ export function BuyerProcurementAdvisor({
                 : 'bg-bg-subtle border border-surface-border text-copy-secondary hover:bg-surface'
             }`}
           >
-            <span>🚜</span> Farm-Gate Loose (₹500–₹700/t)
+            <span>🚜</span> {t('advisor.cat_farmgate', 'Farm-Gate Loose (₹500–₹700/t)')}
           </button>
         </div>
       </div>
@@ -430,10 +429,7 @@ export function BuyerProcurementAdvisor({
       {/* Listing Cards Grid */}
       {processedListings.length === 0 ? (
         <div className="bg-surface border border-surface-border rounded-2xl p-8 text-center space-y-2">
-          <p className="text-sm font-semibold text-copy-primary">No straw listings match your current filters.</p>
-          <p className="text-xs text-copy-muted">
-            Try resetting your search query, village filter, or industry purpose selection.
-          </p>
+          <p className="text-sm font-semibold text-copy-primary">{t('advisor.no_listings_found', 'No straw listings match your current filters.')}</p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
@@ -480,7 +476,7 @@ export function BuyerProcurementAdvisor({
 
                         {listing.combine_sms_used && (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                            Combine SMS Chopped
+                            {t('advisor.sms_chopped', 'Combine SMS Chopped')}
                           </span>
                         )}
 
@@ -492,7 +488,7 @@ export function BuyerProcurementAdvisor({
                       </div>
 
                       <h4 className="font-display font-bold text-base text-copy-primary">
-                        {tonnes} Tonnes Paddy Straw • {listing.acres || '?'} Acres
+                        {tonnes} {t('common.tonne', 'Tonnes')} • {listing.acres || '?'} {t('listing.acres', 'Acres')}
                       </h4>
                       <p className="text-xs text-copy-secondary flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-copy-muted" />
@@ -500,7 +496,7 @@ export function BuyerProcurementAdvisor({
                           {village}, {listing.district || 'Punjab'}
                         </span>
                         <span>•</span>
-                        <span>Farmer: {listing.farmer_name || 'Verified Farmer'}</span>
+                        <span>{t('advisor.farmer_label', 'Farmer:')} {listing.farmer_name || t('advisor.verified_farmer', 'Verified Farmer')}</span>
                       </p>
                     </div>
 
@@ -509,7 +505,7 @@ export function BuyerProcurementAdvisor({
                       <div className="text-lg font-bold font-display text-copy-primary">
                         ₹{price.toLocaleString()}/t
                       </div>
-                      <div className="text-[11px] text-copy-muted">Est. ₹{total} Total</div>
+                      <div className="text-[11px] text-copy-muted">{t('advisor.est_total', 'Est. ₹{{total}} Total', { total })}</div>
                       {listing.market_price_range && (
                         <div className="text-[10px] text-brand font-semibold">{listing.market_price_range}</div>
                       )}
@@ -519,14 +515,14 @@ export function BuyerProcurementAdvisor({
                   {/* Quality Grade & Moisture Bar */}
                   <div className="p-2.5 rounded-xl bg-bg-subtle/60 border border-surface-border-subtle flex items-center justify-between text-xs">
                     <div>
-                      <span className="text-[10px] text-copy-muted uppercase font-bold block">Quality Grade</span>
+                      <span className="text-[10px] text-copy-muted uppercase font-bold block">{t('advisor.quality_label', 'Quality Grade')}</span>
                       <strong className="text-copy-primary text-xs">
-                        {advice?.quality_grade || 'Standard Agricultural Straw'}
+                        {advice?.quality_grade || t('advisor.standard_straw', 'Standard Agricultural Straw')}
                       </strong>
                     </div>
                     {listing.moisture_level && (
                       <div className="text-right">
-                        <span className="text-[10px] text-copy-muted uppercase font-bold block">Moisture Level</span>
+                        <span className="text-[10px] text-copy-muted uppercase font-bold block">{t('advisor.moisture_label', 'Moisture Level')}</span>
                         <strong className="text-brand text-xs font-mono">{listing.moisture_level}</strong>
                       </div>
                     )}
@@ -535,7 +531,7 @@ export function BuyerProcurementAdvisor({
                   {/* Reasons & Rationale List */}
                   <div className="space-y-1.5 pt-1">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-copy-muted">
-                      Procurement Rationale & Analysis:
+                      {t('advisor.rationale_title', 'Procurement Rationale & Analysis:')}
                     </span>
                     <ul className="space-y-1 text-xs text-copy-secondary">
                       {advice?.reasons.map((r, i) => (
@@ -556,9 +552,9 @@ export function BuyerProcurementAdvisor({
                   {/* Harvest Schedule */}
                   <div className="flex items-center gap-2 text-xs text-copy-secondary pt-1">
                     <Calendar className="w-3.5 h-3.5 text-copy-muted" />
-                    <span>Harvest: {new Date(listing.harvest_date).toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                    <span>{t('advisor.harvest_label', 'Harvest Date:')} {new Date(listing.harvest_date).toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                     <span>•</span>
-                    <span>Baler Partner: {listing.baler_name || 'Regional Straw Baler'}</span>
+                    <span>{t('advisor.baler_partner', 'Baler Partner:')} {listing.baler_name || t('advisor.regional_baler', 'Regional Straw Baler')}</span>
                   </div>
                 </div>
 
@@ -573,7 +569,7 @@ export function BuyerProcurementAdvisor({
                     )}
                     {listing.source === 'whatsapp' && (
                       <span className="px-2 py-0.5 bg-bg-subtle text-copy-secondary text-[10px] rounded-full border border-surface-border">
-                        💬 via WhatsApp
+                        {t('dashboard.via_whatsapp', '💬 via WhatsApp')}
                       </span>
                     )}
                   </div>
@@ -587,7 +583,7 @@ export function BuyerProcurementAdvisor({
                         title="Inspect ESA Sentinel-2 & NASA FIRMS zero-burn satellite audit"
                       >
                         <span>🛰️</span>
-                        <span>Satellite Audit</span>
+                        <span>{t('advisor.satellite_audit_btn', 'Satellite Audit')}</span>
                       </button>
                     )}
 
@@ -598,7 +594,7 @@ export function BuyerProcurementAdvisor({
                         title="Locate on heatmap"
                       >
                         <MapPin className="w-3 h-3" />
-                        <span>Map</span>
+                        <span>{t('advisor.view_on_map', 'Map')}</span>
                       </button>
                     )}
 
@@ -613,11 +609,11 @@ export function BuyerProcurementAdvisor({
                         }`}
                       >
                         {procuringId === listing.id ? (
-                          <span>Processing...</span>
+                          <span>{t('advisor.procuring', 'Processing...')}</span>
                         ) : (
                           <>
                             <Sparkles className="w-3 h-3" />
-                            <span>Procure Lot (₹{price}/t)</span>
+                            <span>{t('advisor.procure_btn', '⚡ Procure Lot')} (₹{price}/t)</span>
                           </>
                         )}
                       </button>
@@ -625,7 +621,7 @@ export function BuyerProcurementAdvisor({
 
                     {!isOpen && (
                       <span className="px-3 py-1.5 bg-bg-subtle text-copy-muted rounded-xl text-xs font-semibold uppercase">
-                        {listing.status === 'pooled' ? 'Committed in Pool' : listing.status}
+                        {listing.status === 'pooled' ? t('advisor.status_pooled', 'Committed in Pool') : t(`status.${listing.status}`, listing.status)}
                       </span>
                     )}
                   </div>

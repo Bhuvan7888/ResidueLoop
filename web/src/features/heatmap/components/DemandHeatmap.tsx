@@ -108,49 +108,49 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <div className="bg-surface border border-surface-border rounded-xl p-3 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-copy-muted font-medium">Regional Demand</span>
+            <span className="text-xs text-copy-muted font-medium">{t('heatmap.buyer_demand', 'Regional Demand')}</span>
             <span className="w-2 h-2 rounded-full bg-brand"></span>
           </div>
           <div className="mt-1 flex items-baseline gap-1.5">
             <span className="text-xl font-bold text-copy-primary tabular-nums">
               {kpis.totalDemand.toLocaleString()}
             </span>
-            <span className="text-xs text-copy-secondary">tonnes</span>
+            <span className="text-xs text-copy-secondary">{t('common.tonne', 'tonnes')}</span>
           </div>
-          <p className="text-[11px] text-copy-muted mt-0.5">Industrial factory orders</p>
+          <p className="text-[11px] text-copy-muted mt-0.5">{t('heatmap.orders_sub', 'Industrial factory orders')}</p>
         </div>
 
         <div className="bg-surface border border-surface-border rounded-xl p-3 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-copy-muted font-medium">Farmer Straw Supply</span>
+            <span className="text-xs text-copy-muted font-medium">{t('heatmap.farmer_supply', 'Farmer Straw Supply')}</span>
             <span className="w-2 h-2 rounded-full bg-state-success"></span>
           </div>
           <div className="mt-1 flex items-baseline gap-1.5">
             <span className="text-xl font-bold text-state-success tabular-nums">
               {kpis.totalSupply.toLocaleString()}
             </span>
-            <span className="text-xs text-copy-secondary">tonnes</span>
+            <span className="text-xs text-copy-secondary">{t('common.tonne', 'tonnes')}</span>
           </div>
-          <p className="text-[11px] text-copy-muted mt-0.5">Live farmer crop listings</p>
+          <p className="text-[11px] text-copy-muted mt-0.5">{t('heatmap.listings_sub', 'Live farmer crop listings')}</p>
         </div>
 
         <div className="bg-surface border border-surface-border rounded-xl p-3 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-copy-muted font-medium">Unfilled Deficit</span>
+            <span className="text-xs text-copy-muted font-medium">{t('heatmap.unfilled_deficit', 'Unfilled Deficit')}</span>
             <span className="w-2 h-2 rounded-full bg-state-warning animate-pulse"></span>
           </div>
           <div className="mt-1 flex items-baseline gap-1.5">
             <span className="text-xl font-bold text-state-warning tabular-nums">
               {kpis.totalUnfilled.toLocaleString()}
             </span>
-            <span className="text-xs text-copy-secondary">tonnes</span>
+            <span className="text-xs text-copy-secondary">{t('common.tonne', 'tonnes')}</span>
           </div>
-          <p className="text-[11px] text-copy-muted mt-0.5">{deficitZonesCount} shortage clusters</p>
+          <p className="text-[11px] text-copy-muted mt-0.5">{t('heatmap.shortage_clusters', { count: deficitZonesCount, defaultValue: `${deficitZonesCount} shortage clusters` })}</p>
         </div>
 
         <div className="bg-surface border border-surface-border rounded-xl p-3 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-copy-muted font-medium">Purchase Benchmark</span>
+            <span className="text-xs text-copy-muted font-medium">{t('heatmap.purchase_benchmark', 'Purchase Benchmark')}</span>
             <span className="text-[11px] font-mono text-copy-muted">₹/t</span>
           </div>
           <div className="mt-1 flex items-baseline gap-1.5">
@@ -159,7 +159,7 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
             </span>
             <span className="text-xs text-copy-secondary">/t avg</span>
           </div>
-          <p className="text-[11px] text-copy-muted mt-0.5">Regional fair rate</p>
+          <p className="text-[11px] text-copy-muted mt-0.5">{t('heatmap.regional_fair_rate', 'Regional fair rate')}</p>
         </div>
       </div>
 
@@ -178,7 +178,7 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
           {/* Status & Live Sync Pill */}
           <div className="pointer-events-auto flex items-center gap-2 bg-surface/95 backdrop-blur-md border border-surface-border px-3 py-1.5 rounded-xl shadow-xs text-xs">
             <span className="w-2 h-2 rounded-full bg-state-success animate-pulse"></span>
-            <span className="font-semibold text-copy-primary">Live Database Synced</span>
+            <span className="font-semibold text-copy-primary">{t('heatmap.live_synced', 'Live Database Synced')}</span>
             <span className="text-copy-muted">•</span>
             <button
               onClick={() => refetch()}
@@ -187,7 +187,7 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
               title="Refresh live map from database"
             >
               <RefreshCw className={`w-3 h-3 ${isFetching ? 'animate-spin text-brand' : ''}`} />
-              <span>{isFetching ? 'Syncing...' : 'Sync Now'}</span>
+              <span>{isFetching ? t('heatmap.syncing', 'Syncing...') : t('heatmap.sync_now', 'Sync Now')}</span>
             </button>
           </div>
 
@@ -195,7 +195,7 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
           <div className="pointer-events-auto flex items-center gap-1 bg-surface/95 backdrop-blur-md border border-surface-border p-1 rounded-xl shadow-xs text-xs">
             <div className="flex items-center gap-1 px-2 py-0.5 text-copy-muted font-medium">
               <Layers className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Layers:</span>
+              <span className="hidden sm:inline">{t('heatmap.layers', 'Layers:')}</span>
             </div>
             <button
               onClick={() => setLayers((prev) => ({ ...prev, demand: !prev.demand }))}
@@ -203,7 +203,7 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
                 layers.demand ? 'bg-brand/20 text-brand' : 'text-copy-muted hover:bg-bg-subtle'
               }`}
             >
-              Demand
+              {t('heatmap.layer_demand', 'Demand')}
             </button>
             <button
               onClick={() => setLayers((prev) => ({ ...prev, supply: !prev.supply }))}
@@ -211,7 +211,7 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
                 layers.supply ? 'bg-state-success-dim text-state-success' : 'text-copy-muted hover:bg-bg-subtle'
               }`}
             >
-              Supply
+              {t('heatmap.layer_supply', 'Supply')}
             </button>
             <button
               onClick={() => setLayers((prev) => ({ ...prev, unfilled: !prev.unfilled }))}
@@ -219,7 +219,7 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
                 layers.unfilled ? 'bg-state-warning-dim text-state-warning' : 'text-copy-muted hover:bg-bg-subtle'
               }`}
             >
-              Deficit Rings
+              {t('heatmap.layer_unfilled', 'Deficit')}
             </button>
           </div>
         </div>
@@ -246,7 +246,7 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
             <Search className="w-3.5 h-3.5 text-copy-muted absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search village or district..."
+              placeholder={t('heatmap.search_placeholder', 'Search village or district...')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-8 pr-3 py-1.5 text-xs bg-bg-subtle border border-surface-border-subtle rounded-xl text-copy-primary placeholder:text-copy-muted focus:outline-none focus:ring-1 focus:ring-brand"
@@ -263,7 +263,7 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
                   : 'bg-bg-subtle text-copy-secondary hover:bg-surface-border'
               }`}
             >
-              All ({villages.length})
+              {t('heatmap.filter_all', 'All')} ({villages.length})
             </button>
             <button
               onClick={() => setFilterMode('deficit')}
@@ -273,7 +273,7 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
                   : 'bg-bg-subtle text-state-warning hover:bg-surface-border'
               }`}
             >
-              Deficit ({deficitZonesCount})
+              {t('heatmap.filter_deficit', 'Deficit')} ({deficitZonesCount})
             </button>
             <button
               onClick={() => setFilterMode('supply')}
@@ -283,7 +283,7 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
                   : 'bg-bg-subtle text-state-success hover:bg-surface-border'
               }`}
             >
-              Supply ({supplyHubsCount})
+              {t('heatmap.filter_supply', 'Supply')} ({supplyHubsCount})
             </button>
           </div>
 
@@ -336,11 +336,11 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
                     </div>
                     <div className="flex items-center gap-2 text-[11px] tabular-nums">
                       <span className={isSelected ? 'text-brand' : 'text-copy-secondary'}>
-                        Demand: <strong>{v.demand_tonnes}t</strong>
+                        {t('heatmap.layer_demand', 'Demand')}: <strong>{v.demand_tonnes}t</strong>
                       </span>
                       <span>•</span>
                       <span className={isSelected ? 'text-emerald-300' : 'text-state-success'}>
-                        Supply: <strong>{v.supply_tonnes}t</strong>
+                        {t('heatmap.layer_supply', 'Supply')}: <strong>{v.supply_tonnes}t</strong>
                       </span>
                     </div>
                   </div>
@@ -348,11 +348,11 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
                   <div className="text-right flex items-center gap-1">
                     {hasDeficit ? (
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-state-warning-dim text-state-warning whitespace-nowrap">
-                        -{v.unfilled_tonnes}t Deficit
+                        -{v.unfilled_tonnes}t {t('heatmap.layer_unfilled', 'Deficit')}
                       </span>
                     ) : hasSupply ? (
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-state-success-dim text-state-success whitespace-nowrap">
-                        +{v.supply_tonnes}t Straw
+                        +{v.supply_tonnes}t {t('heatmap.layer_supply', 'Supply')}
                       </span>
                     ) : (
                       <span className="text-[10px] text-copy-muted">Balanced</span>
@@ -367,13 +367,13 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
           {/* Quick Legend */}
           <div className="pt-2 border-t border-surface-border flex items-center justify-between text-[11px] text-copy-secondary">
             <span className="flex items-center gap-1">
-              <span className="w-2.5 h-2.5 rounded-full bg-brand"></span> Demand
+              <span className="w-2.5 h-2.5 rounded-full bg-brand"></span> {t('heatmap.layer_demand', 'Demand')}
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-2.5 h-2.5 rounded-full bg-state-success"></span> Supply
+              <span className="w-2.5 h-2.5 rounded-full bg-state-success"></span> {t('heatmap.layer_supply', 'Supply')}
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-2.5 h-2.5 rounded-full border border-state-warning bg-state-warning/20"></span> Deficit
+              <span className="w-2.5 h-2.5 rounded-full border border-state-warning bg-state-warning/20"></span> {t('heatmap.layer_unfilled', 'Deficit')}
             </span>
           </div>
         </aside>
@@ -384,7 +384,7 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
             <div className="flex items-start justify-between">
               <div>
                 <span className="text-[10px] uppercase tracking-wider font-semibold text-brand">
-                  Village Inspection
+                  {t('heatmap.intel_title', 'Stubble Sourcing Intelligence')}
                 </span>
                 <h4 className="font-display text-lg font-bold text-copy-primary">
                   {selectedVillage.name}
@@ -404,48 +404,47 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
 
             <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
               <div className="bg-bg-subtle rounded-xl p-2.5 border border-surface-border-subtle">
-                <span className="text-copy-muted text-[11px]">Factory Demand</span>
+                <span className="text-copy-muted text-[11px]">{t('heatmap.buyer_demand', 'Factory Demand')}</span>
                 <p className="text-base font-bold text-copy-primary mt-0.5 tabular-nums">
-                  {selectedVillage.demand_tonnes} <span className="text-xs font-normal">tonnes</span>
+                  {selectedVillage.demand_tonnes} <span className="text-xs font-normal">{t('common.tonne', 'tonnes')}</span>
                 </p>
               </div>
 
               <div className="bg-bg-subtle rounded-xl p-2.5 border border-surface-border-subtle">
-                <span className="text-copy-muted text-[11px]">Farmer Supply</span>
+                <span className="text-copy-muted text-[11px]">{t('heatmap.farmer_supply', 'Farmer Supply')}</span>
                 <p className="text-base font-bold text-state-success mt-0.5 tabular-nums">
-                  {selectedVillage.supply_tonnes} <span className="text-xs font-normal">tonnes</span>
+                  {selectedVillage.supply_tonnes} <span className="text-xs font-normal">{t('common.tonne', 'tonnes')}</span>
                 </p>
               </div>
             </div>
 
             <div className="mt-2.5 p-2.5 rounded-xl border border-surface-border text-xs space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-copy-muted">Market Balance:</span>
+                <span className="text-copy-muted">{t('heatmap.market_balance', 'Market Balance')}:</span>
                 {selectedVillage.is_unfilled_zone && selectedVillage.unfilled_tonnes > 0 ? (
                   <span className="font-semibold text-state-warning flex items-center gap-1">
-                    <TrendingDown className="w-3.5 h-3.5" /> Deficit of {selectedVillage.unfilled_tonnes}t
+                    <TrendingDown className="w-3.5 h-3.5" /> {t('heatmap.deficit_of', 'Deficit of {{tonnes}}t', { tonnes: selectedVillage.unfilled_tonnes })}
                   </span>
                 ) : selectedVillage.supply_tonnes > selectedVillage.demand_tonnes ? (
                   <span className="font-semibold text-state-success flex items-center gap-1">
-                    <TrendingUp className="w-3.5 h-3.5" /> Surplus of{' '}
-                    {Math.round(selectedVillage.supply_tonnes - selectedVillage.demand_tonnes)}t
+                    <TrendingUp className="w-3.5 h-3.5" /> {t('heatmap.surplus_of', 'Surplus of {{tonnes}}t', { tonnes: Math.round(selectedVillage.supply_tonnes - selectedVillage.demand_tonnes) })}
                   </span>
                 ) : (
-                  <span className="font-semibold text-copy-primary">Balanced Demand</span>
+                  <span className="font-semibold text-copy-primary">{t('heatmap.balanced_demand', 'Balanced Demand')}</span>
                 )}
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-copy-muted">Benchmark Price:</span>
+                <span className="text-copy-muted">{t('heatmap.benchmark_price_label', 'Benchmark Price')}:</span>
                 <span className="font-semibold text-copy-primary tabular-nums">
                   ₹{selectedVillage.avg_price || 1500}/tonne
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-copy-muted">Active Farmer Lots:</span>
+                <span className="text-copy-muted">{t('heatmap.active_lots', 'Active Farmer Lots')}:</span>
                 <span className="font-semibold text-copy-primary tabular-nums">
-                  {selectedVillage.listings_count || (selectedVillage.supply_tonnes > 0 ? 1 : 0)} lots
+                  {selectedVillage.listings_count || (selectedVillage.supply_tonnes > 0 ? 1 : 0)} {t('heatmap.lots', 'lots')}
                 </span>
               </div>
             </div>
@@ -459,10 +458,10 @@ export function DemandHeatmap({ onSelectVillageForFilter }: DemandHeatmapProps =
                     procurementEl.scrollIntoView({ behavior: 'smooth' })
                   }
                 }}
-                className="mt-3 w-full py-2 bg-brand text-on-brand rounded-xl text-xs font-semibold hover:bg-accent-secondary transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                className="mt-3 w-full py-2 bg-brand text-on-brand rounded-xl text-xs font-semibold hover:bg-accent-secondary transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                View Farmer Stubble Lots from {selectedVillage.name}
+                {t('heatmap.match_stubble', '⚡ Match Farmer Stubble')}: {selectedVillage.name}
               </button>
             )}
           </div>

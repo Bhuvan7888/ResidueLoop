@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   getDonorHistory,
   getNGOs,
@@ -33,6 +34,7 @@ interface CrowdfundingCampaign {
 }
 
 export function DonorDashboard({ userId }: { userId: string }) {
+  const { t } = useTranslation()
   const [history, setHistory] = useState<
     { id: string; amount: number; created_at: string; ngos?: { profiles?: { name: string } } }[]
   >([])
@@ -120,22 +122,22 @@ export function DonorDashboard({ userId }: { userId: string }) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
             <h3 className="text-xl font-bold text-copy-primary flex items-center gap-2">
-              <span>🌾</span> Anti-Stubble Burning Crowdfunding Portal
+              <span>🌾</span> {t('donor.portal_title', 'Anti-Stubble Burning Crowdfunding Portal')}
             </h3>
             <p className="text-sm text-copy-secondary mt-1">
-              When stubble remains unsold in 2–3 days, farmers face pressure to burn. Crowdfund clearance costs so balers can clear their fields cleanly!
+              {t('donor.portal_sub', 'When stubble remains unsold in 2–3 days, farmers face pressure to burn. Crowdfund clearance costs so balers can clear their fields cleanly!')}
             </p>
           </div>
           <span className="text-xs bg-state-error-dim text-state-error border border-state-error/30 font-semibold px-3 py-1 rounded-full self-start sm:self-auto">
-            Urgent Citizen Action
+            {t('donor.urgent_action', 'Urgent Citizen Action')}
           </span>
         </div>
 
         {campaigns.length === 0 ? (
           <div className="bg-surface border border-surface-border rounded-2xl p-6 text-center space-y-2">
-            <p className="font-semibold text-copy-primary">No Fields At Immediate Burning Risk</p>
+            <p className="font-semibold text-copy-primary">{t('donor.no_fields_risk', 'No Fields At Immediate Burning Risk')}</p>
             <p className="text-xs text-copy-secondary">
-              All listed stubble is currently matched with industrial buyers. Any unsold farmer stubble will appear here for public crowdfunding.
+              {t('donor.no_fields_desc', 'All listed stubble is currently matched with industrial buyers. Any unsold farmer stubble will appear here for public crowdfunding.')}
             </p>
           </div>
         ) : (
@@ -158,19 +160,21 @@ export function DonorDashboard({ userId }: { userId: string }) {
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs px-2 py-0.5 rounded-full bg-state-error-dim text-state-error font-medium">
-                          🔥 Fire Risk (Unsold &gt; 2 Days)
+                          {t('donor.risk_tag', '🔥 Fire Risk (Unsold > 2 Days)')}
                         </span>
                         <span className="text-xs text-copy-secondary">
-                          {acres} Acres • ~{tonnes.toFixed(1)}t Straw
+                          {t('donor.field_specs', '{{acres}} Acres • ~{{tonnes}}t Straw', { acres, tonnes: tonnes.toFixed(1) })}
                         </span>
                       </div>
-                      <h4 className="text-base font-semibold text-copy-primary mt-1.5">{farmerName}&apos;s Field</h4>
+                      <h4 className="text-base font-semibold text-copy-primary mt-1.5">
+                        {t('donor.farmers_field', "{{name}}'s Field", { name: farmerName })}
+                      </h4>
                       <p className="text-xs text-copy-secondary mt-0.5">
                         📍 {villageName} • {camp.purpose}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-copy-secondary">Goal</p>
+                      <p className="text-xs text-copy-secondary">{t('donor.goal', 'Goal')}</p>
                       <p className="text-lg font-bold text-copy-primary">₹{goal.toLocaleString()}</p>
                     </div>
                   </div>
@@ -178,8 +182,8 @@ export function DonorDashboard({ userId }: { userId: string }) {
                   {/* Progress visualization */}
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs text-copy-secondary">
-                      <span>Funded by Citizens: ₹{funded.toLocaleString()}</span>
-                      <span>Target: ₹{goal.toLocaleString()} ({pct}%)</span>
+                      <span>{t('donor.funded_citizens', 'Funded by Citizens: ₹{{funded}}', { funded: funded.toLocaleString() })}</span>
+                      <span>{t('donor.target_pct', 'Target: ₹{{goal}} ({{pct}}%)', { goal: goal.toLocaleString(), pct })}</span>
                     </div>
                     <div className="w-full bg-bg-subtle rounded-full h-2.5 overflow-hidden">
                       <div className="bg-brand h-2.5 rounded-full transition-all duration-500" style={{ width: `${pct}%` }}></div>
@@ -211,14 +215,14 @@ export function DonorDashboard({ userId }: { userId: string }) {
                           onClick={() => handleCampaignDonate(camp, customAmount)}
                           className="flex-1 bg-brand text-on-brand py-2 text-xs font-semibold rounded-xl hover:bg-accent-secondary"
                         >
-                          Confirm ₹{customAmount} Contribution
+                          {t('donor.confirm_contribution', 'Confirm ₹{{amount}} Contribution', { amount: customAmount })}
                         </button>
                         <button
                           type="button"
                           onClick={() => setSelectedCampaignId(null)}
                           className="px-3 border border-surface-border text-xs rounded-xl text-copy-secondary hover:bg-bg-subtle"
                         >
-                          Cancel
+                          {t('common.cancel', 'Cancel')}
                         </button>
                       </div>
                     </div>
@@ -231,7 +235,7 @@ export function DonorDashboard({ userId }: { userId: string }) {
                       }}
                       className="w-full bg-brand text-on-brand py-2.5 rounded-xl font-medium text-xs hover:bg-accent-secondary active:scale-[0.99] transition-all shadow-xs"
                     >
-                      🛡️ Crowdfund Clearance to Prevent Fire
+                      {t('donor.crowdfund_btn', '🛡️ Crowdfund Clearance to Prevent Fire')}
                     </button>
                   )}
                 </div>
@@ -243,20 +247,20 @@ export function DonorDashboard({ userId }: { userId: string }) {
 
       {/* Section 2: General Clean Air NGO Donation */}
       <div className="bg-surface border border-surface-border rounded-2xl p-5 shadow-xs">
-        <h3 className="text-lg font-semibold text-copy-primary mb-1">Direct NGO Clean Air Fund</h3>
+        <h3 className="text-lg font-semibold text-copy-primary mb-1">{t('donor.direct_title', 'Direct NGO Clean Air Fund')}</h3>
         <p className="text-xs text-copy-secondary mb-4">
-          Support verified ground NGOs equipping machinery and providing baler subsidies across North India.
+          {t('donor.direct_subtitle', 'Support verified ground NGOs equipping machinery and providing baler subsidies across North India.')}
         </p>
         <form onSubmit={handleGeneralDonate} className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
-              <label className="block text-xs font-medium text-copy-secondary mb-1">Select Verified NGO</label>
+              <label className="block text-xs font-medium text-copy-secondary mb-1">{t('donor.select_ngo_label', 'Select Verified NGO')}</label>
               <select
                 name="ngo_id"
                 required
                 className="w-full border border-surface-border bg-surface rounded-xl p-2.5 text-sm text-copy-primary focus:ring-2 focus:ring-accent-primary outline-none"
               >
-                <option value="">Choose an NGO...</option>
+                <option value="">{t('donor.choose_ngo', 'Choose an NGO...')}</option>
                 {ngos.map((n) => (
                   <option key={n.profile_id} value={n.profile_id}>
                     {n.profiles?.name || 'Clean Air Trust'}
@@ -265,7 +269,7 @@ export function DonorDashboard({ userId }: { userId: string }) {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-copy-secondary mb-1">Contribution Amount (₹)</label>
+              <label className="block text-xs font-medium text-copy-secondary mb-1">{t('donor.amount_label', 'Contribution Amount (₹)')}</label>
               <input
                 name="amount"
                 type="number"
@@ -281,20 +285,24 @@ export function DonorDashboard({ userId }: { userId: string }) {
                 type="submit"
                 className="w-full bg-brand text-on-brand rounded-xl py-2.5 font-medium text-sm hover:bg-accent-secondary transition-colors shadow-xs"
               >
-                Donate to Clean Air Fund
+                {t('donor.donate_btn', 'Donate to Clean Air Fund')}
               </button>
             </div>
           </div>
 
           {/* Dynamic Stubble Diverted Estimate Badge */}
           <div className="flex flex-wrap items-center gap-3 p-3 bg-bg-subtle rounded-xl text-xs text-copy-secondary border border-surface-border">
-            <span className="font-semibold text-copy-primary">🌾 Estimated Citizen Impact:</span>
+            <span className="font-semibold text-copy-primary">{t('donor.estimated_impact', '🌾 Estimated Citizen Impact:')}</span>
             <span>
-              ~<strong className="text-copy-primary">{(directAmount / 200).toFixed(1)}t</strong> of paddy straw cleanly baled & diverted
+              <strong className="text-copy-primary">
+                {t('donor.impact_straw', '~{{tonnes}}t of paddy straw cleanly baled & diverted', { tonnes: (directAmount / 200).toFixed(1) })}
+              </strong>
             </span>
             <span>•</span>
             <span>
-              ~<strong className="text-copy-primary">{(directAmount / 500).toFixed(1)} acres</strong> saved from smoke pollution
+              <strong className="text-copy-primary">
+                {t('donor.impact_acres', '~{{acres}} acres saved from smoke pollution', { acres: (directAmount / 500).toFixed(1) })}
+              </strong>
             </span>
           </div>
         </form>
@@ -304,13 +312,15 @@ export function DonorDashboard({ userId }: { userId: string }) {
       <div className="space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
-            <h3 className="text-lg font-semibold text-copy-primary">Wind-Link Trajectory Ranking ({selectedCity} Focus)</h3>
+            <h3 className="text-lg font-semibold text-copy-primary">
+              {t('donor.wind_title', 'Wind-Link Trajectory Ranking ({{city}} Focus)', { city: selectedCity })}
+            </h3>
             <p className="text-xs text-copy-secondary">
-              Villages identified where preventing fires has the highest direct impact on reducing downwind air pollution.
+              {t('donor.wind_subtitle', 'Villages identified where preventing fires has the highest direct impact on reducing downwind air pollution.')}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <label className="text-xs text-copy-secondary whitespace-nowrap">Downwind City:</label>
+            <label className="text-xs text-copy-secondary whitespace-nowrap">{t('donor.downwind_city', 'Downwind City:')}</label>
             <select
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
@@ -334,8 +344,8 @@ export function DonorDashboard({ userId }: { userId: string }) {
               <div>
                 <p className="font-semibold text-copy-primary text-sm">{r.village?.name || 'Village Area'}</p>
                 <p className="text-xs text-copy-secondary mt-0.5">
-                  Downwind Exposure Index: <strong className="text-copy-primary">{r.influence_score}</strong>
-                  {r.distance_km ? ` • ${r.distance_km} km away` : ''}
+                  {t('donor.exposure_index', 'Downwind Exposure Index:')} <strong className="text-copy-primary">{r.influence_score}</strong>
+                  {r.distance_km ? ` • ${t('donor.km_away', '{{dist}} km away', { dist: r.distance_km })}` : ''}
                 </p>
               </div>
               <span className="bg-state-warning-dim text-state-warning text-xs font-medium px-2.5 py-1 rounded-full border border-state-warning/30">
@@ -348,9 +358,9 @@ export function DonorDashboard({ userId }: { userId: string }) {
 
       {/* Section 4: Your Impact History */}
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold text-copy-primary">Your Citizen Impact History</h3>
+        <h3 className="text-lg font-semibold text-copy-primary">{t('donor.history_title', 'Your Citizen Impact History')}</h3>
         {history.length === 0 ? (
-          <p className="text-xs text-copy-secondary">No contributions yet. Start by crowdfunded a plot above!</p>
+          <p className="text-xs text-copy-secondary">{t('donor.no_history', 'No contributions yet. Start by crowdfunding a plot above!')}</p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {history.map((h) => (
@@ -361,14 +371,14 @@ export function DonorDashboard({ userId }: { userId: string }) {
                 <div>
                   <div className="flex items-center gap-2">
                     <p className="font-medium text-copy-primary text-sm">
-                      Contribution to {h.ngos?.profiles?.name || 'Clean Air Collective'}
+                      {t('donor.contribution_to', 'Contribution to {{name}}', { name: h.ngos?.profiles?.name || 'Clean Air Collective' })}
                     </p>
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-state-success-dim text-state-success">
-                      ✓ Deployed
+                      {t('donor.deployed', '✓ Deployed')}
                     </span>
                   </div>
                   <p className="text-xs text-copy-secondary mt-0.5">
-                    {new Date(h.created_at).toLocaleDateString()} • ~{(h.amount / 200).toFixed(1)}t Straw Diverted
+                    {new Date(h.created_at).toLocaleDateString()} • {t('donor.straw_diverted', '~{{tonnes}}t Straw Diverted', { tonnes: (h.amount / 200).toFixed(1) })}
                   </p>
                 </div>
                 <p className="font-bold text-brand">₹{h.amount.toLocaleString()}</p>
@@ -381,7 +391,7 @@ export function DonorDashboard({ userId }: { userId: string }) {
       {/* Section 5: Real-time Citizen Notifications */}
       {notifications.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-lg font-semibold text-copy-primary">Impact Notifications</h3>
+          <h3 className="text-lg font-semibold text-copy-primary">{t('donor.notifications_title', 'Impact Notifications')}</h3>
           <div className="grid gap-3 sm:grid-cols-2">
             {notifications.map((n) => (
               <div key={n.id} className="bg-surface border border-brand/20 rounded-xl p-4 shadow-xs">

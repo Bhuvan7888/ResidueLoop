@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   getNgoLedger,
   getNgoRequests,
@@ -37,6 +38,7 @@ interface DonationItem {
 }
 
 export function NgoDashboard({ userId }: { userId: string }) {
+  const { t } = useTranslation()
   const [ledger, setLedger] = useState({ totalReceived: 0, totalDisbursed: 0, balance: 0 })
   const [requests, setRequests] = useState<AssistanceRequest[]>([])
   const [disbursements, setDisbursements] = useState<DisbursementItem[]>([])
@@ -71,7 +73,11 @@ export function NgoDashboard({ userId }: { userId: string }) {
   const handleAction = async (id: string, action: 'approved' | 'declined') => {
     try {
       await updateRequestStatus(id, action)
-      setActionMsg(`Request ${action === 'approved' ? 'approved' : 'declined'} successfully.`)
+      setActionMsg(
+        action === 'approved'
+          ? t('ngo.approved_msg', 'Request approved successfully.')
+          : t('ngo.declined_msg', 'Request declined.')
+      )
       loadData()
     } catch (err: unknown) {
       setActionMsg(err instanceof Error ? err.message : 'Action failed')
@@ -113,34 +119,34 @@ export function NgoDashboard({ userId }: { userId: string }) {
       {/* Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-surface border border-surface-border rounded-2xl p-5 shadow-xs">
-          <p className="text-xs font-medium text-copy-secondary">Total Received (Inflow)</p>
+          <p className="text-xs font-medium text-copy-secondary">{t('ngo.inflow', 'Total Received (Inflow)')}</p>
           <p className="text-2xl font-bold text-state-success mt-1">₹{ledger.totalReceived.toLocaleString()}</p>
-          <p className="text-[11px] text-copy-muted mt-1">Citizen & Corporate Clean Air donations</p>
+          <p className="text-[11px] text-copy-muted mt-1">{t('ngo.inflow_sub', 'Citizen & Corporate Clean Air donations')}</p>
         </div>
         <div className="bg-surface border border-surface-border rounded-2xl p-5 shadow-xs">
-          <p className="text-xs font-medium text-copy-secondary">Total Disbursed (Outflow)</p>
+          <p className="text-xs font-medium text-copy-secondary">{t('ngo.outflow', 'Total Disbursed (Outflow)')}</p>
           <p className="text-2xl font-bold text-state-error mt-1">₹{ledger.totalDisbursed.toLocaleString()}</p>
-          <p className="text-[11px] text-copy-muted mt-1">Direct to balers, transport & farmers</p>
+          <p className="text-[11px] text-copy-muted mt-1">{t('ngo.outflow_sub', 'Direct to balers, transport & farmers')}</p>
         </div>
         <div className="bg-surface border border-surface-border rounded-2xl p-5 shadow-xs">
-          <p className="text-xs font-medium text-copy-secondary">Available Working Fund</p>
+          <p className="text-xs font-medium text-copy-secondary">{t('ngo.working_fund', 'Available Working Fund')}</p>
           <p className="text-2xl font-bold text-brand mt-1">₹{ledger.balance.toLocaleString()}</p>
-          <p className="text-[11px] text-copy-muted mt-1">Ready for immediate field clearance</p>
+          <p className="text-[11px] text-copy-muted mt-1">{t('ngo.working_fund_sub', 'Ready for immediate field clearance')}</p>
         </div>
       </div>
 
       {/* Assistance Requests Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-copy-primary">Field Clearance Assistance Requests</h3>
+          <h3 className="text-lg font-semibold text-copy-primary">{t('ngo.requests_title', 'Field Clearance Assistance Requests')}</h3>
           <span className="text-xs text-copy-secondary">
-            {requests.filter((r) => r.status === 'pending').length} Pending Review
+            {t('ngo.pending_review', '{{count}} Pending Review', { count: requests.filter((r) => r.status === 'pending').length })}
           </span>
         </div>
 
         {requests.length === 0 ? (
           <div className="bg-surface border border-surface-border rounded-2xl p-6 text-center text-copy-secondary text-sm">
-            No assistance requests found.
+            {t('ngo.no_requests', 'No assistance requests found.')}
           </div>
         ) : (
           requests.map((req) => (
@@ -148,7 +154,7 @@ export function NgoDashboard({ userId }: { userId: string }) {
               <div className="flex justify-between items-start">
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold text-copy-primary">{req.farmers?.profiles?.name || 'Local Farmer'}</p>
+                    <p className="font-semibold text-copy-primary">{req.farmers?.profiles?.name || t('ngo.local_farmer', 'Local Farmer')}</p>
                     <span
                       className={`px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
                         req.status === 'approved'
@@ -162,11 +168,11 @@ export function NgoDashboard({ userId }: { userId: string }) {
                     </span>
                   </div>
                   <p className="text-xs text-copy-secondary mt-1">
-                    {req.listings?.acres ? `${req.listings.acres} Acres • ` : ''}
-                    Goal: <strong className="text-copy-primary">₹{req.amount_requested.toLocaleString()}</strong>
+                    {req.listings?.acres ? `${req.listings.acres} ${t('farmer.acres', 'Acres')} • ` : ''}
+                    {t('ngo.goal', 'Goal:')} <strong className="text-copy-primary">₹{req.amount_requested.toLocaleString()}</strong>
                   </p>
                   <p className="text-xs text-copy-secondary mt-1">
-                    Purpose: <span className="text-copy-primary">{req.purpose}</span>
+                    {t('ngo.purpose', 'Purpose:')} <span className="text-copy-primary">{req.purpose}</span>
                   </p>
                 </div>
               </div>
@@ -177,13 +183,13 @@ export function NgoDashboard({ userId }: { userId: string }) {
                     onClick={() => handleAction(req.id, 'approved')}
                     className="px-4 py-2 bg-brand text-on-brand rounded-xl text-xs font-semibold hover:bg-accent-secondary transition-colors"
                   >
-                    ✓ Approve for Clearance
+                    {t('ngo.approve', '✓ Approve for Clearance')}
                   </button>
                   <button
                     onClick={() => handleAction(req.id, 'declined')}
                     className="px-4 py-2 bg-surface border border-surface-border text-copy-secondary rounded-xl text-xs font-semibold hover:bg-bg-subtle transition-colors"
                   >
-                    ✕ Decline
+                    {t('ngo.decline', '✕ Decline')}
                   </button>
                 </div>
               )}
@@ -193,22 +199,22 @@ export function NgoDashboard({ userId }: { userId: string }) {
                   onSubmit={(e) => handleDisbursement(req.id, e)}
                   className="space-y-3 pt-3 border-t border-surface-border bg-bg-subtle/50 p-4 rounded-xl"
                 >
-                  <p className="text-xs font-semibold text-copy-primary">Record Clean Clearance Disbursement</p>
+                  <p className="text-xs font-semibold text-copy-primary">{t('ngo.disbursement_form_title', 'Record Clean Clearance Disbursement')}</p>
                   <div className="grid gap-3 sm:grid-cols-4">
                     <div>
-                      <label className="text-[11px] text-copy-secondary block mb-1">Payee Type</label>
+                      <label className="text-[11px] text-copy-secondary block mb-1">{t('ngo.payee_type', 'Payee Type')}</label>
                       <select
                         name="payee_type"
                         defaultValue="baler"
                         className="w-full border border-surface-border rounded-xl px-2.5 py-2 text-xs bg-surface text-copy-primary outline-none focus:ring-2 focus:ring-accent-primary"
                       >
-                        <option value="baler">Baler / Machinery Operator</option>
-                        <option value="transport provider">Transport / Hauler</option>
-                        <option value="farmer">Farmer Direct Incentive</option>
+                        <option value="baler">{t('ngo.payee_type_baler', 'Baler / Machinery Operator')}</option>
+                        <option value="transport provider">{t('ngo.payee_type_transport', 'Transport / Hauler')}</option>
+                        <option value="farmer">{t('ngo.payee_type_farmer', 'Farmer Direct Incentive')}</option>
                       </select>
                     </div>
                     <div>
-                      <label className="text-[11px] text-copy-secondary block mb-1">Payee Name</label>
+                      <label className="text-[11px] text-copy-secondary block mb-1">{t('ngo.payee_name', 'Payee Name')}</label>
                       <input
                         name="payee_name"
                         required
@@ -217,7 +223,7 @@ export function NgoDashboard({ userId }: { userId: string }) {
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] text-copy-secondary block mb-1">Amount (₹)</label>
+                      <label className="text-[11px] text-copy-secondary block mb-1">{t('ngo.amount_label', 'Amount (₹)')}</label>
                       <input
                         name="amount"
                         type="number"
@@ -228,10 +234,10 @@ export function NgoDashboard({ userId }: { userId: string }) {
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] text-copy-secondary block mb-1">Notes / Verification Ref</label>
+                      <label className="text-[11px] text-copy-secondary block mb-1">{t('ngo.note_label', 'Notes / Verification Ref')}</label>
                       <input
                         name="note"
-                        placeholder="e.g. Field baled without burning"
+                        placeholder={t('ngo.note_placeholder', 'e.g. Field baled without burning')}
                         className="w-full border border-surface-border rounded-xl px-2.5 py-2 text-xs bg-surface text-copy-primary outline-none focus:ring-2 focus:ring-accent-primary"
                       />
                     </div>
@@ -241,7 +247,7 @@ export function NgoDashboard({ userId }: { userId: string }) {
                       type="submit"
                       className="px-4 py-2 bg-brand text-on-brand rounded-xl text-xs font-semibold hover:bg-accent-secondary transition-colors"
                     >
-                      Record Disbursement
+                      {t('ngo.record_btn', 'Record Disbursement')}
                     </button>
                   </div>
                 </form>
@@ -255,9 +261,9 @@ export function NgoDashboard({ userId }: { userId: string }) {
       <div className="bg-surface border border-surface-border rounded-2xl p-5 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
-            <h3 className="text-lg font-semibold text-copy-primary">Auditable Transaction Ledger</h3>
+            <h3 className="text-lg font-semibold text-copy-primary">{t('ngo.ledger_title', 'Auditable Transaction Ledger')}</h3>
             <p className="text-xs text-copy-secondary">
-              Real-time transparent audit record linking citizen donations to field clearance disbursements.
+              {t('ngo.ledger_sub', 'Real-time transparent audit record linking citizen donations to field clearance disbursements.')}
             </p>
           </div>
           <div className="flex gap-2">
@@ -270,7 +276,7 @@ export function NgoDashboard({ userId }: { userId: string }) {
                   : 'bg-bg-subtle text-copy-secondary hover:bg-surface-border'
               }`}
             >
-              Disbursements ({disbursements.length})
+              {t('ngo.tab_disbursements', 'Disbursements ({{count}})', { count: disbursements.length })}
             </button>
             <button
               type="button"
@@ -281,7 +287,7 @@ export function NgoDashboard({ userId }: { userId: string }) {
                   : 'bg-bg-subtle text-copy-secondary hover:bg-surface-border'
               }`}
             >
-              Donations Inflow ({donations.length})
+              {t('ngo.tab_donations', 'Donations Inflow ({{count}})', { count: donations.length })}
             </button>
           </div>
         </div>
@@ -289,19 +295,19 @@ export function NgoDashboard({ userId }: { userId: string }) {
         {activeLedgerTab === 'disbursements' ? (
           disbursements.length === 0 ? (
             <div className="p-6 text-center text-copy-secondary text-xs">
-              No disbursements recorded yet.
+              {t('ngo.no_disbursements', 'No disbursements recorded yet.')}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-surface-border text-copy-secondary">
-                    <th className="pb-2.5 font-medium">Date</th>
-                    <th className="pb-2.5 font-medium">Payee</th>
-                    <th className="pb-2.5 font-medium">Type</th>
-                    <th className="pb-2.5 font-medium">Notes / Purpose</th>
-                    <th className="pb-2.5 font-medium text-right">Amount</th>
-                    <th className="pb-2.5 font-medium text-right">Status</th>
+                    <th className="pb-2.5 font-medium">{t('ngo.th_date', 'Date')}</th>
+                    <th className="pb-2.5 font-medium">{t('ngo.th_payee', 'Payee')}</th>
+                    <th className="pb-2.5 font-medium">{t('ngo.th_type', 'Type')}</th>
+                    <th className="pb-2.5 font-medium">{t('ngo.th_notes', 'Notes / Purpose')}</th>
+                    <th className="pb-2.5 font-medium text-right">{t('ngo.th_amount', 'Amount')}</th>
+                    <th className="pb-2.5 font-medium text-right">{t('ngo.th_status', 'Status')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-surface-border">
@@ -324,7 +330,7 @@ export function NgoDashboard({ userId }: { userId: string }) {
                       </td>
                       <td className="py-2.5 text-right">
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-state-success-dim text-state-success">
-                          ✓ Settled
+                          {t('ngo.settled', '✓ Settled')}
                         </span>
                       </td>
                     </tr>
@@ -336,18 +342,18 @@ export function NgoDashboard({ userId }: { userId: string }) {
         ) : (
           donations.length === 0 ? (
             <div className="p-6 text-center text-copy-secondary text-xs">
-              No donations received yet.
+              {t('ngo.no_donations', 'No donations received yet.')}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-surface-border text-copy-secondary">
-                    <th className="pb-2.5 font-medium">Date</th>
-                    <th className="pb-2.5 font-medium">Donor / Source</th>
-                    <th className="pb-2.5 font-medium">Target Village</th>
-                    <th className="pb-2.5 font-medium text-right">Amount</th>
-                    <th className="pb-2.5 font-medium text-right">Verification</th>
+                    <th className="pb-2.5 font-medium">{t('ngo.th_date', 'Date')}</th>
+                    <th className="pb-2.5 font-medium">{t('ngo.th_donor', 'Donor / Source')}</th>
+                    <th className="pb-2.5 font-medium">{t('ngo.th_target_village', 'Target Village')}</th>
+                    <th className="pb-2.5 font-medium text-right">{t('ngo.th_amount', 'Amount')}</th>
+                    <th className="pb-2.5 font-medium text-right">{t('ngo.th_verification', 'Verification')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-surface-border">
@@ -357,17 +363,17 @@ export function NgoDashboard({ userId }: { userId: string }) {
                         {new Date(don.created_at).toLocaleDateString()}
                       </td>
                       <td className="py-2.5 font-medium text-copy-primary">
-                        {don.donor?.name || 'Anonymous Citizen'}
+                        {don.donor?.name || t('ngo.anonymous_citizen', 'Anonymous Citizen')}
                       </td>
                       <td className="py-2.5 text-copy-secondary">
-                        {don.villages?.name || 'General Clean Air Pool'}
+                        {don.villages?.name || t('ngo.general_pool', 'General Clean Air Pool')}
                       </td>
                       <td className="py-2.5 text-right font-bold text-state-success">
                         +₹{don.amount.toLocaleString()}
                       </td>
                       <td className="py-2.5 text-right">
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-state-success-dim text-state-success">
-                          Verified
+                          {t('ngo.verified', 'Verified')}
                         </span>
                       </td>
                     </tr>
@@ -381,9 +387,9 @@ export function NgoDashboard({ userId }: { userId: string }) {
 
       {/* Notifications Section */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-copy-primary">Activity Notifications</h3>
+        <h3 className="text-lg font-semibold text-copy-primary">{t('ngo.notifications_title', 'Activity Notifications')}</h3>
         {notifications.length === 0 ? (
-          <p className="text-xs text-copy-secondary">No new notifications.</p>
+          <p className="text-xs text-copy-secondary">{t('ngo.no_notifications', 'No new notifications.')}</p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {notifications.map((n) => (

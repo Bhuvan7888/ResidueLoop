@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { VerificationCard, VerificationProps } from './VerificationCard'
 
 interface SatelliteAuditModalProps {
@@ -21,6 +22,8 @@ export function SatelliteAuditModal({
   verification,
   plot,
 }: SatelliteAuditModalProps) {
+  const { t } = useTranslation()
+
   if (!isOpen) return null
 
   // Default clean verification data if none provided (e.g. for buyer pool inspection)
@@ -50,17 +53,17 @@ export function SatelliteAuditModal({
             <div className="flex items-center gap-2">
               <span className="text-xl">🛰️</span>
               <h3 className="font-display text-lg text-copy-primary">
-                Satellite Earth Observation Audit
+                {t('audit.title', 'Satellite Earth Observation Audit')}
               </h3>
             </div>
             <p className="text-xs text-copy-secondary mt-0.5">
-              Verified Zero-Burn Field Provenance for <strong>{villageName}, {district}</strong>
+              {t('audit.subtitle', { village: villageName, district, defaultValue: `Verified Zero-Burn Field Provenance for ${villageName}, ${district}` })}
             </p>
           </div>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-surface border border-surface-border flex items-center justify-center text-copy-muted hover:text-copy-primary hover:bg-bg-subtle transition-all text-sm font-bold"
-            aria-label="Close modal"
+            aria-label={t('audit.close', 'Close')}
           >
             ✕
           </button>
@@ -77,15 +80,17 @@ export function SatelliteAuditModal({
           {/* Sourcing Provenance Audit List */}
           <div className="rounded-2xl border border-surface-border bg-bg-subtle/40 p-4 space-y-3">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-copy-muted">
-              Biomass Purchase Audit Verification Checklist
+              {t('audit.checklist_title', 'Biomass Purchase Audit Verification Checklist')}
             </h4>
             <div className="grid gap-2 sm:grid-cols-2 text-xs">
               <div className="flex items-start gap-2 bg-surface p-2.5 rounded-xl border border-surface-border-subtle">
                 <span className="text-state-success font-bold text-sm">✓</span>
                 <div>
-                  <strong className="text-copy-primary block">Thermal Sensor Sweep</strong>
+                  <strong className="text-copy-primary block">
+                    {t('audit.thermal_title', 'Thermal Sensor Sweep')}
+                  </strong>
                   <span className="text-copy-secondary text-[11px]">
-                    NASA FIRMS VIIRS 375m radius scan confirms 0 thermal anomalies detected.
+                    {t('audit.thermal_desc', 'NASA FIRMS VIIRS 375m radius scan confirms 0 thermal anomalies detected.')}
                   </span>
                 </div>
               </div>
@@ -93,9 +98,11 @@ export function SatelliteAuditModal({
               <div className="flex items-start gap-2 bg-surface p-2.5 rounded-xl border border-surface-border-subtle">
                 <span className="text-state-success font-bold text-sm">✓</span>
                 <div>
-                  <strong className="text-copy-primary block">Sentinel-2 MSI NBR Delta</strong>
+                  <strong className="text-copy-primary block">
+                    {t('audit.nbr_title', 'Sentinel-2 MSI NBR Delta')}
+                  </strong>
                   <span className="text-copy-secondary text-[11px]">
-                    Near-Infrared vs Short-Wave Infrared confirms intact crop residue, no burn scar.
+                    {t('audit.nbr_desc', 'Near-Infrared vs Short-Wave Infrared confirms intact crop residue, no burn scar.')}
                   </span>
                 </div>
               </div>
@@ -103,9 +110,11 @@ export function SatelliteAuditModal({
               <div className="flex items-start gap-2 bg-surface p-2.5 rounded-xl border border-surface-border-subtle">
                 <span className="text-state-success font-bold text-sm">✓</span>
                 <div>
-                  <strong className="text-copy-primary block">Industrial Boiler Safety</strong>
+                  <strong className="text-copy-primary block">
+                    {t('audit.boiler_title', 'Industrial Boiler Safety')}
+                  </strong>
                   <span className="text-copy-secondary text-[11px]">
-                    Low silica, non-charred paddy straw guaranteed for bio-coal / paper conversion.
+                    {t('audit.boiler_desc', 'Low silica, non-charred paddy straw guaranteed for bio-coal / paper conversion.')}
                   </span>
                 </div>
               </div>
@@ -113,9 +122,11 @@ export function SatelliteAuditModal({
               <div className="flex items-start gap-2 bg-surface p-2.5 rounded-xl border border-surface-border-subtle">
                 <span className="text-state-success font-bold text-sm">✓</span>
                 <div>
-                  <strong className="text-copy-primary block">Carbon Credit Verifiable</strong>
+                  <strong className="text-copy-primary block">
+                    {t('audit.carbon_title', 'Carbon Credit Verifiable')}
+                  </strong>
                   <span className="text-copy-secondary text-[11px]">
-                    Timestamped ESA/NASA orbital telemetry eligible for certified Scope 3 credits.
+                    {t('audit.carbon_desc', 'Timestamped ESA/NASA orbital telemetry eligible for certified Scope 3 credits.')}
                   </span>
                 </div>
               </div>
@@ -126,13 +137,13 @@ export function SatelliteAuditModal({
         {/* Modal Footer */}
         <div className="px-6 py-4 border-t border-surface-border bg-bg-subtle/30 flex items-center justify-between">
           <span className="text-[11px] text-copy-muted">
-            Telemetry provided via ESA Copernicus Sentinel Hub & NASA FIRMS APIs
+            {t('audit.telemetry_footer', 'Telemetry provided via ESA Copernicus Sentinel Hub & NASA FIRMS APIs')}
           </span>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-copy-primary text-base font-semibold text-xs hover:opacity-90 transition-opacity"
+            className="px-4 py-2 rounded-xl bg-copy-primary text-base font-semibold text-xs hover:opacity-90 transition-opacity cursor-pointer"
           >
-            Close Audit
+            {t('audit.close', 'Close Audit')}
           </button>
         </div>
       </div>

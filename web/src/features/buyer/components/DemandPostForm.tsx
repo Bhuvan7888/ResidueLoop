@@ -79,10 +79,10 @@ export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
       <div className="bg-surface border border-surface-border rounded-2xl p-5 space-y-4 shadow-xs">
         <div>
           <h3 className="text-base font-bold text-copy-primary flex items-center gap-2">
-            <span>🏭</span> 1. Your Industry & Purpose for Paddy Straw
+            <span>🏭</span> {t('buyer.demand_step1', '1. Your Industry & Purpose for Paddy Straw')}
           </h3>
           <p className="text-xs text-copy-secondary mt-0.5">
-            We match your purchase tender with farmers possessing matching stubble quality and form.
+            {t('buyer.demand_step1_desc', 'We match your purchase tender with farmers possessing matching stubble quality and form.')}
           </p>
         </div>
 
@@ -116,10 +116,10 @@ export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
       <div className="bg-surface border border-surface-border rounded-2xl p-5 space-y-4 shadow-xs">
         <div>
           <h3 className="text-base font-bold text-copy-primary flex items-center gap-2">
-            <span>📦</span> 2. Required Delivery Form
+            <span>📦</span> {t('buyer.demand_step2', '2. Required Delivery Form')}
           </h3>
           <p className="text-xs text-copy-secondary mt-0.5">
-            Select the form and packaging required by your boiler, paper mill, or livestock feed facility.
+            {t('buyer.demand_step2_desc', 'Select the form and packaging required by your boiler, paper mill, or livestock feed facility.')}
           </p>
         </div>
 
@@ -155,10 +155,10 @@ export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
       <div className="bg-surface border border-surface-border rounded-2xl p-5 space-y-4 shadow-xs">
         <div>
           <h3 className="text-base font-bold text-copy-primary flex items-center gap-2">
-            <span>⚖️</span> 3. Volume and Offer Price
+            <span>⚖️</span> {t('buyer.demand_step3', '3. Volume and Offer Price')}
           </h3>
           <p className="text-xs text-copy-secondary mt-0.5">
-            Set your target volume and offer price per tonne based on regional Punjab market benchmarks.
+            {t('buyer.demand_step3_desc', 'Set your target volume and offer price per tonne based on regional Punjab market benchmarks.')}
           </p>
         </div>
 
@@ -196,12 +196,14 @@ export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
         <div className="p-3 bg-brand/10 border border-brand/30 rounded-xl flex items-center justify-between text-xs">
           <div>
             <span className="font-semibold text-copy-primary block">
-              Market Index for {activeTier.name}:
+              {t('buyer.market_index_for', 'Market Index for {{tier}}:', { tier: activeTier.name })}
             </span>
             <span className="text-brand font-bold">{activeTier.priceUnit}</span>
           </div>
           <div className="text-right">
-            <span className="text-[10px] text-copy-muted block uppercase font-semibold">Total Tender Value</span>
+            <span className="text-[10px] text-copy-muted block uppercase font-semibold">
+              {t('buyer.est_total_contract', 'Total Tender Value')}
+            </span>
             <span className="text-base font-bold font-display text-state-success">
               ₹{Math.round(totalContractValue).toLocaleString()}
             </span>
@@ -212,7 +214,7 @@ export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
         <div className="grid grid-cols-2 gap-4 pt-1">
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-copy-secondary mb-1">
-              {t('buyer.start_date', 'Window Start Date')}
+              {t('buyer.date_from', 'Start Date')}
             </label>
             <input
               type="date"
@@ -226,7 +228,7 @@ export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
 
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-copy-secondary mb-1">
-              {t('buyer.end_date', 'Window End Date')}
+              {t('buyer.date_to', 'End Date')}
             </label>
             <input
               type="date"
@@ -253,7 +255,7 @@ export function DemandPostForm({ onSubmit, onCancel }: DemandPostFormProps) {
           disabled={form.formState.isSubmitting}
           className="flex-1 bg-brand text-on-brand rounded-xl py-2.5 font-bold hover:bg-accent-secondary disabled:opacity-50 text-sm cursor-pointer shadow-sm"
         >
-          {form.formState.isSubmitting ? t('common.saving', 'Publishing...') : 'Publish Industry Demand Tender'}
+          {form.formState.isSubmitting ? t('common.saving', 'Publishing...') : t('buyer.post_tender', 'Publish Industry Demand Tender')}
         </button>
       </div>
     </form>

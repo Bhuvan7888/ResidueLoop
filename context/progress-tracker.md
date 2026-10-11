@@ -36,6 +36,16 @@ This tracker records verified evidence only. Earlier completion claims were inde
 - [x] Replaced farmer profile/plot no-op paths with persistence. ID upload now validates file signature, encrypts content with AES-256-GCM, stores only a private path and last four digits, and performs the documented mock review. Live upload verification is blocked on `ID_DOCUMENT_ENCRYPTION_KEY` and the hosted migration.
 - [x] Added the farmer workspace setup forms for profile, plot, consent, and multipart ID proof submission. The API client now preserves `FormData` and `api-client.test.ts` covers this regression. English and Punjabi strings are present. The setup cannot be manually completed until the hosted schema migration, phone-Auth test accounts, and API encryption key are configured.
 
+## Multi-Portal Hindi & Punjabi Localization — 2026-10-11
+
+- [x] Attained 100% key and semantic parity across `en.json`, `hi.json`, and `pa.json` (511 unique i18n keys with 0 diffs).
+- [x] Localized Buyer Workspace: `BuyerDashboard.tsx`, `BuyerProcurementAdvisor.tsx`, `DemandPostForm.tsx`, and `BuyerProfileForm.tsx` (headers, streams, alerts, multi-farmer pooling, demand posts, tender builder, market index, decision tabs, sorting, satellite telemetry audit buttons).
+- [x] Localized Regional Demand Heatmap: `DemandHeatmap.tsx` (KPI cluster cards, live database sync pill, layer toggles, directory search, filter pills, village listings, legend, floating market intelligence inspection card, surplus/deficit badges, price benchmarks).
+- [x] Localized Field Telemetry & Audits: `SatelliteAuditModal.tsx` and `PickupCard.tsx` (ESA/NASA radar scan checklist, NBR delta, thermal hotspot sweep, boiler safety, carbon credit eligibility, and buyer payment flagging).
+- [x] Localized Charity & Donor Portals: `NgoDashboard.tsx` and `DonorDashboard.tsx` (inflow/outflow/working fund overview, assistance requests, field clearance disbursement form, auditable transaction ledger, anti-stubble burning crowdfunding portal, wind-link downwind city ranking, direct NGO clean air fund, citizen impact history).
+- [x] Localized User Navigation: `UserProfileDropdown.tsx` (saved profile details for farmers/buyers/donors/NGOs, identity verification badges, acreage, mission statements, encryption pill, and portal role switcher).
+- [x] Verified quality across all portals: `cd web && npm run typecheck && npm run lint && npm test && npm run build` (13 tests passed, 0 errors, build in 495ms); `cd api && python3 -m poetry run pytest` (25 tests passed).
+
 ## Recovery Decisions
 
 - D1. FastAPI under `/api/v1` is the only mutation boundary. The web app uses one token-aware API client and no Supabase Edge Functions.

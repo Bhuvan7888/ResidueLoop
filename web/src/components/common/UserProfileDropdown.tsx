@@ -185,25 +185,30 @@ export function UserProfileDropdown({ onSignOut }: UserProfileDropdownProps) {
         {/* Saved User Details Section */}
         <div className="py-3 space-y-2 text-xs">
           <p className="text-[11px] font-semibold text-copy-secondary uppercase tracking-wider">
-            Saved Profile Details
+            {t('profile.saved_details', 'Saved Profile Details')}
           </p>
 
           {role === 'farmer' && (
             <div className="space-y-1.5 bg-bg-subtle/60 rounded-xl p-3 border border-surface-border">
               <div className="flex justify-between items-center">
-                <span className="text-copy-secondary">Home Village:</span>
+                <span className="text-copy-secondary">{t('profile.home_village', 'Home Village:')}</span>
                 <span className="font-semibold text-copy-primary">
-                  {details?.villageName ? `${details.villageName}, ${details.district || 'Moga'}` : 'Not selected yet'}
+                  {details?.villageName ? `${details.villageName}, ${details.district || 'Moga'}` : t('profile.not_selected', 'Not selected yet')}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-copy-secondary">Registered Land:</span>
+                <span className="text-copy-secondary">{t('profile.registered_land', 'Registered Land:')}</span>
                 <span className="font-semibold text-copy-primary">
-                  {details?.totalAcres ? `${details.totalAcres.toFixed(1)} acres (${details.plotCount} plots)` : '0 plots registered'}
+                  {details?.totalAcres
+                    ? t('profile.plots_registered', '{{acres}} acres ({{plots}} plots)', {
+                        acres: details.totalAcres.toFixed(1),
+                        plots: details.plotCount || 0,
+                      })
+                    : t('profile.zero_plots', '0 plots registered')}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-copy-secondary">Identity Verification:</span>
+                <span className="text-copy-secondary">{t('profile.identity_verification', 'Identity Verification:')}</span>
                 <span
                   className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                     details?.idStatus === 'verified'
@@ -214,10 +219,10 @@ export function UserProfileDropdown({ onSignOut }: UserProfileDropdownProps) {
                   }`}
                 >
                   {details?.idStatus === 'verified'
-                    ? '🛡️ Verified Farmer'
+                    ? `🛡️ ${t('farmer.id_verified_badge', 'Verified Farmer')}`
                     : details?.idStatus === 'pending'
-                    ? '⏳ In Review'
-                    : 'Not Submitted'}
+                    ? `⏳ ${t('farmer.id_pending_badge', 'Reviewing')}`
+                    : t('profile.not_submitted', 'Not Submitted')}
                 </span>
               </div>
             </div>
@@ -226,32 +231,36 @@ export function UserProfileDropdown({ onSignOut }: UserProfileDropdownProps) {
           {role === 'buyer' && (
             <div className="space-y-1.5 bg-bg-subtle/60 rounded-xl p-3 border border-surface-border">
               <div className="flex justify-between items-center">
-                <span className="text-copy-secondary">Organization:</span>
+                <span className="text-copy-secondary">{t('profile.organization', 'Organization:')}</span>
                 <span className="font-semibold text-copy-primary truncate max-w-[160px]">
                   {details?.orgName || 'Industrial Plant'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-copy-secondary">Facility Type:</span>
+                <span className="text-copy-secondary">{t('profile.facility_type', 'Facility Type:')}</span>
                 <span className="font-semibold text-copy-primary capitalize">
                   {details?.buyerType || 'Biomass'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-copy-secondary">Target Capacity:</span>
+                <span className="text-copy-secondary">{t('profile.target_capacity', 'Target Capacity:')}</span>
                 <span className="font-semibold text-copy-primary">
-                  {details?.capacity ? `${details.capacity} tonnes/season` : 'Active'}
+                  {details?.capacity
+                    ? t('profile.tonnes_season', '{{count}} tonnes/season', { count: details.capacity })
+                    : t('profile.active_status', 'Active')}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-copy-secondary">Minimum Load:</span>
+                <span className="text-copy-secondary">{t('profile.minimum_load', 'Minimum Load:')}</span>
                 <span className="font-semibold text-copy-primary">
-                  {details?.minLoad ? `${details.minLoad} tonnes` : '8 tonnes'}
+                  {details?.minLoad
+                    ? t('profile.tonnes_unit', '{{count}} tonnes', { count: details.minLoad })
+                    : t('profile.tonnes_unit', '{{count}} tonnes', { count: 8 })}
                 </span>
               </div>
               {details?.pricePerTonne && (
                 <div className="flex justify-between items-center">
-                  <span className="text-copy-secondary">Offer Rate:</span>
+                  <span className="text-copy-secondary">{t('profile.offer_rate', 'Offer Rate:')}</span>
                   <span className="font-semibold text-brand">
                     ₹{details.pricePerTonne.toLocaleString()}/t
                   </span>
@@ -263,12 +272,12 @@ export function UserProfileDropdown({ onSignOut }: UserProfileDropdownProps) {
           {(role === 'donor' || role === 'ngo') && (
             <div className="space-y-1.5 bg-bg-subtle/60 rounded-xl p-3 border border-surface-border">
               <div className="flex justify-between items-center">
-                <span className="text-copy-secondary">Mission:</span>
-                <span className="font-semibold text-copy-primary">Anti-Stubble Burning & Clean Air</span>
+                <span className="text-copy-secondary">{t('profile.mission', 'Mission:')}</span>
+                <span className="font-semibold text-copy-primary">{t('profile.mission_desc', 'Anti-Stubble Burning & Clean Air')}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-copy-secondary">Target Focus:</span>
-                <span className="font-semibold text-copy-primary">Punjab & Delhi NCR Corridors</span>
+                <span className="text-copy-secondary">{t('profile.target_focus', 'Target Focus:')}</span>
+                <span className="font-semibold text-copy-primary">{t('profile.corridors', 'Punjab & Delhi NCR Corridors')}</span>
               </div>
             </div>
           )}
@@ -278,10 +287,10 @@ export function UserProfileDropdown({ onSignOut }: UserProfileDropdownProps) {
             <span className="text-sm">🔒</span>
             <div>
               <p className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
-                End-to-End Encrypted (AES-256 GCM)
+                {t('profile.encrypted', 'End-to-End Encrypted (AES-256 GCM)')}
               </p>
               <p className="text-[10px] text-emerald-700/80 dark:text-emerald-400/80">
-                Real-time zero-delay sync active with ResidueLoop Network
+                {t('profile.sync_active', 'Real-time zero-delay sync active with ResidueLoop Network')}
               </p>
             </div>
           </div>
@@ -290,7 +299,7 @@ export function UserProfileDropdown({ onSignOut }: UserProfileDropdownProps) {
         {/* Switch Portal Role View */}
         <div className="pt-2.5 pb-1 border-t border-surface-border space-y-1.5">
           <p className="text-[10px] font-semibold text-copy-secondary uppercase tracking-wider">
-            Switch Portal Role View
+            {t('profile.switch_role', 'Switch Portal Role View')}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
             <button
@@ -306,7 +315,7 @@ export function UserProfileDropdown({ onSignOut }: UserProfileDropdownProps) {
                   : 'bg-bg-subtle hover:bg-surface border border-surface-border text-copy-primary hover:border-brand/40'
               }`}
             >
-              🌾 Farmer
+              🌾 {t('auth.role_farmer', 'Farmer')}
             </button>
             <button
               type="button"
@@ -321,7 +330,7 @@ export function UserProfileDropdown({ onSignOut }: UserProfileDropdownProps) {
                   : 'bg-bg-subtle hover:bg-surface border border-surface-border text-copy-primary hover:border-brand/40'
               }`}
             >
-              🏭 Buyer
+              🏭 {t('auth.role_buyer', 'Buyer')}
             </button>
             <button
               type="button"
@@ -336,7 +345,7 @@ export function UserProfileDropdown({ onSignOut }: UserProfileDropdownProps) {
                   : 'bg-bg-subtle hover:bg-surface border border-surface-border text-copy-primary hover:border-brand/40'
               }`}
             >
-              🌱 Donor
+              🌱 {t('auth.role_donor', 'Donor')}
             </button>
             <button
               type="button"
@@ -351,7 +360,7 @@ export function UserProfileDropdown({ onSignOut }: UserProfileDropdownProps) {
                   : 'bg-bg-subtle hover:bg-surface border border-surface-border text-copy-primary hover:border-brand/40'
               }`}
             >
-              🏛️ NGO
+              🏛️ {t('auth.role_ngo', 'NGO')}
             </button>
           </div>
         </div>
