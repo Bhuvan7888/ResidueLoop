@@ -62,6 +62,14 @@ This tracker records verified evidence only. Earlier completion claims were inde
   - Eliminated bilingual text mashups (`/`) and hardcoded Hindi fallbacks in `NewListingForm.tsx` and `FarmerDashboard.tsx`.
   - Replaced Hindi fallbacks in `t()` calls (`~110 से 165 tonnes`, `चरण 1 / Step 1`, `✓ चुना गया`, `तारीख:`, Big 3 Actions) with English defaults mapped to comprehensive i18n keys across `en.json`, `hi.json`, and `pa.json`.
   - Verified 100% key parity (568 keys in each translation dictionary) and clean rendering in English, Hindi, and Punjabi modes.
+- [x] Customized Residue Listings & Matched Offers in Friendly Mode (2026-10-11):
+  - Added 4-Step Visual Timeline Progress Bar (`Listed ➔ Buyer Matched ➔ Trolley Scheduled ➔ Money Received`) on all listing and offer cards with step circles and colored progress tracks.
+  - Replaced dense technical jargon with everyday farmer terms (Straw Type, Harvest Date, Fair Rate, Guaranteed Payout).
+  - Highlighted prominent green Estimated Payout amounts (`💰 ₹X,XX,XXX`) on each listing.
+  - Upgraded Matched Offer cards (`OfferCard.tsx`) with reassuring `🛡️ Verified Factory Buyer • Guaranteed Bank Payout` trust banner, 4-step progress tracker, and prominent `✅ Accept Offer & Confirm Pickup` CTA.
+  - Added warm, inviting empty states with illustrations and a direct `+ Sell My Stubble Now` CTA.
+  - Retained 100% key and semantic parity across `en.json`, `hi.json`, and `pa.json` (589 keys each).
+  - Verified static quality: `npm run typecheck` (0 errors), `npm test` (13 tests passed), `npm run lint` (0 errors), `npm run build` (built in 595ms).
 
 ## Recovery Decisions
 

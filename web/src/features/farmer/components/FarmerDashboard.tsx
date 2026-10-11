@@ -572,13 +572,49 @@ export function FarmerDashboard({ userId }: { userId: string }) {
 
           {/* Section 1: Listings & Pooling */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-copy-primary">{t('farmer.listings_title')}</h3>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-xl font-bold text-copy-primary flex items-center gap-2">
+                  <span>🌾</span> {t('farmer.listings_title', 'My Listed Stubble & Fields')}
+                </h3>
+                <p className="text-xs text-copy-secondary mt-0.5">
+                  {t('farmer.listings_desc', 'Track buyers, scheduled trolley pickup, and guaranteed payments.')}
+                </p>
+              </div>
+              {listings.length > 0 && (
+                <span className="text-xs px-3 py-1 rounded-full font-bold bg-brand/10 text-brand border border-brand/20 self-start sm:self-auto">
+                  {listings.length} {t('farmer.active_listings_count', 'Active Listings')}
+                </span>
+              )}
+            </div>
+
             <div className="grid gap-4">
               {listings.length === 0 ? (
-                <div className="bg-surface border border-surface-border rounded-2xl p-6 text-center">
-                  <p className="text-copy-secondary text-sm">
-                    {t('farmer.no_listings')}
-                  </p>
+                <div className="bg-surface border-2 border-dashed border-surface-border hover:border-brand/40 rounded-3xl p-8 text-center space-y-4 transition-colors">
+                  <div className="w-16 h-16 rounded-3xl bg-brand/10 text-brand flex items-center justify-center text-3xl mx-auto">
+                    🌾
+                  </div>
+                  <div className="max-w-md mx-auto space-y-1">
+                    <h4 className="text-lg font-bold text-copy-primary">
+                      {t('farmer.no_listings_title', 'No fields listed yet')}
+                    </h4>
+                    <p className="text-xs text-copy-secondary leading-relaxed">
+                      {t('farmer.no_listings_desc', 'List your paddy straw in 2 simple steps to get fair market prices and free trolley pickup directly from your field.')}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isVerified) {
+                        setActionMsg(i18n.language === 'hi' ? '⚠️ सत्यापित पहचान आवश्यक! लिस्टिंग बनाने से पहले कृपया ऊपर अपना पहचान प्रमाण जमा करें।' : i18n.language === 'pa' ? '⚠️ ਤਸਦੀਕਸ਼ੁਦਾ ਪਛਾਣ ਲੋੜੀਂਦੀ ਹੈ! ਕਿਰਪਾ ਕਰਕੇ ਲਿਸਟਿੰਗ ਬਣਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਆਪਣੀ ਪਛਾਣ ਦਾ ਸਬੂਤ ਜਮ੍ਹਾਂ ਕਰੋ।' : '⚠️ Verified ID required! Please submit and verify your ID proof before creating a listing.')
+                        return
+                      }
+                      setView('listing')
+                    }}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand text-on-brand text-sm font-extrabold shadow-md hover:bg-accent-secondary transition-all hover:scale-[1.01] cursor-pointer mx-auto"
+                  >
+                    <span>+</span> {t('farmer.start_listing_cta', 'Sell My Stubble Now')}
+                  </button>
                 </div>
               ) : (
                 listings.map((listing) => {
@@ -588,101 +624,140 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                   const isPooled = listing.status === 'pooled'
                   const isCompleted = listing.status === 'completed'
                   const linkedPool = listing.pool_id ? pools.find((p) => p.id === listing.pool_id) : null
+                  const plotIdx = plots.findIndex((p) => p.id === listing.plot_id)
+                  const plotLabel = plotIdx >= 0 ? `${t('farmer.plot_num')}${plotIdx + 1}` : t('farmer.selected_plot_default', 'Plot #1')
+                  
+                  // 4-step progress: 1. Listed -> 2. Buyer Matched -> 3. Trolley Scheduled -> 4. Money Received
+                  const currentStep = isCompleted ? 4 : isPooled ? 3 : isMatched ? 2 : 1
+                  const estPayout = Math.round(listing.total_price || (listing.est_tonnes || 0) * (listing.price_per_tonne || 1950))
 
                   return (
-                    <div key={listing.id} className="bg-surface border border-surface-border rounded-2xl p-5 space-y-4 shadow-xs">
+                    <div key={listing.id} className="bg-surface border-2 border-surface-border hover:border-brand/40 rounded-3xl p-6 space-y-4 shadow-xs transition-all">
+                      {/* Top Header Row */}
                       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-                        <div>
+                        <div className="space-y-1">
                           <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-                            <p className="font-semibold text-copy-primary">
-                              {acresDisplay} {t('listing.acres', 'acres')} • {listing.est_tonnes ? `${listing.est_tonnes.toFixed(1)} ${t('listing.tonnes', 'tonnes')}` : ''}
-                            </p>
-                            <span className={`px-2.5 py-0.5 text-xs rounded-full font-medium ${
-                              isMatched || isPooled ? 'bg-state-success-dim text-state-success' :
-                              isCompleted ? 'bg-blue-100 text-blue-800' :
-                              'bg-amber-100 text-amber-800'
-                            }`}>
-                              {t(`status.${listing.status}`, isUnsold ? (i18n.language === 'hi' ? 'बिक्री के लिए उपलब्ध' : 'Unsold (In Marketplace)') : listing.status)}
-                            </span>
+                            <span className="text-xl">🌾</span>
+                            <h4 className="font-bold text-copy-primary text-base sm:text-lg">
+                              {plotLabel} • {acresDisplay} {t('listing.acres', 'acres')}
+                              {listing.est_tonnes ? ` (~${listing.est_tonnes.toFixed(1)} ${t('listing.tonnes', 'tonnes')})` : ''}
+                            </h4>
                             {listing.source === 'whatsapp' && (
-                              <span className="px-2 py-0.5 bg-bg-subtle text-copy-secondary text-xs rounded-full flex items-center gap-1 border border-surface-border">
-                                {t('farmer.via_whatsapp')}
-                              </span>
-                            )}
-                            {isUnsold && (
-                              <span className="px-2 py-0.5 bg-state-error-dim text-state-error text-xs rounded-full font-medium">
-                                {t('farmer.burning_risk')}
+                              <span className="px-2.5 py-0.5 bg-bg-subtle text-copy-secondary text-xs rounded-full flex items-center gap-1 border border-surface-border font-medium">
+                                💬 {t('farmer.via_whatsapp')}
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-copy-secondary mt-1">{t('farmer.expected_harvest')} {listing.harvest_date}</p>
+                          <p className="text-xs text-copy-secondary">
+                            🗓️ {t('farmer.harvest_cut_label', 'Harvest Date')}: <strong className="text-copy-primary">{listing.harvest_date}</strong>
+                          </p>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          {isUnsold && (
-                            <button
-                              type="button"
-                              onClick={() => handleQuickCharityList(listing.id)}
-                              className="px-3 py-1.5 bg-state-error text-white rounded-lg text-xs font-semibold hover:opacity-90 shadow-xs"
-                              title="List on Charity Crowdfunding so normal citizens can pay for balers to clear your field"
-                            >
-                              {t('farmer.list_charity')}
-                            </button>
-                          )}
-                          <button
-                            onClick={() => { setActiveListing(listing.id); setView('assistance') }}
-                            className="px-3 py-1.5 bg-surface border border-surface-border text-copy-primary rounded-lg text-xs font-medium hover:bg-bg-subtle"
-                          >
-                            {t('farmer.custom_assistance')}
-                          </button>
+                        {/* Estimated Payout Badge */}
+                        <div className="bg-state-success-dim/80 border border-state-success/30 rounded-2xl px-4 py-2 flex flex-col items-start sm:items-end self-start sm:self-auto">
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-state-success">
+                            💰 {t('farmer.guaranteed_payout', 'Estimated Payout')}
+                          </span>
+                          <div className="text-xl sm:text-2xl font-black text-state-success">
+                            ₹{estPayout.toLocaleString('en-IN')}
+                          </div>
                         </div>
                       </div>
 
-                      {/* Stubble Condition, Form, Quality & Fair Pricing */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-surface-border-subtle text-xs">
-                        <div className="bg-bg-subtle/50 p-2.5 rounded-xl border border-surface-border/40">
+                      {/* 4-Step Timeline Progress Bar */}
+                      <div className="bg-bg-subtle/70 rounded-2xl p-4 border border-surface-border-subtle space-y-2.5">
+                        <div className="flex items-center justify-between text-[11px] sm:text-xs font-bold gap-1">
+                          <div className={`flex items-center gap-1.5 ${currentStep >= 1 ? 'text-brand' : 'text-copy-muted'}`}>
+                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
+                              currentStep > 1 ? 'bg-brand text-on-brand' : 'bg-brand text-on-brand ring-2 ring-brand/30'
+                            }`}>
+                              {currentStep > 1 ? '✓' : '1'}
+                            </span>
+                            <span className="truncate">{t('farmer.step_listed', 'Listed')}</span>
+                          </div>
+
+                          <div className={`flex items-center gap-1.5 ${currentStep >= 2 ? 'text-brand' : 'text-copy-muted'}`}>
+                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
+                              currentStep >= 2 ? 'bg-brand text-on-brand ring-2 ring-brand/30' : 'bg-surface border border-surface-border'
+                            }`}>
+                              {currentStep > 2 ? '✓' : '2'}
+                            </span>
+                            <span className="truncate">{t('farmer.step_matched', 'Buyer Matched')}</span>
+                          </div>
+
+                          <div className={`flex items-center gap-1.5 ${currentStep >= 3 ? 'text-brand' : 'text-copy-muted'}`}>
+                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
+                              currentStep >= 3 ? 'bg-brand text-on-brand ring-2 ring-brand/30' : 'bg-surface border border-surface-border'
+                            }`}>
+                              {currentStep > 3 ? '✓' : '3'}
+                            </span>
+                            <span className="truncate">{t('farmer.step_trolley', 'Trolley Scheduled')}</span>
+                          </div>
+
+                          <div className={`flex items-center gap-1.5 ${currentStep >= 4 ? 'text-state-success' : 'text-copy-muted'}`}>
+                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
+                              currentStep >= 4 ? 'bg-state-success text-white ring-2 ring-state-success/30' : 'bg-surface border border-surface-border'
+                            }`}>
+                              {currentStep >= 4 ? '✓' : '4'}
+                            </span>
+                            <span className="truncate">{t('farmer.step_paid', 'Money Received')}</span>
+                          </div>
+                        </div>
+
+                        {/* Progress track line */}
+                        <div className="w-full bg-surface-border-subtle rounded-full h-2 overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-500 ${currentStep >= 4 ? 'bg-state-success' : 'bg-brand'}`}
+                            style={{ width: currentStep === 1 ? '25%' : currentStep === 2 ? '50%' : currentStep === 3 ? '75%' : '100%' }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Everyday Friendly Details Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div className="bg-bg-subtle/50 p-3 rounded-2xl border border-surface-border/40">
                           <span className="text-[10px] uppercase font-bold tracking-wider text-copy-muted block">
-                            {t('farmer.stubble_form_delivery')}
+                            🚜 {t('farmer.straw_type_label', 'Straw Type')}
                           </span>
-                          <strong className="text-copy-primary text-xs mt-0.5 block truncate">
+                          <strong className="text-copy-primary text-sm mt-1 block truncate">
                             {getStubbleFormDisplay(listing.stubble_form_name, listing.combine_sms_used, i18n.language)}
                           </strong>
-                          <span className="text-[11px] text-brand font-medium">
+                          <span className="text-[11px] text-brand font-medium mt-0.5 block">
                             {getPriceRangeDisplay(listing.market_price_range, listing.combine_sms_used, i18n.language)}
                           </span>
                         </div>
 
-                        <div className="bg-bg-subtle/50 p-2.5 rounded-xl border border-surface-border/40">
+                        <div className="bg-bg-subtle/50 p-3 rounded-2xl border border-surface-border/40">
                           <span className="text-[10px] uppercase font-bold tracking-wider text-copy-muted block">
-                            {t('farmer.quality_moisture')}
+                            ⭐ {t('farmer.quality_moisture', 'Quality & Grade')}
                           </span>
-                          <strong className="text-copy-primary text-xs mt-0.5 block truncate">
+                          <strong className="text-copy-primary text-sm mt-1 block truncate">
                             {getQualityGradeDisplay(listing.quality_grade, listing.combine_sms_used, i18n.language)}
                           </strong>
-                          <span className="text-[11px] text-copy-secondary">
+                          <span className="text-[11px] text-copy-secondary mt-0.5 block">
                             {i18n.language === 'hi' ? 'नमी: ' : i18n.language === 'pa' ? 'ਨਮੀ: ' : 'Moisture: '}{listing.moisture_level || (listing.combine_sms_used ? '12-15%' : '15-20%')}
                           </span>
                         </div>
 
-                        <div className="bg-bg-subtle/50 p-2.5 rounded-xl border border-surface-border/40">
+                        <div className="bg-bg-subtle/50 p-3 rounded-2xl border border-surface-border/40">
                           <span className="text-[10px] uppercase font-bold tracking-wider text-copy-muted block">
-                            {t('farmer.market_benchmark')}
+                            💵 {t('farmer.agreed_rate_label', 'Fair Rate')}
                           </span>
-                          <strong className="text-state-success text-xs mt-0.5 block">
-                            ₹{(listing.price_per_tonne || (listing.combine_sms_used ? 1850 : 600)).toLocaleString()}/{t('listing.tonnes', 'tonnes')}
+                          <strong className="text-state-success text-sm mt-1 block">
+                            ₹{(listing.price_per_tonne || (listing.combine_sms_used ? 1850 : 600)).toLocaleString()}/{t('listing.tonnes', 'tonne')}
                           </strong>
-                          <span className="text-[11px] text-copy-secondary">
-                            {t('farmer.est_payout')} ₹{Math.round(listing.total_price || (listing.est_tonnes || 0) * (listing.price_per_tonne || 600)).toLocaleString()}
+                          <span className="text-[11px] text-copy-secondary mt-0.5 block">
+                            {t('farmer.zero_deductions', '100% Guaranteed')}
                           </span>
                         </div>
                       </div>
 
-                      {/* Suitable Purposes */}
+                      {/* Suitable Industries */}
                       {listing.intended_purposes && listing.intended_purposes.length > 0 && (
                         <div className="flex items-center gap-1.5 flex-wrap text-[11px] pt-1">
                           <span className="text-copy-muted font-medium">{t('farmer.target_industries')}</span>
                           {listing.intended_purposes.map((p) => (
-                            <span key={p} className="px-2 py-0.5 rounded-md bg-brand/10 text-brand font-medium">
+                            <span key={p} className="px-2.5 py-1 rounded-xl bg-brand/10 text-brand font-bold">
                               {getIndustryDisplay(p, i18n.language)}
                             </span>
                           ))}
@@ -695,6 +770,43 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                           <PoolProgress pool={linkedPool || undefined} />
                         </div>
                       )}
+
+                      {/* Bottom Status & Assistance Bar */}
+                      <div className="pt-3 border-t border-surface-border-subtle flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                        <div className="text-xs">
+                          {isUnsold ? (
+                            <span className="text-amber-800 font-semibold flex items-center gap-1.5">
+                              <span>⏳</span> {t('farmer.field_status_searching', 'Searching 10+ nearby factories & balers...')}
+                            </span>
+                          ) : (
+                            <span className="text-state-success font-semibold flex items-center gap-1.5">
+                              <span>🚚</span> {t('farmer.field_status_assigned', 'Buyer matched! Trolley being scheduled.')}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2 self-start sm:self-auto">
+                          {isUnsold && (
+                            <button
+                              type="button"
+                              onClick={() => handleQuickCharityList(listing.id)}
+                              className="px-3.5 py-2 bg-state-error text-white rounded-xl text-xs font-bold hover:opacity-90 shadow-xs cursor-pointer flex items-center gap-1.5"
+                              title="List on Charity Crowdfunding so normal citizens can pay for balers to clear your field"
+                            >
+                              <span>🌾</span>
+                              <span>{t('farmer.free_clearance_btn', 'Need Free Field Clearance?')}</span>
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => { setActiveListing(listing.id); setView('assistance') }}
+                            className="px-3.5 py-2 bg-surface border border-surface-border text-copy-primary rounded-xl text-xs font-semibold hover:bg-bg-subtle cursor-pointer flex items-center gap-1.5"
+                          >
+                            <span>💬</span>
+                            <span>{t('farmer.need_help_btn', 'Need Help?')}</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )
                 })
@@ -704,10 +816,35 @@ export function FarmerDashboard({ userId }: { userId: string }) {
 
           {/* Section 2: Verified Matching Offers */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-copy-primary">{t('farmer.matched_offers_title')}</h3>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-xl font-bold text-copy-primary flex items-center gap-2">
+                  <span>🤝</span> {t('farmer.matched_offers_title', 'Buyer Offers For You')}
+                </h3>
+                <p className="text-xs text-copy-secondary mt-0.5">
+                  {t('farmer.matched_offers_desc', 'Verified factories and balers ready to buy your straw at fixed prices.')}
+                </p>
+              </div>
+              {offers.length > 0 && (
+                <span className="text-xs px-3 py-1 rounded-full font-bold bg-state-success-dim text-state-success border border-state-success/30 self-start sm:self-auto">
+                  {offers.length} {t('matching.verified_offer', 'Offers')}
+                </span>
+              )}
+            </div>
+
             {offers.length === 0 ? (
-              <div className="bg-surface border border-surface-border rounded-2xl p-6 text-center">
-                <p className="text-copy-secondary text-sm">{t('farmer.no_offers')}</p>
+              <div className="bg-surface border-2 border-dashed border-surface-border rounded-3xl p-8 text-center space-y-3">
+                <div className="w-16 h-16 rounded-3xl bg-accent-primary/10 text-accent-primary flex items-center justify-center text-3xl mx-auto">
+                  🤝
+                </div>
+                <div className="max-w-md mx-auto space-y-1">
+                  <h4 className="text-lg font-bold text-copy-primary">
+                    {t('farmer.no_offers_title', 'Looking for the best buyer offers')}
+                  </h4>
+                  <p className="text-xs text-copy-secondary leading-relaxed">
+                    {t('farmer.no_offers_desc', 'As soon as a verified factory or baler matches your location and harvest date, their offer will appear here.')}
+                  </p>
+                </div>
               </div>
             ) : (
               <div className="grid gap-4">
