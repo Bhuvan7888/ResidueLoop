@@ -58,6 +58,17 @@ def text_messages(payload: dict[str, Any]) -> list[IncomingMessage]:
     return found
 
 
+def failed_statuses(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    """Delivery reports Meta marks as failed, with the error it gives (for example 131047 when the 24-hour window is closed)."""
+    failed: list[dict[str, Any]] = []
+    for entry in payload.get("entry") or []:
+        for change in entry.get("changes") or []:
+            for status in (change.get("value") or {}).get("statuses") or []:
+                if status.get("status") == "failed":
+                    failed.append({"id": status.get("id"), "errors": status.get("errors")})
+    return failed
+
+
 async def send_text(to_phone: str, body: str) -> str:
     """Send one WhatsApp text and return its provider message id. Free-form text works inside the 24-hour window."""
     settings = get_settings()

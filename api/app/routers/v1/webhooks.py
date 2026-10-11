@@ -1,4 +1,5 @@
 import json
+import logging
 
 from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Query, Request, Response
 from fastapi.responses import PlainTextResponse
@@ -8,6 +9,7 @@ from app.integrations import whatsapp
 from app.services import conversation_service
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
+logger = logging.getLogger(__name__)
 
 
 @router.get("/whatsapp")
@@ -35,7 +37,11 @@ async def whatsapp_webhook(
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON") from None
 
+    parsed = payload if isinstance(payload, dict) else {}
+    for failure in whatsapp.failed_statuses(parsed):
+        logger.warning("whatsapp delivery failed: %s", failure)
+
     # Answer Meta at once and do the model call and the reply in the background, as Meta retries slow webhooks.
-    for message in whatsapp.text_messages(payload if isinstance(payload, dict) else {}):
+    for message in whatsapp.text_messages(parsed):
         background.add_task(conversation_service.handle_inbound, message.id, message.phone, message.text)
     return Response(status_code=200)

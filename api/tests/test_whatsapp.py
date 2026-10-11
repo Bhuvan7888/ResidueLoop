@@ -90,6 +90,12 @@ def test_only_text_messages_from_indian_numbers_are_extracted() -> None:
     assert whatsapp.text_messages({}) == [] and whatsapp.text_messages({"entry": [{"changes": None}]}) == []
 
 
+def test_failed_delivery_reports_are_extracted_with_their_error() -> None:
+    report = {"entry": [{"changes": [{"value": {"statuses": [{"id": "wamid.9", "status": "failed", "errors": [{"code": 131047, "title": "Re-engagement message"}]},{"id": "wamid.8", "status": "delivered"}]}}]}]}
+    assert whatsapp.failed_statuses(report) == [{"id": "wamid.9", "errors": [{"code": 131047, "title": "Re-engagement message"}]}]
+    assert whatsapp.failed_statuses({}) == []
+
+
 def test_webhook_handshake_returns_the_challenge_only_for_the_right_token() -> None:
     client = TestClient(app)
     ok = client.get(
