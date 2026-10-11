@@ -56,9 +56,9 @@ async def get_crowdfunding_campaigns() -> list[dict[str, Any]]:
         created_at_str = listing.get("created_at")
         try:
             created_dt = datetime.datetime.fromisoformat(created_at_str.replace("Z", "+00:00"))
-            age_days = (now - created_dt).total_seconds() / 86400.0
+            _ = (now - created_dt).total_seconds() / 86400.0
         except Exception:
-            age_days = 2.5
+            pass
 
         # Check if an assistance request already exists for this listing
         existing_req = client.table("assistance_requests").select("id").eq("listing_id", listing["id"]).execute()
@@ -199,7 +199,7 @@ async def create_donation(
                     client.table("listings").update({"status": "completed"}).eq("id", req["listing_id"]).execute()
                     client.table("notifications").insert({
                         "profile_id": farmer_id,
-                        "message": f"🚜 Field Cleared! Your stubble clearance has been 100% crowdfunded by citizens. Balers are dispatched to clear your field cleanly!",
+                        "message": "🚜 Field Cleared! Your stubble clearance has been 100% crowdfunded by citizens. Balers are dispatched to clear your field cleanly!",
                         "read": False
                     }).execute()
         except Exception:

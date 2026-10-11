@@ -21,13 +21,20 @@ export async function createListing(data: ListingPayload) {
 }
 
 export async function getListings(farmerId?: string) {
-  let query = supabase.from('listings').select('*, plots(*)').order('created_at', { ascending: false })
+  try {
+    const url = farmerId ? `/listings?farmer_id=${encodeURIComponent(farmerId)}` : '/listings'
+    const res = await apiRequest<Record<string, unknown>[]>(url)
+    if (res) return res
+  } catch (err) {
+    console.warn('API getListings fallback to Supabase:', err)
+  }
+  let query = supabase.from('listings').select('*, plots(*, villages(*))').order('created_at', { ascending: false })
   if (farmerId) {
     query = query.eq('farmer_id', farmerId)
   }
   const { data, error } = await query
   if (error) throw error
-  return data
+  return data || []
 }
 
 export async function getPlots(farmerId: string) {

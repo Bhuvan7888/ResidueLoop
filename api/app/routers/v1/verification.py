@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 import logging
 from typing import Any
 from fastapi import APIRouter, HTTPException, Query
@@ -38,7 +38,7 @@ async def trigger_plot_verification(
     settings = get_settings()
 
     # 1. Fetch plot details
-    plot_res = client.table("plots").select("id, farmer_id, acres, centre, radius_m").eq("id", plot_id).maybeSingle().execute()
+    plot_res = client.table("plots").select("id, farmer_id, acres, centre, radius_m").eq("id", plot_id).maybe_single().execute()
     if not plot_res.data:
         raise HTTPException(status_code=404, detail="Plot not found")
 

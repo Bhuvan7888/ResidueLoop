@@ -58,3 +58,10 @@ export async function getDemandPosts() {
   if (error) throw error
   return data
 }
+
+export async function procureListing(listingId: string, offerPrice: number = 1500) {
+  return apiRequest(`/buyers/procure/${listingId}`, {
+    body: { offer_price: offerPrice },
+    method: 'POST',
+  })
+}

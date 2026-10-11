@@ -1,10 +1,18 @@
-from typing import Any
+from typing import Any, Optional
 from fastapi import APIRouter, Depends
 from app.core.security import require_role
-from app.services.listing_service import create_listing
+from app.services.listing_service import create_listing, get_all_listings
 from app.schemas.market import ListingCreate
 
 router = APIRouter(prefix="/listings", tags=["listings"])
+
+@router.get("")
+async def list_listings(
+    farmer_id: Optional[str] = None,
+    status: Optional[str] = None,
+) -> dict[str, Any]:
+    items = await get_all_listings(farmer_id=farmer_id, status_filter=status)
+    return {"data": items}
 
 @router.post("")
 async def add_listing(

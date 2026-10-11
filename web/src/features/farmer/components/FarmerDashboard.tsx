@@ -272,6 +272,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
             plots={plots.map((p, idx) => ({ id: p.id, name: `Plot ${idx + 1}`, acres: p.acres }))}
             onSubmit={async (data) => {
               await createListing(data)
+              await queryClient.invalidateQueries({ queryKey: ['heatmap'] })
               reloadData()
               setView('dashboard')
             }} 
@@ -413,52 +414,37 @@ export function FarmerDashboard({ userId }: { userId: string }) {
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
-                {plots.map((plot, idx) => (
-                  <div key={plot.id} className="bg-surface border border-surface-border rounded-2xl p-5 space-y-4 shadow-xs">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-semibold text-copy-primary text-base">Plot #{idx + 1}</h4>
-                        <p className="text-xs text-copy-secondary mt-0.5">{plot.acres} acres registered</p>
-                      </div>
-                      
-                      {/* Interactive Satellite Check Button */}
-                      <div className="flex flex-col items-end gap-1">
-                        <span className="text-[10px] text-copy-muted uppercase font-semibold">Demo / Live Satellite:</span>
-                        <div className="flex flex-wrap gap-1">
-                          <button
-                            type="button"
-                            disabled={verifyingPlotId === plot.id}
-                            onClick={() => handleRunSatelliteCheck(plot.id, 'verified')}
-                            className="px-2 py-1 bg-state-success-dim border border-state-success/30 text-state-success text-[11px] font-semibold rounded-lg hover:bg-state-success hover:text-white transition-all disabled:opacity-50"
-                            title="Simulate clear Sentinel-2 NBR pass with 0 FIRMS fire hits"
-                          >
-                            ✓ Clean Pass
-                          </button>
-                          <button
-                            type="button"
-                            disabled={verifyingPlotId === plot.id}
-                            onClick={() => handleRunSatelliteCheck(plot.id, 'fire_detected')}
-                            className="px-2 py-1 bg-state-error-dim border border-state-error/30 text-state-error text-[11px] font-semibold rounded-lg hover:bg-state-error hover:text-white transition-all disabled:opacity-50"
-                            title="Simulate FIRMS thermal fire alert"
-                          >
-                            🔥 Fire Alert
-                          </button>
-                          <button
-                            type="button"
-                            disabled={verifyingPlotId === plot.id}
-                            onClick={() => handleRunSatelliteCheck(plot.id, 'inconclusive')}
-                            className="px-2 py-1 bg-bg-subtle border border-surface-border text-copy-secondary text-[11px] font-semibold rounded-lg hover:bg-surface transition-all disabled:opacity-50"
-                            title="Simulate optical cloud cover"
-                          >
-                            ☁️ Cloudy
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                {plots.map((plot, idx) => {
+                  const sortedVerifs = plot.verifications && plot.verifications.length > 0
+                    ? [...plot.verifications].sort(
+                        (a, b) =>
+                          new Date(b.checked_at || b.created_at || 0).getTime() -
+                          new Date(a.checked_at || a.created_at || 0).getTime()
+                      )
+                    : []
+                  const latestVerif = sortedVerifs[0]
 
-                    <VerificationCard verification={plot.verifications?.[plot.verifications.length - 1]} />
-                  </div>
-                ))}
+                  return (
+                    <div key={plot.id} className="bg-surface border border-surface-border rounded-2xl p-5 space-y-4 shadow-xs">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="font-semibold text-copy-primary text-base">Plot #{idx + 1}</h4>
+                          <p className="text-xs text-copy-secondary mt-0.5">{plot.acres} acres registered</p>
+                        </div>
+                        <span className="text-[11px] font-mono text-copy-muted bg-bg-subtle px-2 py-0.5 rounded border border-surface-border-subtle">
+                          GPS: {plot.centre?.coordinates ? `${plot.centre.coordinates[1]?.toFixed(3)}°N, ${plot.centre.coordinates[0]?.toFixed(3)}°E` : 'Auto-detected'}
+                        </span>
+                      </div>
+
+                      <VerificationCard
+                        verification={latestVerif}
+                        plot={plot}
+                        onTriggerCheck={(scenario) => handleRunSatelliteCheck(plot.id, scenario)}
+                        isTriggering={verifyingPlotId === plot.id}
+                      />
+                    </div>
+                  )
+                })}
               </div>
             )}
           </div>

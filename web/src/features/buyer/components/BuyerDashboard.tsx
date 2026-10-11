@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { BuyerProfileForm } from './BuyerProfileForm'
 import { DemandPostForm } from './DemandPostForm'
 import { createBuyerProfile, createDemandPost, getDemandPosts, updateDemandPost } from '../api'
@@ -9,6 +10,8 @@ import { getPools } from '@/features/matching/api'
 import { getNotifications } from '@/features/charity/api'
 import { PoolProgress } from '@/features/matching/components/PoolProgress'
 import { DemandHeatmap } from '@/features/heatmap/components/DemandHeatmap'
+import { BuyerProcurementAdvisor, type ListingWithAdvice } from './BuyerProcurementAdvisor'
+import { SatelliteAuditModal } from '@/features/verification/components/SatelliteAuditModal'
 
 interface Pool {
   id: string
@@ -37,7 +40,14 @@ interface DemandPostItem {
 }
 
 export function BuyerDashboard({ userId }: { userId?: string }) {
+  const queryClient = useQueryClient()
   const [view, setView] = useState<'profile' | 'demand' | 'dashboard'>('dashboard')
+  const [selectedVillageFilter, setSelectedVillageFilter] = useState<string | null>(null)
+  const [auditModal, setAuditModal] = useState<{
+    isOpen: boolean
+    villageName?: string
+    district?: string
+  } | null>(null)
   const [pickups, setPickups] = useState<
     {
       id: string
@@ -48,22 +58,23 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
       pools: { pickup_date: string | null }
     }[]
   >([])
-  const [listings, setListings] = useState<
-    { id: string; acres?: number; status: string; harvest_date: string; source: string; est_tonnes?: number; plots?: { acres: number } }[]
-  >([])
+  const [listings, setListings] = useState<ListingWithAdvice[]>([])
   const [pools, setPools] = useState<Pool[]>([])
   const [demandPosts, setDemandPosts] = useState<DemandPostItem[]>([])
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
 
   const loadData = useCallback(() => {
     getPickups().then(setPickups).catch(console.error)
-    getListings().then(setListings).catch(console.error)
+    getListings()
+      .then((data) => setListings((data as unknown as ListingWithAdvice[]) || []))
+      .catch(console.error)
     getPools().then((data) => setPools((data as unknown as Pool[]) || [])).catch(console.error)
     getDemandPosts().then((data) => setDemandPosts((data as unknown as DemandPostItem[]) || [])).catch(console.error)
+    queryClient.invalidateQueries({ queryKey: ['heatmap'] })
     if (userId) {
       getNotifications(userId).then(setNotifications).catch(console.error)
     }
-  }, [userId])
+  }, [userId, queryClient])
 
   useEffect(() => {
     loadData()
@@ -158,19 +169,35 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
 
           {/* Section 2: Regional Biomass Heatmap */}
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-copy-primary">Regional Demand & Supply Heatmap</h3>
-            <DemandHeatmap />
+            <DemandHeatmap
+              onSelectVillageForFilter={(vName) => setSelectedVillageFilter(vName)}
+              selectedVillageName={selectedVillageFilter}
+            />
           </div>
 
           {/* Section 3: Active Multi-Farmer Straw Pools */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <h3 className="text-lg font-semibold text-copy-primary">Multi-Farmer Straw Pools</h3>
                 <p className="text-xs text-copy-secondary mt-0.5">
                   Pooling stubble from 2–3 nearby farmers cumulatively to fulfill your bulk demand requirements.
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setAuditModal({
+                    isOpen: true,
+                    villageName: 'All Regional Pools (Punjab)',
+                    district: 'Punjab',
+                  })
+                }
+                className="text-xs px-3 py-1.5 bg-state-success-dim border border-state-success/30 text-state-success hover:bg-state-success hover:text-white rounded-xl flex items-center gap-1.5 font-semibold transition-all cursor-pointer shadow-xs"
+              >
+                <span>🛰️</span>
+                <span>Open Satellite Telemetry Hub</span>
+              </button>
             </div>
 
             {pools.length === 0 ? (
@@ -182,17 +209,31 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
                 {pools.map((pool) => (
-                  <div key={pool.id} className="space-y-2">
+                  <div key={pool.id} className="space-y-2 bg-surface p-4 rounded-2xl border border-surface-border shadow-xs">
                     <PoolProgress pool={pool} />
                     {pool.villages && (
-                      <p className="text-xs text-copy-secondary px-1">
+                      <p className="text-xs text-copy-secondary">
                         📍 Sourced from farmers in: <strong className="text-copy-primary">{pool.villages.name}, {pool.villages.district}</strong>
                       </p>
                     )}
-                    <div className="flex items-center gap-1.5 px-1 text-[11px] text-state-success font-medium">
-                      <span>🛰️</span>
-                      <span>Satellite Audit: 0 Fires Detected • Sentinel-2 Clean Clearance Verified</span>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setAuditModal({
+                          isOpen: true,
+                          villageName: pool.villages?.name || 'Regional Pool',
+                          district: pool.villages?.district || 'Punjab',
+                        })
+                      }
+                      className="flex items-center justify-between w-full px-2.5 py-1.5 rounded-xl bg-state-success-dim border border-state-success/30 text-state-success text-xs font-semibold hover:bg-state-success hover:text-white transition-all cursor-pointer text-left"
+                      title="Inspect Sentinel-2 NBR and NASA FIRMS radar scan"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <span>🛰️</span>
+                        <span>Zero-Burn Satellite Audit: 0 Fires Detected</span>
+                      </span>
+                      <span className="text-[10px] underline">Inspect Telemetry →</span>
+                    </button>
                   </div>
                 ))}
               </div>
@@ -261,50 +302,30 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
             )}
           </div>
 
-          {/* Section 4: Available Supply (Listings) */}
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-copy-primary">Available Farmer Supply (Listings)</h3>
-            {listings.length === 0 ? (
-              <div className="bg-surface border border-surface-border rounded-2xl p-6 text-center">
-                <p className="text-copy-secondary text-sm">No listings available right now.</p>
-              </div>
-            ) : (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {listings.map((listing) => {
-                  const acres = listing.acres ?? listing.plots?.acres ?? (listing.est_tonnes ? (listing.est_tonnes / 2.5).toFixed(1) : '?')
-                  return (
-                    <div
-                      key={listing.id}
-                      className="bg-surface border border-surface-border rounded-2xl p-4 flex justify-between items-center shadow-xs"
-                    >
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <p className="font-semibold text-copy-primary">
-                            {acres} acres • {listing.est_tonnes ? `${listing.est_tonnes.toFixed(1)}t` : ''}
-                          </p>
-                          <span
-                            className={`px-2 py-0.5 text-xs rounded-full font-medium ${
-                              listing.status === 'matched' || listing.status === 'pooled'
-                                ? 'bg-state-success-dim text-state-success'
-                                : 'bg-bg-subtle text-copy-secondary'
-                            }`}
-                          >
-                            {listing.status}
-                          </span>
-                          {listing.source === 'whatsapp' && (
-                            <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
-                              WhatsApp
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-copy-secondary mt-1">Expected Harvest: {listing.harvest_date}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
+          {/* Section 4: Smart Procurement Advisor - What to Buy vs What Not to Buy */}
+          <BuyerProcurementAdvisor
+            listings={listings}
+            onReload={loadData}
+            onFocusVillageOnMap={(vName) => {
+              setSelectedVillageFilter(vName)
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
+            selectedVillageFilter={selectedVillageFilter}
+            onClearVillageFilter={() => setSelectedVillageFilter(null)}
+            onOpenSatelliteAudit={(listing) => {
+              setAuditModal({
+                isOpen: true,
+                villageName:
+                  listing.village_name ||
+                  listing.plots?.villages?.name ||
+                  'Regional Village Pool',
+                district:
+                  listing.district ||
+                  listing.plots?.villages?.district ||
+                  'Punjab',
+              })
+            }}
+          />
 
           {/* Section 5: Pickups & Instant Payments */}
           <div className="space-y-3">
@@ -333,6 +354,14 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
           </div>
         </div>
       )}
+
+      {/* Satellite Earth Observation Audit Modal */}
+      <SatelliteAuditModal
+        isOpen={!!auditModal?.isOpen}
+        onClose={() => setAuditModal(null)}
+        villageName={auditModal?.villageName}
+        district={auditModal?.district}
+      />
     </div>
   )
 }

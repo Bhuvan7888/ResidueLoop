@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from pydantic import BaseModel
 
-from app.core.security import require_role
 from app.services import heatmap_service
 
 router = APIRouter(prefix="/heatmap", tags=["heatmap"])
@@ -16,8 +15,15 @@ class VillageHeat(BaseModel):
     supply_tonnes: float
     unfilled_tonnes: float
     is_unfilled_zone: bool
+    district: str = "Punjab"
+    surplus_tonnes: float = 0.0
+    is_surplus_zone: bool = False
+    listings_count: int = 0
+    avg_price: float = 1500.0
+    status: str = "balanced"
 
 
 @router.get("/villages")
 def village_heatmap() -> dict[str, list[VillageHeat]]:
     return {"data": [VillageHeat(**zone) for zone in heatmap_service.get_village_heatmap()]}
+
