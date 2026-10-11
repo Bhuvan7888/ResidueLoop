@@ -102,20 +102,60 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
         </button>
 
         {import.meta.env.DEV && (
-          <button
-            type="button"
-            onClick={async () => {
-              try {
-                await signInDevUser();
-                onSuccess();
-              } catch (err: unknown) {
-                setError(err instanceof Error ? err.message : 'Dev login failed');
-              }
-            }}
-            className="w-full mt-2 bg-slate-200 text-slate-800 rounded-xl py-2 font-medium"
-          >
-            [DEV] Bypass OTP
-          </button>
+          <div className="pt-3 border-t border-surface-border space-y-2">
+            <p className="text-[11px] font-semibold text-copy-secondary uppercase tracking-wider text-center">
+              ⚡ 1-Click Demo Login (Instant Access)
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await signInDevUser('farmer')
+                    onSuccess()
+                  } catch (err: unknown) {
+                    setError(err instanceof Error ? err.message : 'Farmer login failed')
+                  }
+                }}
+                className="p-2.5 rounded-xl border border-surface-border bg-surface hover:border-brand/50 hover:bg-bg-subtle text-xs font-semibold text-copy-primary flex flex-col items-center gap-1 shadow-xs transition-all active:scale-95"
+              >
+                <span className="text-lg">🌾</span>
+                <span>Farmer</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await signInDevUser('buyer')
+                    onSuccess()
+                  } catch (err: unknown) {
+                    setError(err instanceof Error ? err.message : 'Buyer login failed')
+                  }
+                }}
+                className="p-2.5 rounded-xl border border-brand/40 bg-brand/5 hover:border-brand hover:bg-brand/10 text-xs font-semibold text-brand flex flex-col items-center gap-1 shadow-xs transition-all active:scale-95"
+              >
+                <span className="text-lg">🏭</span>
+                <span>Buyer</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await signInDevUser('donor')
+                    onSuccess()
+                  } catch (err: unknown) {
+                    setError(err instanceof Error ? err.message : 'Donor login failed')
+                  }
+                }}
+                className="p-2.5 rounded-xl border border-surface-border bg-surface hover:border-brand/50 hover:bg-bg-subtle text-xs font-semibold text-copy-primary flex flex-col items-center gap-1 shadow-xs transition-all active:scale-95"
+              >
+                <span className="text-lg">🌱</span>
+                <span>Donor</span>
+              </button>
+            </div>
+          </div>
         )}
       </form>
     )

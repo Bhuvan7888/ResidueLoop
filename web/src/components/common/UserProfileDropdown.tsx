@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { signInDevUser } from '@/features/auth/api'
 
 interface ProfileDetails {
   name?: string
@@ -286,8 +287,62 @@ export function UserProfileDropdown({ onSignOut }: UserProfileDropdownProps) {
           </div>
         </div>
 
+        {/* Switch Portal Role View */}
+        <div className="pt-2.5 pb-1 border-t border-surface-border space-y-1.5">
+          <p className="text-[10px] font-semibold text-copy-secondary uppercase tracking-wider">
+            Switch Portal Role View
+          </p>
+          <div className="grid grid-cols-3 gap-1.5">
+            <button
+              type="button"
+              disabled={role === 'farmer'}
+              onClick={async () => {
+                await signInDevUser('farmer')
+                window.location.reload()
+              }}
+              className={`py-1.5 px-2 rounded-xl text-xs font-semibold text-center transition-all ${
+                role === 'farmer'
+                  ? 'bg-brand text-on-brand font-bold shadow-xs cursor-default'
+                  : 'bg-bg-subtle hover:bg-surface border border-surface-border text-copy-primary hover:border-brand/40'
+              }`}
+            >
+              🌾 Farmer
+            </button>
+            <button
+              type="button"
+              disabled={role === 'buyer'}
+              onClick={async () => {
+                await signInDevUser('buyer')
+                window.location.reload()
+              }}
+              className={`py-1.5 px-2 rounded-xl text-xs font-semibold text-center transition-all ${
+                role === 'buyer'
+                  ? 'bg-brand text-on-brand font-bold shadow-xs cursor-default'
+                  : 'bg-bg-subtle hover:bg-surface border border-surface-border text-copy-primary hover:border-brand/40'
+              }`}
+            >
+              🏭 Buyer
+            </button>
+            <button
+              type="button"
+              disabled={role === 'donor'}
+              onClick={async () => {
+                await signInDevUser('donor')
+                window.location.reload()
+              }}
+              className={`py-1.5 px-2 rounded-xl text-xs font-semibold text-center transition-all ${
+                role === 'donor'
+                  ? 'bg-brand text-on-brand font-bold shadow-xs cursor-default'
+                  : 'bg-bg-subtle hover:bg-surface border border-surface-border text-copy-primary hover:border-brand/40'
+              }`}
+            >
+              🌱 Donor
+            </button>
+          </div>
+        </div>
+
         {/* Footer Actions */}
-        <div className="pt-2.5 border-t border-surface-border flex items-center justify-between gap-2">
+        <div className="pt-2 border-t border-surface-border flex items-center justify-between gap-2">
           <span className="text-[11px] text-copy-secondary font-mono">
             ID: {userId?.slice(0, 8)}...
           </span>
