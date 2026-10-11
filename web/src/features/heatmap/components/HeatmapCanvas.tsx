@@ -24,24 +24,90 @@ function token(name: string, fallback: string): string {
 }
 
 function baseStyle(): StyleSpecification {
+  const maptilerKey = (import.meta.env.VITE_MAPTILER_KEY || '').trim()
+  const cartoKey = (import.meta.env.VITE_CARTO_API_KEY || '').trim()
+
+  // 1. If valid MapTiler key provided (excluding outdated placeholder)
+  if (maptilerKey && maptilerKey !== 'BbyEHHphf6oc8KDJIE0Y') {
+    return {
+      version: 8,
+      sources: {
+        'basemap': {
+          type: 'raster',
+          tiles: [`https://api.maptiler.com/maps/dataviz-light/256/{z}/{x}/{y}.png?key=${maptilerKey}`],
+          tileSize: 256,
+          attribution: '&copy; MapTiler &copy; OpenStreetMap contributors',
+        },
+      },
+      layers: [
+        {
+          id: 'basemap-layer',
+          type: 'raster',
+          source: 'basemap',
+          minzoom: 0,
+          maxzoom: 18,
+        },
+      ],
+    }
+  }
+
+  // 2. If CARTO API key is provided
+  if (cartoKey) {
+    return {
+      version: 8,
+      sources: {
+        'basemap': {
+          type: 'raster',
+          tiles: [`https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png?api_key=${cartoKey}`],
+          tileSize: 256,
+          attribution: '&copy; CartoDB, OpenStreetMap contributors',
+        },
+      },
+      layers: [
+        {
+          id: 'basemap-layer',
+          type: 'raster',
+          source: 'basemap',
+          minzoom: 0,
+          maxzoom: 18,
+        },
+      ],
+    }
+  }
+
+  // 3. Default: High-performance, unwatermarked clean canvas with crisp geographic labels (Zero API key required)
   return {
     version: 8,
     sources: {
-      'carto-positron': {
+      'esri-base': {
         type: 'raster',
         tiles: [
-          'https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png',
           'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
         ],
         tileSize: 256,
-        attribution: '&copy; CartoDB, OpenStreetMap contributors',
+        attribution: '&copy; Esri, OpenStreetMap contributors',
+      },
+      'esri-labels': {
+        type: 'raster',
+        tiles: [
+          'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+        ],
+        tileSize: 256,
+        attribution: '',
       },
     },
     layers: [
       {
-        id: 'carto-positron-layer',
+        id: 'esri-base-layer',
         type: 'raster',
-        source: 'carto-positron',
+        source: 'esri-base',
+        minzoom: 0,
+        maxzoom: 18,
+      },
+      {
+        id: 'esri-labels-layer',
+        type: 'raster',
+        source: 'esri-labels',
         minzoom: 0,
         maxzoom: 18,
       },
