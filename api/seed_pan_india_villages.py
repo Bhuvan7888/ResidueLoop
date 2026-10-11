@@ -1,97 +1,881 @@
 import uuid
 from app.core.security import get_supabase_client
 
-# Comprehensive list of agricultural hubs, villages, and tehsils across Indian States
+# Comprehensive dataset of agricultural hubs, tehsils, and villages across North Indian States & UTs
 VILLAGES_DATA = [
-    # --- PUNJAB ---
-    # Moga
-    {"name": "Badhni Kalan", "district": "Moga", "lat": 30.8200, "lng": 75.1710, "area": 1200},
-    {"name": "Ajitwal", "district": "Moga", "lat": 30.8110, "lng": 75.2100, "area": 950},
-    {"name": "Dharamkot", "district": "Moga", "lat": 30.9440, "lng": 75.2360, "area": 1100},
-    {"name": "Nihal Singh Wala", "district": "Moga", "lat": 30.5900, "lng": 75.2800, "area": 1050},
-    {"name": "Bagha Purana", "district": "Moga", "lat": 30.6860, "lng": 75.0920, "area": 1300},
+    # =========================================================================
+    # PUNJAB (All 23 Districts)
+    # =========================================================================
+    # Amritsar
+    {"name": "Ajnala", "district": "Amritsar", "lat": 31.8400, "lng": 74.7600, "area": 1250},
+    {"name": "Majitha", "district": "Amritsar", "lat": 31.7600, "lng": 74.9500, "area": 1150},
+    {"name": "Jandiala Guru", "district": "Amritsar", "lat": 31.5600, "lng": 75.0300, "area": 1050},
+    {"name": "Attari", "district": "Amritsar", "lat": 31.6000, "lng": 74.6000, "area": 980},
+    {"name": "Rayya", "district": "Amritsar", "lat": 31.5300, "lng": 75.2200, "area": 1100},
+    {"name": "Chogawan", "district": "Amritsar", "lat": 31.7200, "lng": 74.6700, "area": 920},
+    # Barnala
+    {"name": "Barnala Rural", "district": "Barnala", "lat": 30.3800, "lng": 75.5400, "area": 1400},
+    {"name": "Tapa", "district": "Barnala", "lat": 30.3400, "lng": 75.3800, "area": 1250},
+    {"name": "Mehal Kalan", "district": "Barnala", "lat": 30.5400, "lng": 75.6800, "area": 1350},
+    {"name": "Bhadaur", "district": "Barnala", "lat": 30.4800, "lng": 75.3200, "area": 1100},
+    {"name": "Sehna", "district": "Barnala", "lat": 30.4400, "lng": 75.4000, "area": 1180},
+    # Bathinda
+    {"name": "Talwandi Sabo", "district": "Bathinda", "lat": 29.9800, "lng": 75.0900, "area": 1600},
+    {"name": "Rampura Phul", "district": "Bathinda", "lat": 30.2700, "lng": 75.2400, "area": 1450},
+    {"name": "Maur", "district": "Bathinda", "lat": 30.0800, "lng": 75.2500, "area": 1250},
+    {"name": "Goniana", "district": "Bathinda", "lat": 30.3100, "lng": 74.9000, "area": 1080},
+    {"name": "Sangat", "district": "Bathinda", "lat": 29.9900, "lng": 74.8400, "area": 1120},
+    {"name": "Bhagta Bhai Ka", "district": "Bathinda", "lat": 30.4700, "lng": 75.1200, "area": 1300},
+    # Faridkot
+    {"name": "Kotkapura", "district": "Faridkot", "lat": 30.5800, "lng": 74.8200, "area": 1500},
+    {"name": "Jaitu", "district": "Faridkot", "lat": 30.4300, "lng": 74.8800, "area": 1350},
+    {"name": "Sadiq", "district": "Faridkot", "lat": 30.6400, "lng": 74.6100, "area": 1100},
+    {"name": "Bajakhana", "district": "Faridkot", "lat": 30.4200, "lng": 75.0200, "area": 1050},
+    # Fatehgarh Sahib
+    {"name": "Sirhind", "district": "Fatehgarh Sahib", "lat": 30.6400, "lng": 76.3800, "area": 1400},
+    {"name": "Mandi Gobindgarh", "district": "Fatehgarh Sahib", "lat": 30.6600, "lng": 76.3000, "area": 1200},
+    {"name": "Amloh", "district": "Fatehgarh Sahib", "lat": 30.6100, "lng": 76.2300, "area": 1300},
+    {"name": "Bassi Pathana", "district": "Fatehgarh Sahib", "lat": 30.7100, "lng": 76.4100, "area": 1150},
+    {"name": "Khamanon", "district": "Fatehgarh Sahib", "lat": 30.8200, "lng": 76.3500, "area": 1250},
+    # Fazilka
+    {"name": "Abohar", "district": "Fazilka", "lat": 30.1400, "lng": 74.1900, "area": 1700},
+    {"name": "Jalalabad", "district": "Fazilka", "lat": 30.6100, "lng": 74.2500, "area": 1550},
+    {"name": "Khuian Sarwar", "district": "Fazilka", "lat": 30.0500, "lng": 74.0800, "area": 1200},
+    {"name": "Arniwala", "district": "Fazilka", "lat": 30.4300, "lng": 74.2700, "area": 1100},
+    # Firozpur
+    {"name": "Zira", "district": "Firozpur", "lat": 30.9700, "lng": 74.9800, "area": 1300},
+    {"name": "Guruharsahai", "district": "Firozpur", "lat": 30.7200, "lng": 74.4000, "area": 1100},
+    {"name": "Makhu", "district": "Firozpur", "lat": 31.1000, "lng": 75.0200, "area": 1250},
+    {"name": "Mamdot", "district": "Firozpur", "lat": 30.9800, "lng": 74.4500, "area": 1150},
+    # Gurdaspur
+    {"name": "Batala Rural", "district": "Gurdaspur", "lat": 31.8100, "lng": 75.2000, "area": 1400},
+    {"name": "Dera Baba Nanak", "district": "Gurdaspur", "lat": 32.0300, "lng": 75.0300, "area": 1200},
+    {"name": "Fatehgarh Churian", "district": "Gurdaspur", "lat": 31.8600, "lng": 74.9600, "area": 1150},
+    {"name": "Dinanagar", "district": "Gurdaspur", "lat": 32.1400, "lng": 75.4700, "area": 1300},
+    {"name": "Kalanaur", "district": "Gurdaspur", "lat": 31.9900, "lng": 75.1700, "area": 1100},
+    {"name": "Qadian", "district": "Gurdaspur", "lat": 31.8200, "lng": 75.3900, "area": 1250},
+    # Hoshiarpur
+    {"name": "Dasuya", "district": "Hoshiarpur", "lat": 31.8100, "lng": 75.6500, "area": 1350},
+    {"name": "Mukerian", "district": "Hoshiarpur", "lat": 31.9500, "lng": 75.6200, "area": 1400},
+    {"name": "Garhshankar", "district": "Hoshiarpur", "lat": 31.2100, "lng": 76.1400, "area": 1200},
+    {"name": "Mahilpur", "district": "Hoshiarpur", "lat": 31.3300, "lng": 76.0400, "area": 1100},
+    {"name": "Tanda Urmar", "district": "Hoshiarpur", "lat": 31.6700, "lng": 75.6400, "area": 1300},
+    # Jalandhar
+    {"name": "Nakodar", "district": "Jalandhar", "lat": 31.1200, "lng": 75.4700, "area": 1450},
+    {"name": "Phillaur", "district": "Jalandhar", "lat": 31.0200, "lng": 75.7800, "area": 1300},
+    {"name": "Shahkot", "district": "Jalandhar", "lat": 31.0800, "lng": 75.3300, "area": 1350},
+    {"name": "Kartarpur", "district": "Jalandhar", "lat": 31.4400, "lng": 75.5000, "area": 1200},
+    {"name": "Adampur", "district": "Jalandhar", "lat": 31.4300, "lng": 75.7200, "area": 1150},
+    {"name": "Goraya", "district": "Jalandhar", "lat": 31.1200, "lng": 75.7700, "area": 1100},
+    {"name": "Bhogpur", "district": "Jalandhar", "lat": 31.5500, "lng": 75.6300, "area": 1250},
+    # Kapurthala
+    {"name": "Phagwara Rural", "district": "Kapurthala", "lat": 31.2200, "lng": 75.7700, "area": 1350},
+    {"name": "Sultanpur Lodhi", "district": "Kapurthala", "lat": 31.2100, "lng": 75.1900, "area": 1500},
+    {"name": "Bholath", "district": "Kapurthala", "lat": 31.5300, "lng": 75.5100, "area": 1200},
+    {"name": "Nadala", "district": "Kapurthala", "lat": 31.5400, "lng": 75.6200, "area": 1100},
+    {"name": "Dhilwan", "district": "Kapurthala", "lat": 31.5200, "lng": 75.3500, "area": 1150},
     # Ludhiana
     {"name": "Khanna", "district": "Ludhiana", "lat": 30.7072, "lng": 76.2167, "area": 1800},
     {"name": "Samrala", "district": "Ludhiana", "lat": 30.8350, "lng": 76.1920, "area": 1400},
     {"name": "Jagraon", "district": "Ludhiana", "lat": 30.7850, "lng": 75.4780, "area": 1600},
     {"name": "Raikot", "district": "Ludhiana", "lat": 30.6500, "lng": 75.6000, "area": 1200},
     {"name": "Sahnewal", "district": "Ludhiana", "lat": 30.8400, "lng": 75.9800, "area": 900},
-    # Sangrur
-    {"name": "Sunam", "district": "Sangrur", "lat": 30.1300, "lng": 75.8000, "area": 1500},
-    {"name": "Dhuri", "district": "Sangrur", "lat": 30.3700, "lng": 75.8700, "area": 1400},
-    {"name": "Moonak", "district": "Sangrur", "lat": 29.8200, "lng": 75.8900, "area": 1100},
-    {"name": "Malerkotla", "district": "Sangrur", "lat": 30.5200, "lng": 75.8800, "area": 1300},
-    # Bathinda
-    {"name": "Rampura Phul", "district": "Bathinda", "lat": 30.2700, "lng": 75.2400, "area": 1450},
-    {"name": "Talwandi Sabo", "district": "Bathinda", "lat": 29.9800, "lng": 75.0900, "area": 1600},
-    {"name": "Maur", "district": "Bathinda", "lat": 30.0800, "lng": 75.2500, "area": 1250},
+    {"name": "Payal", "district": "Ludhiana", "lat": 30.7200, "lng": 76.0500, "area": 1300},
+    {"name": "Doraha", "district": "Ludhiana", "lat": 30.8100, "lng": 76.0300, "area": 1150},
+    {"name": "Machhiwara", "district": "Ludhiana", "lat": 30.9100, "lng": 76.2000, "area": 1350},
+    {"name": "Mullanpur Dakha", "district": "Ludhiana", "lat": 30.8500, "lng": 75.7500, "area": 1250},
+    # Malerkotla
+    {"name": "Malerkotla", "district": "Malerkotla", "lat": 30.5200, "lng": 75.8800, "area": 1300},
+    {"name": "Amargarh", "district": "Malerkotla", "lat": 30.5800, "lng": 75.9800, "area": 1200},
+    {"name": "Ahmedgarh", "district": "Malerkotla", "lat": 30.6800, "lng": 75.8300, "area": 1250},
+    # Mansa
+    {"name": "Budhlada", "district": "Mansa", "lat": 29.9200, "lng": 75.5600, "area": 1500},
+    {"name": "Sardulgarh", "district": "Mansa", "lat": 29.7000, "lng": 75.2400, "area": 1400},
+    {"name": "Bhikhi", "district": "Mansa", "lat": 30.0600, "lng": 75.5300, "area": 1250},
+    {"name": "Jhunir", "district": "Mansa", "lat": 29.8100, "lng": 75.3100, "area": 1150},
+    # Moga
+    {"name": "Badhni Kalan", "district": "Moga", "lat": 30.8200, "lng": 75.1710, "area": 1200},
+    {"name": "Ajitwal", "district": "Moga", "lat": 30.8110, "lng": 75.2100, "area": 950},
+    {"name": "Dharamkot", "district": "Moga", "lat": 30.9440, "lng": 75.2360, "area": 1100},
+    {"name": "Nihal Singh Wala", "district": "Moga", "lat": 30.5900, "lng": 75.2800, "area": 1050},
+    {"name": "Bagha Purana", "district": "Moga", "lat": 30.6860, "lng": 75.0920, "area": 1300},
+    {"name": "Kot Ise Khan", "district": "Moga", "lat": 30.9000, "lng": 75.1800, "area": 1150},
+    # Sri Muktsar Sahib
+    {"name": "Malout", "district": "Sri Muktsar Sahib", "lat": 30.1900, "lng": 74.4900, "area": 1600},
+    {"name": "Gidderbaha", "district": "Sri Muktsar Sahib", "lat": 30.2000, "lng": 74.6600, "area": 1450},
+    {"name": "Lambi", "district": "Sri Muktsar Sahib", "lat": 29.9800, "lng": 74.5100, "area": 1350},
+    {"name": "Bariwala", "district": "Sri Muktsar Sahib", "lat": 30.5900, "lng": 74.6500, "area": 1100},
+    # Pathankot
+    {"name": "Sujanpur", "district": "Pathankot", "lat": 32.3200, "lng": 75.6100, "area": 1100},
+    {"name": "Narot Jaimal Singh", "district": "Pathankot", "lat": 32.2200, "lng": 75.5000, "area": 1050},
+    {"name": "Dhar Kalan", "district": "Pathankot", "lat": 32.4100, "lng": 75.8800, "area": 950},
     # Patiala
     {"name": "Nabha", "district": "Patiala", "lat": 30.3700, "lng": 76.1500, "area": 1700},
     {"name": "Samana", "district": "Patiala", "lat": 30.1500, "lng": 76.1900, "area": 1500},
     {"name": "Rajpura", "district": "Patiala", "lat": 30.4800, "lng": 76.5900, "area": 1350},
-    # Amritsar
-    {"name": "Ajnala", "district": "Amritsar", "lat": 31.8400, "lng": 74.7600, "area": 1250},
-    {"name": "Majitha", "district": "Amritsar", "lat": 31.7600, "lng": 74.9500, "area": 1150},
-    {"name": "Jandiala Guru", "district": "Amritsar", "lat": 31.5600, "lng": 75.0300, "area": 1050},
-    # Firozpur
-    {"name": "Zira", "district": "Firozpur", "lat": 30.9700, "lng": 74.9800, "area": 1300},
-    {"name": "Guruharsahai", "district": "Firozpur", "lat": 30.7200, "lng": 74.4000, "area": 1100},
+    {"name": "Patran", "district": "Patiala", "lat": 29.9400, "lng": 76.0600, "area": 1400},
+    {"name": "Ghanaur", "district": "Patiala", "lat": 30.3300, "lng": 76.6100, "area": 1250},
+    {"name": "Shutrana", "district": "Patiala", "lat": 29.9000, "lng": 76.0400, "area": 1200},
+    # Rupnagar
+    {"name": "Anandpur Sahib", "district": "Rupnagar", "lat": 31.2300, "lng": 76.5000, "area": 1150},
+    {"name": "Chamkaur Sahib", "district": "Rupnagar", "lat": 30.8900, "lng": 76.4200, "area": 1250},
+    {"name": "Morinda", "district": "Rupnagar", "lat": 30.7900, "lng": 76.4900, "area": 1200},
+    {"name": "Nurpur Bedi", "district": "Rupnagar", "lat": 31.1400, "lng": 76.5500, "area": 1050},
+    # SAS Nagar
+    {"name": "Kharar Rural", "district": "SAS Nagar", "lat": 30.7400, "lng": 76.6400, "area": 1100},
+    {"name": "Dera Bassi", "district": "SAS Nagar", "lat": 30.5800, "lng": 76.8400, "area": 1200},
+    {"name": "Kurali", "district": "SAS Nagar", "lat": 30.8200, "lng": 76.5700, "area": 1150},
+    {"name": "Banur", "district": "SAS Nagar", "lat": 30.5300, "lng": 76.7200, "area": 1050},
+    # Shahid Bhagat Singh Nagar
+    {"name": "Banga", "district": "Shahid Bhagat Singh Nagar", "lat": 31.1800, "lng": 75.9900, "area": 1250},
+    {"name": "Balachaur", "district": "Shahid Bhagat Singh Nagar", "lat": 31.0600, "lng": 76.3300, "area": 1200},
+    {"name": "Rahon", "district": "Shahid Bhagat Singh Nagar", "lat": 31.0500, "lng": 76.1200, "area": 1100},
+    {"name": "Aur", "district": "Shahid Bhagat Singh Nagar", "lat": 31.0900, "lng": 76.0500, "area": 1050},
+    # Sangrur
+    {"name": "Sunam", "district": "Sangrur", "lat": 30.1300, "lng": 75.8000, "area": 1500},
+    {"name": "Dhuri", "district": "Sangrur", "lat": 30.3700, "lng": 75.8700, "area": 1400},
+    {"name": "Moonak", "district": "Sangrur", "lat": 29.8200, "lng": 75.8900, "area": 1100},
+    {"name": "Lehragaga", "district": "Sangrur", "lat": 29.9300, "lng": 75.8100, "area": 1350},
+    {"name": "Dirba", "district": "Sangrur", "lat": 30.0600, "lng": 75.9800, "area": 1300},
+    {"name": "Bhawanigarh", "district": "Sangrur", "lat": 30.2700, "lng": 76.0300, "area": 1250},
+    {"name": "Longowal", "district": "Sangrur", "lat": 30.2000, "lng": 75.6800, "area": 1200},
+    # Tarn Taran
+    {"name": "Patti", "district": "Tarn Taran", "lat": 31.2800, "lng": 74.8500, "area": 1450},
+    {"name": "Khadoor Sahib", "district": "Tarn Taran", "lat": 31.4200, "lng": 75.1000, "area": 1300},
+    {"name": "Bhikhiwind", "district": "Tarn Taran", "lat": 31.3300, "lng": 74.7000, "area": 1350},
+    {"name": "Harike", "district": "Tarn Taran", "lat": 31.1700, "lng": 74.9600, "area": 1200},
+    {"name": "Chohla Sahib", "district": "Tarn Taran", "lat": 31.3000, "lng": 75.0500, "area": 1150},
+    {"name": "Goindwal Sahib", "district": "Tarn Taran", "lat": 31.3700, "lng": 75.1400, "area": 1250},
 
-    # --- HARYANA ---
-    # Karnal
-    {"name": "Karnal Town", "district": "Karnal", "lat": 29.6857, "lng": 76.9897, "area": 1500},
-    {"name": "Nilokheri", "district": "Karnal", "lat": 29.8300, "lng": 76.9200, "area": 1200},
-    {"name": "Gharaunda", "district": "Karnal", "lat": 29.5400, "lng": 76.9700, "area": 1300},
-    {"name": "Assandh", "district": "Karnal", "lat": 29.5200, "lng": 76.6000, "area": 1400},
-    {"name": "Indri", "district": "Karnal", "lat": 29.8800, "lng": 77.0600, "area": 1150},
+    # =========================================================================
+    # HARYANA (All 22 Districts)
+    # =========================================================================
     # Ambala
-    {"name": "Ambala Village", "district": "Ambala", "lat": 30.3782, "lng": 76.7767, "area": 1100},
-    {"name": "Barara", "district": "Ambala", "lat": 30.2100, "lng": 77.0400, "area": 950},
-    {"name": "Naraingarh", "district": "Ambala", "lat": 30.4800, "lng": 77.1300, "area": 1050},
-    # Kurukshetra
-    {"name": "Pehowa", "district": "Kurukshetra", "lat": 29.9800, "lng": 76.5800, "area": 1400},
-    {"name": "Shahbad Markanda", "district": "Kurukshetra", "lat": 30.1700, "lng": 76.8700, "area": 1350},
-    {"name": "Ladwa", "district": "Kurukshetra", "lat": 29.9900, "lng": 77.0500, "area": 1100},
+    {"name": "Barara", "district": "Ambala", "lat": 30.2100, "lng": 77.0400, "area": 1150},
+    {"name": "Naraingarh", "district": "Ambala", "lat": 30.4800, "lng": 77.1300, "area": 1250},
+    {"name": "Saha", "district": "Ambala", "lat": 30.2500, "lng": 76.9700, "area": 1050},
+    {"name": "Mullana", "district": "Ambala", "lat": 30.2400, "lng": 77.0500, "area": 1100},
+    {"name": "Shahzadpur", "district": "Ambala", "lat": 30.4200, "lng": 77.0200, "area": 950},
+    # Bhiwani
+    {"name": "Tosham", "district": "Bhiwani", "lat": 28.8700, "lng": 75.9100, "area": 1350},
+    {"name": "Bawani Khera", "district": "Bhiwani", "lat": 28.9500, "lng": 76.0200, "area": 1250},
+    {"name": "Loharu", "district": "Bhiwani", "lat": 28.4200, "lng": 75.8100, "area": 1100},
+    {"name": "Siwani", "district": "Bhiwani", "lat": 28.9100, "lng": 75.6100, "area": 1200},
+    # Charkhi Dadri
+    {"name": "Badhra", "district": "Charkhi Dadri", "lat": 28.5000, "lng": 75.9800, "area": 1250},
+    {"name": "Bond Kalan", "district": "Charkhi Dadri", "lat": 28.7200, "lng": 76.3200, "area": 1150},
+    {"name": "Jhojhu Kalan", "district": "Charkhi Dadri", "lat": 28.4500, "lng": 76.1500, "area": 1050},
+    # Faridabad
+    {"name": "Ballabgarh Rural", "district": "Faridabad", "lat": 28.3300, "lng": 77.3200, "area": 1100},
+    {"name": "Tigaon", "district": "Faridabad", "lat": 28.3600, "lng": 77.4000, "area": 1200},
+    {"name": "Mohna", "district": "Faridabad", "lat": 28.2500, "lng": 77.4200, "area": 1150},
+    # Fatehabad
+    {"name": "Tohana", "district": "Fatehabad", "lat": 29.7000, "lng": 75.9000, "area": 1450},
+    {"name": "Ratia", "district": "Fatehabad", "lat": 29.6800, "lng": 75.5800, "area": 1400},
+    {"name": "Bhuna", "district": "Fatehabad", "lat": 29.5300, "lng": 75.7000, "area": 1250},
+    {"name": "Bhattu Kalan", "district": "Fatehabad", "lat": 29.3800, "lng": 75.3300, "area": 1100},
+    {"name": "Jakhal", "district": "Fatehabad", "lat": 29.7800, "lng": 75.8300, "area": 1300},
+    # Gurugram
+    {"name": "Sohna Rural", "district": "Gurugram", "lat": 28.2400, "lng": 77.0600, "area": 1050},
+    {"name": "Pataudi", "district": "Gurugram", "lat": 28.3200, "lng": 76.7800, "area": 1250},
+    {"name": "Farrukhnagar", "district": "Gurugram", "lat": 28.4500, "lng": 76.8200, "area": 1150},
+    {"name": "Manesar Rural", "district": "Gurugram", "lat": 28.3500, "lng": 76.9300, "area": 950},
+    # Hisar
+    {"name": "Hansi", "district": "Hisar", "lat": 29.1000, "lng": 75.9600, "area": 1500},
+    {"name": "Barwala", "district": "Hisar", "lat": 29.3700, "lng": 75.9000, "area": 1400},
+    {"name": "Narnaund", "district": "Hisar", "lat": 29.2200, "lng": 76.1400, "area": 1350},
+    {"name": "Uklana", "district": "Hisar", "lat": 29.5100, "lng": 75.8700, "area": 1300},
+    {"name": "Adampur", "district": "Hisar", "lat": 29.2800, "lng": 75.4700, "area": 1250},
+    # Jhajjar
+    {"name": "Bahadurgarh Rural", "district": "Jhajjar", "lat": 28.6900, "lng": 76.9200, "area": 1100},
+    {"name": "Beri", "district": "Jhajjar", "lat": 28.7000, "lng": 76.5800, "area": 1300},
+    {"name": "Badli", "district": "Jhajjar", "lat": 28.5800, "lng": 76.8000, "area": 1200},
+    {"name": "Matanhail", "district": "Jhajjar", "lat": 28.4400, "lng": 76.5200, "area": 1150},
+    # Jind
+    {"name": "Narwana", "district": "Jind", "lat": 29.5900, "lng": 76.1200, "area": 1550},
+    {"name": "Safidon", "district": "Jind", "lat": 29.4100, "lng": 76.6600, "area": 1450},
+    {"name": "Uchana", "district": "Jind", "lat": 29.4600, "lng": 76.1700, "area": 1400},
+    {"name": "Julana", "district": "Jind", "lat": 29.1200, "lng": 76.3900, "area": 1300},
+    {"name": "Pillukhera", "district": "Jind", "lat": 29.3200, "lng": 76.5400, "area": 1250},
     # Kaithal
-    {"name": "Guhla Cheeka", "district": "Kaithal", "lat": 30.0400, "lng": 76.2900, "area": 1450},
-    {"name": "Pundri", "district": "Kaithal", "lat": 29.7600, "lng": 76.5600, "area": 1200},
-    {"name": "Kalayat", "district": "Kaithal", "lat": 29.6700, "lng": 76.2500, "area": 1100},
-    # Fatehabad & Sirsa
-    {"name": "Tohana", "district": "Fatehabad", "lat": 29.7000, "lng": 75.9000, "area": 1350},
-    {"name": "Ratia", "district": "Fatehabad", "lat": 29.6800, "lng": 75.5800, "area": 1300},
-    {"name": "Dabwali", "district": "Sirsa", "lat": 29.9600, "lng": 74.7200, "area": 1500},
-    {"name": "Ellenabad", "district": "Sirsa", "lat": 29.4500, "lng": 74.6500, "area": 1200},
+    {"name": "Guhla Cheeka", "district": "Kaithal", "lat": 30.0400, "lng": 76.2900, "area": 1500},
+    {"name": "Pundri", "district": "Kaithal", "lat": 29.7600, "lng": 76.5600, "area": 1350},
+    {"name": "Kalayat", "district": "Kaithal", "lat": 29.6700, "lng": 76.2500, "area": 1250},
+    {"name": "Rajound", "district": "Kaithal", "lat": 29.6200, "lng": 76.4900, "area": 1200},
+    {"name": "Siwand", "district": "Kaithal", "lat": 29.8800, "lng": 76.4500, "area": 1100},
+    # Karnal
+    {"name": "Nilokheri", "district": "Karnal", "lat": 29.8300, "lng": 76.9200, "area": 1350},
+    {"name": "Gharaunda", "district": "Karnal", "lat": 29.5400, "lng": 76.9700, "area": 1400},
+    {"name": "Assandh", "district": "Karnal", "lat": 29.5200, "lng": 76.6000, "area": 1500},
+    {"name": "Indri", "district": "Karnal", "lat": 29.8800, "lng": 77.0600, "area": 1300},
+    {"name": "Taraori", "district": "Karnal", "lat": 29.8000, "lng": 76.9300, "area": 1450},
+    {"name": "Nissing", "district": "Karnal", "lat": 29.6700, "lng": 76.8200, "area": 1250},
+    # Kurukshetra
+    {"name": "Pehowa", "district": "Kurukshetra", "lat": 29.9800, "lng": 76.5800, "area": 1550},
+    {"name": "Shahbad Markanda", "district": "Kurukshetra", "lat": 30.1700, "lng": 76.8700, "area": 1500},
+    {"name": "Ladwa", "district": "Kurukshetra", "lat": 29.9900, "lng": 77.0500, "area": 1350},
+    {"name": "Babain", "district": "Kurukshetra", "lat": 30.0800, "lng": 77.0000, "area": 1200},
+    {"name": "Ismailabad", "district": "Kurukshetra", "lat": 30.1100, "lng": 76.7800, "area": 1250},
+    # Mahendragarh
+    {"name": "Narnaul Rural", "district": "Mahendragarh", "lat": 28.0400, "lng": 76.1000, "area": 1150},
+    {"name": "Kanina", "district": "Mahendragarh", "lat": 28.3200, "lng": 76.3000, "area": 1200},
+    {"name": "Ateli", "district": "Mahendragarh", "lat": 28.1000, "lng": 76.2600, "area": 1100},
+    {"name": "Nangal Chaudhry", "district": "Mahendragarh", "lat": 27.9000, "lng": 76.0500, "area": 1050},
+    # Nuh
+    {"name": "Ferozepur Jhirka", "district": "Nuh", "lat": 27.7900, "lng": 76.9500, "area": 1250},
+    {"name": "Punhana", "district": "Nuh", "lat": 27.8600, "lng": 77.2000, "area": 1300},
+    {"name": "Taoru", "district": "Nuh", "lat": 28.2100, "lng": 76.9400, "area": 1150},
+    # Palwal
+    {"name": "Hodal", "district": "Palwal", "lat": 27.8900, "lng": 77.3600, "area": 1300},
+    {"name": "Hathin", "district": "Palwal", "lat": 28.0400, "lng": 77.2400, "area": 1250},
+    {"name": "Hassanpur", "district": "Palwal", "lat": 27.9700, "lng": 77.4800, "area": 1150},
+    # Panchkula
+    {"name": "Kalka Rural", "district": "Panchkula", "lat": 30.8300, "lng": 76.9300, "area": 950},
+    {"name": "Pinjore Rural", "district": "Panchkula", "lat": 30.7900, "lng": 76.9100, "area": 1000},
+    {"name": "Raipur Rani", "district": "Panchkula", "lat": 30.6300, "lng": 77.0300, "area": 1100},
+    {"name": "Barwala Rural", "district": "Panchkula", "lat": 30.5500, "lng": 76.9200, "area": 1050},
+    # Panipat
+    {"name": "Samalkha", "district": "Panipat", "lat": 29.2300, "lng": 77.0100, "area": 1350},
+    {"name": "Israna", "district": "Panipat", "lat": 29.2700, "lng": 76.8500, "area": 1400},
+    {"name": "Madlauda", "district": "Panipat", "lat": 29.4300, "lng": 76.7800, "area": 1300},
+    {"name": "Bapoli", "district": "Panipat", "lat": 29.3300, "lng": 77.1000, "area": 1200},
+    # Rewari
+    {"name": "Bawal", "district": "Rewari", "lat": 28.0800, "lng": 76.5800, "area": 1250},
+    {"name": "Kosli", "district": "Rewari", "lat": 28.4100, "lng": 76.4800, "area": 1350},
+    {"name": "Dharuhera Rural", "district": "Rewari", "lat": 28.2000, "lng": 76.7900, "area": 1100},
+    {"name": "Jatusana", "district": "Rewari", "lat": 28.3100, "lng": 76.4700, "area": 1150},
+    # Rohtak
+    {"name": "Meham", "district": "Rohtak", "lat": 28.9600, "lng": 76.2900, "area": 1450},
+    {"name": "Sampla", "district": "Rohtak", "lat": 28.7700, "lng": 76.7700, "area": 1300},
+    {"name": "Kalanaur Rohtak", "district": "Rohtak", "lat": 28.8200, "lng": 76.3900, "area": 1350},
+    # Sirsa
+    {"name": "Dabwali", "district": "Sirsa", "lat": 29.9600, "lng": 74.7200, "area": 1600},
+    {"name": "Ellenabad", "district": "Sirsa", "lat": 29.4500, "lng": 74.6500, "area": 1500},
+    {"name": "Rania", "district": "Sirsa", "lat": 29.5200, "lng": 74.8300, "area": 1400},
+    {"name": "Kalanwali", "district": "Sirsa", "lat": 29.8300, "lng": 74.9800, "area": 1350},
+    {"name": "Nathusari Chopta", "district": "Sirsa", "lat": 29.3900, "lng": 74.9500, "area": 1300},
+    # Sonipat
+    {"name": "Ganaur", "district": "Sonipat", "lat": 29.1300, "lng": 77.0100, "area": 1400},
+    {"name": "Gohana", "district": "Sonipat", "lat": 29.1300, "lng": 76.7000, "area": 1550},
+    {"name": "Kharkhoda", "district": "Sonipat", "lat": 28.8800, "lng": 76.9100, "area": 1300},
+    {"name": "Murthal", "district": "Sonipat", "lat": 29.0200, "lng": 77.0800, "area": 1250},
+    {"name": "Rai", "district": "Sonipat", "lat": 28.9300, "lng": 77.0800, "area": 1200},
+    # Yamunanagar
+    {"name": "Jagadhri Rural", "district": "Yamunanagar", "lat": 30.1600, "lng": 77.3000, "area": 1300},
+    {"name": "Bilaspur Yamunanagar", "district": "Yamunanagar", "lat": 30.3000, "lng": 77.3100, "area": 1350},
+    {"name": "Radaur", "district": "Yamunanagar", "lat": 30.0200, "lng": 77.1500, "area": 1400},
+    {"name": "Chhachhrauli", "district": "Yamunanagar", "lat": 30.2500, "lng": 77.3700, "area": 1250},
+    {"name": "Sadhaura", "district": "Yamunanagar", "lat": 30.3800, "lng": 77.2200, "area": 1200},
 
-    # --- UTTAR PRADESH ---
-    # Meerut & NCR
-    {"name": "Mawana", "district": "Meerut", "lat": 29.1000, "lng": 77.9200, "area": 1300},
-    {"name": "Sardhana", "district": "Meerut", "lat": 29.1500, "lng": 77.6200, "area": 1200},
-    {"name": "Khatauli", "district": "Muzaffarnagar", "lat": 29.2800, "lng": 77.7200, "area": 1400},
-    {"name": "Deoband", "district": "Saharanpur", "lat": 29.7000, "lng": 77.5800, "area": 1350},
-    # Central UP
-    {"name": "Gomti Nagar", "district": "Lucknow", "lat": 26.8500, "lng": 81.0000, "area": 800},
-    {"name": "Bakshi Ka Talab", "district": "Lucknow", "lat": 26.9800, "lng": 80.9200, "area": 950},
-    {"name": "Bilhaur", "district": "Kanpur", "lat": 26.8500, "lng": 80.0500, "area": 1100},
-    {"name": "Ghatampur", "district": "Kanpur", "lat": 26.1600, "lng": 80.1700, "area": 1000},
-    {"name": "Baheri", "district": "Bareilly", "lat": 28.7800, "lng": 79.5000, "area": 1250},
-    {"name": "Palia Kalan", "district": "Lakhimpur Kheri", "lat": 28.4300, "lng": 80.5800, "area": 1400},
-    {"name": "Gola Gokarnath", "district": "Lakhimpur Kheri", "lat": 28.0800, "lng": 80.4700, "area": 1300},
-    # East UP
-    {"name": "Phulpur", "district": "Prayagraj", "lat": 25.5500, "lng": 82.0800, "area": 900},
-    {"name": "Pindra", "district": "Varanasi", "lat": 25.4800, "lng": 82.8500, "area": 850},
-    {"name": "Sahjanwa", "district": "Gorakhpur", "lat": 26.7500, "lng": 83.2300, "area": 950},
-    {"name": "Rudauli", "district": "Ayodhya", "lat": 26.7500, "lng": 81.7500, "area": 1100},
+    # =========================================================================
+    # UTTAR PRADESH (All 75 Districts)
+    # =========================================================================
+    # Western UP & NCR
+    {"name": "Deoband", "district": "Saharanpur", "lat": 29.7000, "lng": 77.5800, "area": 1450},
+    {"name": "Behat", "district": "Saharanpur", "lat": 30.1600, "lng": 77.6100, "area": 1350},
+    {"name": "Nakur", "district": "Saharanpur", "lat": 29.9200, "lng": 77.3000, "area": 1300},
+    {"name": "Khatauli", "district": "Muzaffarnagar", "lat": 29.2800, "lng": 77.7200, "area": 1500},
+    {"name": "Budhana", "district": "Muzaffarnagar", "lat": 29.2800, "lng": 77.4700, "area": 1400},
+    {"name": "Jansath", "district": "Muzaffarnagar", "lat": 29.3200, "lng": 77.8500, "area": 1300},
+    {"name": "Kairana", "district": "Shamli", "lat": 29.3900, "lng": 77.2000, "area": 1450},
+    {"name": "Thanabhawan", "district": "Shamli", "lat": 29.5800, "lng": 77.4200, "area": 1350},
+    {"name": "Kandhla", "district": "Shamli", "lat": 29.3100, "lng": 77.2600, "area": 1250},
+    {"name": "Mawana", "district": "Meerut", "lat": 29.1000, "lng": 77.9200, "area": 1400},
+    {"name": "Sardhana", "district": "Meerut", "lat": 29.1500, "lng": 77.6200, "area": 1350},
+    {"name": "Hastinapur", "district": "Meerut", "lat": 29.1700, "lng": 78.0200, "area": 1300},
+    {"name": "Baraut", "district": "Baghpat", "lat": 29.1000, "lng": 77.2600, "area": 1450},
+    {"name": "Khekra", "district": "Baghpat", "lat": 28.8700, "lng": 77.2800, "area": 1200},
+    {"name": "Chhaprauli", "district": "Baghpat", "lat": 29.2100, "lng": 77.1800, "area": 1250},
+    {"name": "Modinagar Rural", "district": "Ghaziabad", "lat": 28.8300, "lng": 77.5700, "area": 1200},
+    {"name": "Muradnagar Rural", "district": "Ghaziabad", "lat": 28.7800, "lng": 77.5000, "area": 1150},
+    {"name": "Garhmukteshwar", "district": "Hapur", "lat": 28.7800, "lng": 78.1000, "area": 1400},
+    {"name": "Dhaulana", "district": "Hapur", "lat": 28.6500, "lng": 77.6800, "area": 1250},
+    {"name": "Pilkhuwa", "district": "Hapur", "lat": 28.7100, "lng": 77.6500, "area": 1200},
+    {"name": "Jewar", "district": "Gautam Buddha Nagar", "lat": 28.1200, "lng": 77.5500, "area": 1350},
+    {"name": "Dadri Rural", "district": "Gautam Buddha Nagar", "lat": 28.5500, "lng": 77.5500, "area": 1250},
+    {"name": "Dankaur", "district": "Gautam Buddha Nagar", "lat": 28.3500, "lng": 77.5500, "area": 1150},
+    {"name": "Khurja", "district": "Bulandshahr", "lat": 28.2500, "lng": 77.8500, "area": 1500},
+    {"name": "Siyana", "district": "Bulandshahr", "lat": 28.6200, "lng": 78.0700, "area": 1400},
+    {"name": "Anupshahr", "district": "Bulandshahr", "lat": 28.3600, "lng": 78.2700, "area": 1350},
+    {"name": "Shikarpur", "district": "Bulandshahr", "lat": 28.2800, "lng": 78.0100, "area": 1250},
+    {"name": "Debai", "district": "Bulandshahr", "lat": 28.2100, "lng": 78.2600, "area": 1300},
+    {"name": "Atrauli", "district": "Aligarh", "lat": 28.0300, "lng": 78.2800, "area": 1450},
+    {"name": "Khair", "district": "Aligarh", "lat": 27.9400, "lng": 77.8400, "area": 1500},
+    {"name": "Iglas", "district": "Aligarh", "lat": 27.7100, "lng": 77.9300, "area": 1350},
+    {"name": "Sadabad", "district": "Hathras", "lat": 27.4400, "lng": 78.0400, "area": 1350},
+    {"name": "Sasni", "district": "Hathras", "lat": 27.7000, "lng": 78.0800, "area": 1300},
+    {"name": "Sikandra Rao", "district": "Hathras", "lat": 27.6800, "lng": 78.3800, "area": 1400},
+    {"name": "Chhata", "district": "Mathura", "lat": 27.7200, "lng": 77.5000, "area": 1500},
+    {"name": "Mant", "district": "Mathura", "lat": 27.5800, "lng": 77.7200, "area": 1350},
+    {"name": "Govardhan", "district": "Mathura", "lat": 27.5000, "lng": 77.4600, "area": 1250},
+    {"name": "Fatehabad UP", "district": "Agra", "lat": 27.0200, "lng": 78.3100, "area": 1400},
+    {"name": "Kheragarh", "district": "Agra", "lat": 26.9400, "lng": 77.8200, "area": 1300},
+    {"name": "Bah", "district": "Agra", "lat": 26.8700, "lng": 78.6000, "area": 1250},
+    {"name": "Shikohabad", "district": "Firozabad", "lat": 27.1100, "lng": 78.5800, "area": 1450},
+    {"name": "Jasrana", "district": "Firozabad", "lat": 27.2700, "lng": 78.6700, "area": 1350},
+    {"name": "Sirsaganj", "district": "Firozabad", "lat": 27.0500, "lng": 78.7000, "area": 1300},
+    {"name": "Karhal", "district": "Mainpuri", "lat": 27.0000, "lng": 78.9400, "area": 1400},
+    {"name": "Bhongaon", "district": "Mainpuri", "lat": 27.2600, "lng": 79.1800, "area": 1350},
+    {"name": "Kishni", "district": "Mainpuri", "lat": 26.9700, "lng": 79.2600, "area": 1250},
+    {"name": "Patiali", "district": "Kasganj", "lat": 27.7000, "lng": 78.9900, "area": 1300},
+    {"name": "Sahawar", "district": "Kasganj", "lat": 27.7900, "lng": 78.8200, "area": 1250},
+    {"name": "Ganjdundwara", "district": "Kasganj", "lat": 27.7300, "lng": 78.9500, "area": 1350},
+    {"name": "Aliganj", "district": "Etah", "lat": 27.5000, "lng": 79.1800, "area": 1350},
+    {"name": "Jalesar", "district": "Etah", "lat": 27.4800, "lng": 78.3100, "area": 1300},
 
-    # --- RAJASTHAN ---
-    {"name": "Suratgarh", "district": "Sri Ganganagar", "lat": 29.3200, "lng": 73.9000, "area": 1600},
-    {"name": "Anupgarh", "district": "Sri Ganganagar", "lat": 29.1900, "lng": 73.2100, "area": 1400},
-    {"name": "Nohar", "district": "Hanumangarh", "lat": 29.1800, "lng": 74.7700, "area": 1300},
-    {"name": "Bhadra", "district": "Hanumangarh", "lat": 29.1000, "lng": 75.1700, "area": 1250},
-    {"name": "Ramganj Mandi", "district": "Kota", "lat": 24.6500, "lng": 75.9500, "area": 1100},
-    {"name": "Chomu", "district": "Jaipur", "lat": 27.1700, "lng": 75.7200, "area": 950},
-    {"name": "Kotputli", "district": "Jaipur", "lat": 27.7000, "lng": 76.2000, "area": 1050},
+    # Rohilkhand
+    {"name": "Baheri", "district": "Bareilly", "lat": 28.7800, "lng": 79.5000, "area": 1500},
+    {"name": "Nawabganj", "district": "Bareilly", "lat": 28.5400, "lng": 79.6300, "area": 1400},
+    {"name": "Faridpur", "district": "Bareilly", "lat": 28.2100, "lng": 79.5400, "area": 1350},
+    {"name": "Aonla", "district": "Bareilly", "lat": 28.2700, "lng": 79.1600, "area": 1300},
+    {"name": "Dataganj", "district": "Badaun", "lat": 28.0300, "lng": 79.4000, "area": 1400},
+    {"name": "Bisauli", "district": "Badaun", "lat": 28.3100, "lng": 78.9300, "area": 1350},
+    {"name": "Sahaswan", "district": "Badaun", "lat": 28.0700, "lng": 78.7500, "area": 1300},
+    {"name": "Ujhani", "district": "Badaun", "lat": 28.0100, "lng": 79.0100, "area": 1250},
+    {"name": "Puranpur", "district": "Pilibhit", "lat": 28.5100, "lng": 80.1400, "area": 1600},
+    {"name": "Bisalpur", "district": "Pilibhit", "lat": 28.3000, "lng": 79.8000, "area": 1450},
+    {"name": "Barkhera", "district": "Pilibhit", "lat": 28.4500, "lng": 79.8500, "area": 1350},
+    {"name": "Tilhar", "district": "Shahjahanpur", "lat": 27.9700, "lng": 79.7400, "area": 1500},
+    {"name": "Powayan", "district": "Shahjahanpur", "lat": 28.0700, "lng": 80.1000, "area": 1550},
+    {"name": "Jalalabad Shahjahanpur", "district": "Shahjahanpur", "lat": 27.7200, "lng": 79.6600, "area": 1350},
+    {"name": "Bilari", "district": "Moradabad", "lat": 28.6300, "lng": 78.8000, "area": 1450},
+    {"name": "Kanth", "district": "Moradabad", "lat": 29.0500, "lng": 78.6300, "area": 1350},
+    {"name": "Thakurdwara", "district": "Moradabad", "lat": 29.1900, "lng": 78.8600, "area": 1400},
+    {"name": "Bilaspur Rampur", "district": "Rampur", "lat": 28.8800, "lng": 79.2700, "area": 1550},
+    {"name": "Milak", "district": "Rampur", "lat": 28.6200, "lng": 79.1800, "area": 1400},
+    {"name": "Suar", "district": "Rampur", "lat": 29.0300, "lng": 79.0500, "area": 1350},
+    {"name": "Chandausi", "district": "Sambhal", "lat": 28.4500, "lng": 78.7700, "area": 1450},
+    {"name": "Gunnaur", "district": "Sambhal", "lat": 28.2400, "lng": 78.4400, "area": 1350},
+    {"name": "Bahjoi", "district": "Sambhal", "lat": 28.4000, "lng": 78.6200, "area": 1300},
+    {"name": "Dhanaura", "district": "Amroha", "lat": 28.9700, "lng": 78.2500, "area": 1400},
+    {"name": "Hasanpur", "district": "Amroha", "lat": 28.7200, "lng": 78.2800, "area": 1350},
+    {"name": "Gajraula", "district": "Amroha", "lat": 28.8400, "lng": 78.2300, "area": 1300},
+    {"name": "Chandpur", "district": "Bijnor", "lat": 29.1300, "lng": 78.2700, "area": 1450},
+    {"name": "Dhampur", "district": "Bijnor", "lat": 29.3100, "lng": 78.5100, "area": 1500},
+    {"name": "Nagina", "district": "Bijnor", "lat": 29.4400, "lng": 78.4300, "area": 1400},
+    {"name": "Najibabad", "district": "Bijnor", "lat": 29.6100, "lng": 78.3400, "area": 1350},
+    {"name": "Seohara", "district": "Bijnor", "lat": 29.2100, "lng": 78.5800, "area": 1300},
 
-    # --- MADHYA PRADESH ---
+    # Central UP & Terai
+    {"name": "Palia Kalan", "district": "Lakhimpur Kheri", "lat": 28.4300, "lng": 80.5800, "area": 1650},
+    {"name": "Gola Gokarnath", "district": "Lakhimpur Kheri", "lat": 28.0800, "lng": 80.4700, "area": 1550},
+    {"name": "Mohammadi", "district": "Lakhimpur Kheri", "lat": 27.9000, "lng": 80.3200, "area": 1450},
+    {"name": "Nighasan", "district": "Lakhimpur Kheri", "lat": 28.2400, "lng": 80.8600, "area": 1500},
+    {"name": "Dhaurahra", "district": "Lakhimpur Kheri", "lat": 28.0100, "lng": 81.0800, "area": 1400},
+    {"name": "Biswan", "district": "Sitapur", "lat": 27.4900, "lng": 81.0000, "area": 1500},
+    {"name": "Mahmudabad", "district": "Sitapur", "lat": 27.3000, "lng": 81.1200, "area": 1450},
+    {"name": "Misrikh", "district": "Sitapur", "lat": 27.4300, "lng": 80.5200, "area": 1400},
+    {"name": "Laharpur", "district": "Sitapur", "lat": 27.7100, "lng": 80.9000, "area": 1350},
+    {"name": "Sidhauli", "district": "Sitapur", "lat": 27.2800, "lng": 80.8300, "area": 1300},
+    {"name": "Bilgram", "district": "Hardoi", "lat": 27.1800, "lng": 80.0300, "area": 1450},
+    {"name": "Sandila", "district": "Hardoi", "lat": 27.0800, "lng": 80.5100, "area": 1400},
+    {"name": "Shahabad Hardoi", "district": "Hardoi", "lat": 27.6500, "lng": 79.9400, "area": 1350},
+    {"name": "Sawayajpur", "district": "Hardoi", "lat": 27.4200, "lng": 79.7900, "area": 1300},
+    {"name": "Safipur", "district": "Unnao", "lat": 26.7400, "lng": 80.3500, "area": 1400},
+    {"name": "Purwa", "district": "Unnao", "lat": 26.4700, "lng": 80.7700, "area": 1350},
+    {"name": "Bangarmau", "district": "Unnao", "lat": 26.9000, "lng": 80.2100, "area": 1450},
+    {"name": "Hasanganj", "district": "Unnao", "lat": 26.7800, "lng": 80.6000, "area": 1300},
+    {"name": "Bakshi Ka Talab", "district": "Lucknow", "lat": 26.9800, "lng": 80.9200, "area": 1250},
+    {"name": "Mohanlalganj", "district": "Lucknow", "lat": 26.6800, "lng": 80.9800, "area": 1300},
+    {"name": "Malihabad", "district": "Lucknow", "lat": 26.9200, "lng": 80.7100, "area": 1350},
+    {"name": "Goshainganj Lucknow", "district": "Lucknow", "lat": 26.7700, "lng": 81.1200, "area": 1200},
+    {"name": "Lalganj Rae Bareli", "district": "Rae Bareli", "lat": 26.1600, "lng": 80.9700, "area": 1400},
+    {"name": "Salon", "district": "Rae Bareli", "lat": 26.0300, "lng": 81.4500, "area": 1350},
+    {"name": "Dalmau", "district": "Rae Bareli", "lat": 26.0600, "lng": 81.0300, "area": 1300},
+    {"name": "Unchahar", "district": "Rae Bareli", "lat": 25.9200, "lng": 81.3200, "area": 1250},
+    {"name": "Bilhaur", "district": "Kanpur Nagar", "lat": 26.8500, "lng": 80.0500, "area": 1450},
+    {"name": "Ghatampur", "district": "Kanpur Nagar", "lat": 26.1600, "lng": 80.1700, "area": 1400},
+    {"name": "Sarsaul", "district": "Kanpur Nagar", "lat": 26.2700, "lng": 80.5200, "area": 1300},
+    {"name": "Bidhnu", "district": "Kanpur Nagar", "lat": 26.3300, "lng": 80.2800, "area": 1250},
+    {"name": "Akbarpur Kanpur Dehat", "district": "Kanpur Dehat", "lat": 26.4300, "lng": 79.9500, "area": 1400},
+    {"name": "Bhognipur", "district": "Kanpur Dehat", "lat": 26.1900, "lng": 79.8200, "area": 1350},
+    {"name": "Derapur", "district": "Kanpur Dehat", "lat": 26.4300, "lng": 79.7600, "area": 1300},
+    {"name": "Rasulabad", "district": "Kanpur Dehat", "lat": 26.6800, "lng": 79.7800, "area": 1350},
+    {"name": "Bindki", "district": "Fatehpur", "lat": 26.0500, "lng": 80.5900, "area": 1450},
+    {"name": "Khaga", "district": "Fatehpur", "lat": 25.7700, "lng": 81.2200, "area": 1400},
+    {"name": "Haswa", "district": "Fatehpur", "lat": 25.8700, "lng": 80.9200, "area": 1300},
+    {"name": "Kaimganj", "district": "Farrukhabad", "lat": 27.5000, "lng": 79.3500, "area": 1450},
+    {"name": "Amritpur", "district": "Farrukhabad", "lat": 27.4500, "lng": 79.6000, "area": 1350},
+    {"name": "Kamalganj", "district": "Farrukhabad", "lat": 27.2600, "lng": 79.6400, "area": 1300},
+    {"name": "Chhibramau", "district": "Kannauj", "lat": 27.1500, "lng": 79.5000, "area": 1500},
+    {"name": "Tirwa", "district": "Kannauj", "lat": 27.0800, "lng": 79.7700, "area": 1400},
+    {"name": "Saurikh", "district": "Kannauj", "lat": 27.0200, "lng": 79.4800, "area": 1300},
+    {"name": "Bidhuna", "district": "Auraiya", "lat": 26.8100, "lng": 79.5200, "area": 1400},
+    {"name": "Ajitmal", "district": "Auraiya", "lat": 26.5500, "lng": 79.3100, "area": 1350},
+    {"name": "Achhalda", "district": "Auraiya", "lat": 26.7200, "lng": 79.4200, "area": 1250},
+    {"name": "Bharthana", "district": "Etawah", "lat": 26.7500, "lng": 79.2300, "area": 1450},
+    {"name": "Jaswantnagar", "district": "Etawah", "lat": 26.8800, "lng": 78.9600, "area": 1400},
+    {"name": "Saifai", "district": "Etawah", "lat": 26.9600, "lng": 78.9600, "area": 1300},
+
+    # Purvanchal / Eastern UP
+    {"name": "Rudauli", "district": "Ayodhya", "lat": 26.7500, "lng": 81.7500, "area": 1450},
+    {"name": "Bikapur", "district": "Ayodhya", "lat": 26.6000, "lng": 82.1300, "area": 1350},
+    {"name": "Milkipur", "district": "Ayodhya", "lat": 26.5800, "lng": 81.9000, "area": 1300},
+    {"name": "Sohawal", "district": "Ayodhya", "lat": 26.7800, "lng": 82.0000, "area": 1250},
+    {"name": "Ram Sanehi Ghat", "district": "Barabanki", "lat": 26.8000, "lng": 81.5400, "area": 1500},
+    {"name": "Haidergarh", "district": "Barabanki", "lat": 26.5900, "lng": 81.2500, "area": 1400},
+    {"name": "Fatehpur Barabanki", "district": "Barabanki", "lat": 27.1700, "lng": 81.2200, "area": 1350},
+    {"name": "Ramnagar Barabanki", "district": "Barabanki", "lat": 27.0900, "lng": 81.4000, "area": 1300},
+    {"name": "Kadipur", "district": "Sultanpur", "lat": 26.1600, "lng": 82.3800, "area": 1400},
+    {"name": "Jaisinghpur", "district": "Sultanpur", "lat": 26.2300, "lng": 82.3600, "area": 1350},
+    {"name": "Lambhua", "district": "Sultanpur", "lat": 26.1400, "lng": 82.2600, "area": 1300},
+    {"name": "Gauriganj", "district": "Amethi", "lat": 26.2100, "lng": 81.6900, "area": 1400},
+    {"name": "Musafirkhana", "district": "Amethi", "lat": 26.3700, "lng": 81.7900, "area": 1350},
+    {"name": "Tiloi", "district": "Amethi", "lat": 26.3900, "lng": 81.5000, "area": 1300},
+    {"name": "Jagdishpur Amethi", "district": "Amethi", "lat": 26.4700, "lng": 81.6300, "area": 1250},
+    {"name": "Kunda", "district": "Pratapgarh", "lat": 25.7200, "lng": 81.5100, "area": 1450},
+    {"name": "Patti Pratapgarh", "district": "Pratapgarh", "lat": 25.9200, "lng": 82.2000, "area": 1350},
+    {"name": "Lalganj Ajhara", "district": "Pratapgarh", "lat": 25.9800, "lng": 81.7000, "area": 1300},
+    {"name": "Raniganj Pratapgarh", "district": "Pratapgarh", "lat": 25.8600, "lng": 82.0800, "area": 1250},
+    {"name": "Phulpur", "district": "Prayagraj", "lat": 25.5500, "lng": 82.0800, "area": 1400},
+    {"name": "Soraon", "district": "Prayagraj", "lat": 25.5800, "lng": 81.8500, "area": 1350},
+    {"name": "Handia", "district": "Prayagraj", "lat": 25.3600, "lng": 82.1800, "area": 1300},
+    {"name": "Meja", "district": "Prayagraj", "lat": 25.1400, "lng": 82.1200, "area": 1250},
+    {"name": "Karchhana", "district": "Prayagraj", "lat": 25.2800, "lng": 81.9200, "area": 1200},
+    {"name": "Manjhanpur", "district": "Kaushambi", "lat": 25.5300, "lng": 81.3800, "area": 1350},
+    {"name": "Sirathu", "district": "Kaushambi", "lat": 25.6500, "lng": 81.3200, "area": 1300},
+    {"name": "Chail", "district": "Kaushambi", "lat": 25.4200, "lng": 81.6300, "area": 1250},
+    {"name": "Pindra", "district": "Varanasi", "lat": 25.4800, "lng": 82.8500, "area": 1350},
+    {"name": "Rohaniya", "district": "Varanasi", "lat": 25.2600, "lng": 82.9300, "area": 1250},
+    {"name": "Sevapuri", "district": "Varanasi", "lat": 25.3300, "lng": 82.7800, "area": 1300},
+    {"name": "Cholapur", "district": "Varanasi", "lat": 25.4500, "lng": 83.0500, "area": 1200},
+    {"name": "Shahganj Jaunpur", "district": "Jaunpur", "lat": 26.0500, "lng": 82.6800, "area": 1450},
+    {"name": "Machhlishahr", "district": "Jaunpur", "lat": 25.6800, "lng": 82.4200, "area": 1400},
+    {"name": "Mariahu", "district": "Jaunpur", "lat": 25.6200, "lng": 82.6000, "area": 1300},
+    {"name": "Kerakat", "district": "Jaunpur", "lat": 25.6300, "lng": 82.9200, "area": 1250},
+    {"name": "Mohammadabad Ghazipur", "district": "Ghazipur", "lat": 25.6200, "lng": 83.7500, "area": 1450},
+    {"name": "Zamania", "district": "Ghazipur", "lat": 25.4300, "lng": 83.5600, "area": 1400},
+    {"name": "Saidpur", "district": "Ghazipur", "lat": 25.5500, "lng": 83.2200, "area": 1300},
+    {"name": "Jakhanian", "district": "Ghazipur", "lat": 25.7700, "lng": 83.3300, "area": 1250},
+    {"name": "Mughalsarai Rural", "district": "Chandauli", "lat": 25.2800, "lng": 83.1200, "area": 1400},
+    {"name": "Sakaldiha", "district": "Chandauli", "lat": 25.3200, "lng": 83.2500, "area": 1350},
+    {"name": "Chakia", "district": "Chandauli", "lat": 25.0500, "lng": 83.2200, "area": 1250},
+    {"name": "Chunar", "district": "Mirzapur", "lat": 25.1300, "lng": 82.8700, "area": 1350},
+    {"name": "Lalganj Mirzapur", "district": "Mirzapur", "lat": 25.0400, "lng": 82.3500, "area": 1300},
+    {"name": "Marihan", "district": "Mirzapur", "lat": 24.9200, "lng": 82.6800, "area": 1200},
+    {"name": "Robertsganj Rural", "district": "Sonbhadra", "lat": 24.6900, "lng": 83.0700, "area": 1300},
+    {"name": "Ghorawal", "district": "Sonbhadra", "lat": 24.7500, "lng": 82.7800, "area": 1250},
+    {"name": "Duddhi", "district": "Sonbhadra", "lat": 24.2100, "lng": 83.2500, "area": 1150},
+    {"name": "Sahjanwa", "district": "Gorakhpur", "lat": 26.7500, "lng": 83.2300, "area": 1450},
+    {"name": "Campierganj", "district": "Gorakhpur", "lat": 27.0200, "lng": 83.2500, "area": 1400},
+    {"name": "Bansgaon", "district": "Gorakhpur", "lat": 26.5600, "lng": 83.3500, "area": 1350},
+    {"name": "Chauri Chaura", "district": "Gorakhpur", "lat": 26.6400, "lng": 83.6000, "area": 1300},
+    {"name": "Salempur", "district": "Deoria", "lat": 26.3000, "lng": 83.9300, "area": 1400},
+    {"name": "Barhaj", "district": "Deoria", "lat": 26.2700, "lng": 83.7500, "area": 1350},
+    {"name": "Rudrapur Deoria", "district": "Deoria", "lat": 26.4300, "lng": 83.6200, "area": 1300},
+    {"name": "Bhatpar Rani", "district": "Deoria", "lat": 26.2200, "lng": 84.0500, "area": 1250},
+    {"name": "Padrauna", "district": "Kushinagar", "lat": 26.9000, "lng": 83.9800, "area": 1500},
+    {"name": "Hata Kushinagar", "district": "Kushinagar", "lat": 26.7400, "lng": 83.7400, "area": 1400},
+    {"name": "Tamkuhi Raj", "district": "Kushinagar", "lat": 26.6900, "lng": 84.1800, "area": 1350},
+    {"name": "Kasia", "district": "Kushinagar", "lat": 26.7400, "lng": 83.8900, "area": 1300},
+    {"name": "Nautanwa", "district": "Maharajganj", "lat": 27.4300, "lng": 83.4200, "area": 1450},
+    {"name": "Nichlaul", "district": "Maharajganj", "lat": 27.3200, "lng": 83.7300, "area": 1400},
+    {"name": "Pharenda", "district": "Maharajganj", "lat": 27.1300, "lng": 83.2800, "area": 1350},
+    {"name": "Siswa Bazar", "district": "Maharajganj", "lat": 27.1500, "lng": 83.7600, "area": 1300},
+    {"name": "Harraiya", "district": "Basti", "lat": 26.8000, "lng": 82.5200, "area": 1450},
+    {"name": "Bhanpur", "district": "Basti", "lat": 26.9500, "lng": 82.7200, "area": 1350},
+    {"name": "Rudhauli", "district": "Basti", "lat": 27.0100, "lng": 82.8500, "area": 1300},
+    {"name": "Naugarh Siddharthnagar", "district": "Siddharthnagar", "lat": 27.3000, "lng": 83.1000, "area": 1450},
+    {"name": "Bansi", "district": "Siddharthnagar", "lat": 27.1700, "lng": 82.9300, "area": 1400},
+    {"name": "Itwa", "district": "Siddharthnagar", "lat": 27.3300, "lng": 82.6700, "area": 1350},
+    {"name": "Domariyaganj", "district": "Siddharthnagar", "lat": 27.2000, "lng": 82.6700, "area": 1300},
+    {"name": "Khalilabad Rural", "district": "Sant Kabir Nagar", "lat": 26.7800, "lng": 83.0700, "area": 1400},
+    {"name": "Mehdawal", "district": "Sant Kabir Nagar", "lat": 26.9800, "lng": 83.1200, "area": 1350},
+    {"name": "Dhanghata", "district": "Sant Kabir Nagar", "lat": 26.5800, "lng": 83.0300, "area": 1250},
+    {"name": "Sagri", "district": "Azamgarh", "lat": 26.1500, "lng": 83.2800, "area": 1450},
+    {"name": "Lalganj Azamgarh", "district": "Azamgarh", "lat": 25.9300, "lng": 82.9800, "area": 1400},
+    {"name": "Nizamabad UP", "district": "Azamgarh", "lat": 26.0500, "lng": 83.0600, "area": 1350},
+    {"name": "Phoolpur Azamgarh", "district": "Azamgarh", "lat": 26.0800, "lng": 82.8700, "area": 1300},
+    {"name": "Ghosi", "district": "Mau", "lat": 26.1100, "lng": 83.5400, "area": 1450},
+    {"name": "Madhuban", "district": "Mau", "lat": 26.1900, "lng": 83.6700, "area": 1350},
+    {"name": "Muhammadabad Gohna", "district": "Mau", "lat": 26.0400, "lng": 83.3800, "area": 1300},
+    {"name": "Rasra", "district": "Ballia", "lat": 25.8500, "lng": 83.8500, "area": 1450},
+    {"name": "Bairia", "district": "Ballia", "lat": 25.7600, "lng": 84.4800, "area": 1350},
+    {"name": "Bansdih", "district": "Ballia", "lat": 25.8800, "lng": 84.2300, "area": 1300},
+    {"name": "Sikanderpur", "district": "Ballia", "lat": 26.0400, "lng": 84.0500, "area": 1250},
+    {"name": "Tarabganj", "district": "Gonda", "lat": 26.9300, "lng": 81.9800, "area": 1450},
+    {"name": "Colonelganj", "district": "Gonda", "lat": 27.1300, "lng": 81.7000, "area": 1400},
+    {"name": "Mankapur", "district": "Gonda", "lat": 27.0300, "lng": 82.2300, "area": 1350},
+    {"name": "Nanpara", "district": "Bahraich", "lat": 27.8600, "lng": 81.5000, "area": 1500},
+    {"name": "Mahasi", "district": "Bahraich", "lat": 27.5600, "lng": 81.3700, "area": 1400},
+    {"name": "Kaiserganj", "district": "Bahraich", "lat": 27.2500, "lng": 81.5500, "area": 1350},
+    {"name": "Bhinga", "district": "Shravasti", "lat": 27.7100, "lng": 81.9300, "area": 1400},
+    {"name": "Ikauna", "district": "Shravasti", "lat": 27.5400, "lng": 81.9700, "area": 1350},
+    {"name": "Tulsipur", "district": "Balrampur", "lat": 27.5500, "lng": 82.4200, "area": 1450},
+    {"name": "Utraula", "district": "Balrampur", "lat": 27.3100, "lng": 82.4200, "area": 1350},
+    {"name": "Gasri", "district": "Balrampur", "lat": 27.6000, "lng": 82.5200, "area": 1300},
+    {"name": "Jalalpur Ambedkar Nagar", "district": "Ambedkar Nagar", "lat": 26.3100, "lng": 82.7400, "area": 1400},
+    {"name": "Tanda Ambedkar Nagar", "district": "Ambedkar Nagar", "lat": 26.5500, "lng": 82.6500, "area": 1450},
+    {"name": "Alapur", "district": "Ambedkar Nagar", "lat": 26.3600, "lng": 82.9400, "area": 1300},
+    {"name": "Gyanpur", "district": "Bhadohi", "lat": 25.3400, "lng": 82.4300, "area": 1350},
+    {"name": "Aurai", "district": "Bhadohi", "lat": 25.2600, "lng": 82.5500, "area": 1250},
+
+    # Bundelkhand UP
+    {"name": "Mauranipur", "district": "Jhansi", "lat": 25.2400, "lng": 79.1500, "area": 1450},
+    {"name": "Moth", "district": "Jhansi", "lat": 25.7200, "lng": 78.9500, "area": 1350},
+    {"name": "Garautha", "district": "Jhansi", "lat": 25.5700, "lng": 79.3000, "area": 1300},
+    {"name": "Mahroni", "district": "Lalitpur", "lat": 24.5800, "lng": 78.7200, "area": 1350},
+    {"name": "Talbehat", "district": "Lalitpur", "lat": 25.0400, "lng": 78.4300, "area": 1300},
+    {"name": "Madawara", "district": "Lalitpur", "lat": 24.3800, "lng": 78.8500, "area": 1200},
+    {"name": "Konch", "district": "Jalaun", "lat": 25.9800, "lng": 79.1500, "area": 1400},
+    {"name": "Kalpi", "district": "Jalaun", "lat": 26.1200, "lng": 79.7400, "area": 1350},
+    {"name": "Madhogarh", "district": "Jalaun", "lat": 26.2700, "lng": 79.1800, "area": 1300},
+    {"name": "Rath", "district": "Hamirpur", "lat": 25.5900, "lng": 79.5700, "area": 1400},
+    {"name": "Maudaha", "district": "Hamirpur", "lat": 25.6800, "lng": 80.1200, "area": 1350},
+    {"name": "Sarila", "district": "Hamirpur", "lat": 25.7800, "lng": 79.6800, "area": 1250},
+    {"name": "Charkhari", "district": "Mahoba", "lat": 25.4000, "lng": 79.7500, "area": 1350},
+    {"name": "Kulpahar", "district": "Mahoba", "lat": 25.3100, "lng": 79.6400, "area": 1250},
+    {"name": "Atarra", "district": "Banda", "lat": 25.2800, "lng": 80.5700, "area": 1400},
+    {"name": "Naraini", "district": "Banda", "lat": 25.1900, "lng": 80.4800, "area": 1300},
+    {"name": "Baberu", "district": "Banda", "lat": 25.5500, "lng": 80.7200, "area": 1350},
+    {"name": "Karwi", "district": "Chitrakoot", "lat": 25.2100, "lng": 80.8700, "area": 1350},
+    {"name": "Mau Chitrakoot", "district": "Chitrakoot", "lat": 25.2700, "lng": 81.3700, "area": 1250},
+    {"name": "Manikpur", "district": "Chitrakoot", "lat": 25.0400, "lng": 81.1100, "area": 1200},
+
+    # =========================================================================
+    # RAJASTHAN (Northern & Major Agricultural Belts)
+    # =========================================================================
+    # Sri Ganganagar
+    {"name": "Suratgarh", "district": "Sri Ganganagar", "lat": 29.3200, "lng": 73.9000, "area": 1700},
+    {"name": "Anupgarh", "district": "Sri Ganganagar", "lat": 29.1900, "lng": 73.2100, "area": 1600},
+    {"name": "Padampur", "district": "Sri Ganganagar", "lat": 29.6800, "lng": 73.6200, "area": 1500},
+    {"name": "Raisinghnagar", "district": "Sri Ganganagar", "lat": 29.5300, "lng": 73.4500, "area": 1450},
+    {"name": "Sadulshahar", "district": "Sri Ganganagar", "lat": 29.9800, "lng": 74.0300, "area": 1400},
+    {"name": "Karanpur", "district": "Sri Ganganagar", "lat": 29.8500, "lng": 73.4500, "area": 1350},
+    # Hanumangarh
+    {"name": "Nohar", "district": "Hanumangarh", "lat": 29.1800, "lng": 74.7700, "area": 1550},
+    {"name": "Bhadra", "district": "Hanumangarh", "lat": 29.1000, "lng": 75.1700, "area": 1500},
+    {"name": "Pilibanga", "district": "Hanumangarh", "lat": 29.4500, "lng": 73.9800, "area": 1450},
+    {"name": "Sangaria", "district": "Hanumangarh", "lat": 29.8000, "lng": 74.3800, "area": 1400},
+    {"name": "Rawatsar", "district": "Hanumangarh", "lat": 29.2800, "lng": 74.3800, "area": 1350},
+    {"name": "Tibbi", "district": "Hanumangarh", "lat": 29.6500, "lng": 74.5200, "area": 1300},
+    # Bikaner
+    {"name": "Nokha", "district": "Bikaner", "lat": 27.6000, "lng": 73.4200, "area": 1400},
+    {"name": "Dungargarh", "district": "Bikaner", "lat": 28.0900, "lng": 74.0000, "area": 1350},
+    {"name": "Kolayat", "district": "Bikaner", "lat": 27.8400, "lng": 72.9500, "area": 1250},
+    {"name": "Lunkaransar", "district": "Bikaner", "lat": 28.5300, "lng": 73.7500, "area": 1300},
+    # Churu
+    {"name": "Ratangarh", "district": "Churu", "lat": 28.0800, "lng": 74.6200, "area": 1350},
+    {"name": "Sardarshahar", "district": "Churu", "lat": 28.4400, "lng": 74.4900, "area": 1400},
+    {"name": "Sujangarh", "district": "Churu", "lat": 27.7000, "lng": 74.4700, "area": 1300},
+    {"name": "Rajgarh Churu", "district": "Churu", "lat": 28.6400, "lng": 75.3800, "area": 1250},
+    # Jhunjhunu
+    {"name": "Nawalgarh", "district": "Jhunjhunu", "lat": 27.8500, "lng": 75.2700, "area": 1300},
+    {"name": "Chirawa", "district": "Jhunjhunu", "lat": 28.2400, "lng": 75.6400, "area": 1350},
+    {"name": "Khetri", "district": "Jhunjhunu", "lat": 27.9800, "lng": 75.8000, "area": 1200},
+    {"name": "Udaipurwati", "district": "Jhunjhunu", "lat": 27.7200, "lng": 75.4700, "area": 1150},
+    # Sikar
+    {"name": "Fatehpur Sikar", "district": "Sikar", "lat": 27.9800, "lng": 74.9500, "area": 1350},
+    {"name": "Lachhmangarh", "district": "Sikar", "lat": 27.8200, "lng": 75.0300, "area": 1300},
+    {"name": "Neem Ka Thana", "district": "Sikar", "lat": 27.7400, "lng": 75.7800, "area": 1400},
+    {"name": "Sri Madhopur", "district": "Sikar", "lat": 27.4700, "lng": 75.6000, "area": 1250},
+    # Alwar
+    {"name": "Behror", "district": "Alwar", "lat": 27.8900, "lng": 76.2800, "area": 1450},
+    {"name": "Kishangarh Bas", "district": "Alwar", "lat": 27.8200, "lng": 76.7200, "area": 1400},
+    {"name": "Tijara", "district": "Alwar", "lat": 27.9300, "lng": 76.8500, "area": 1350},
+    {"name": "Ramgarh Alwar", "district": "Alwar", "lat": 27.5800, "lng": 76.8100, "area": 1300},
+    {"name": "Kathumar", "district": "Alwar", "lat": 27.3100, "lng": 77.0800, "area": 1250},
+    # Bharatpur
+    {"name": "Deeg", "district": "Bharatpur", "lat": 27.4700, "lng": 77.3200, "area": 1450},
+    {"name": "Bayana", "district": "Bharatpur", "lat": 26.9000, "lng": 77.2900, "area": 1350},
+    {"name": "Kumher", "district": "Bharatpur", "lat": 27.3100, "lng": 77.3700, "area": 1400},
+    {"name": "Nadbai", "district": "Bharatpur", "lat": 27.2300, "lng": 77.1900, "area": 1300},
+    {"name": "Weir", "district": "Bharatpur", "lat": 27.0200, "lng": 77.1700, "area": 1250},
+    {"name": "Kaman", "district": "Bharatpur", "lat": 27.6500, "lng": 77.2700, "area": 1350},
+    # Dholpur
+    {"name": "Bari", "district": "Dholpur", "lat": 26.6500, "lng": 77.6100, "area": 1350},
+    {"name": "Baseri", "district": "Dholpur", "lat": 26.8300, "lng": 77.4300, "area": 1300},
+    {"name": "Rajakhera", "district": "Dholpur", "lat": 26.9000, "lng": 78.1700, "area": 1250},
+    # Karauli
+    {"name": "Hindaun", "district": "Karauli", "lat": 26.7200, "lng": 76.9400, "area": 1400},
+    {"name": "Todabhim", "district": "Karauli", "lat": 26.9200, "lng": 76.8200, "area": 1300},
+    {"name": "Sapotra", "district": "Karauli", "lat": 26.2800, "lng": 76.7500, "area": 1200},
+    # Dausa
+    {"name": "Bandikui", "district": "Dausa", "lat": 27.0500, "lng": 76.5700, "area": 1400},
+    {"name": "Lalsot", "district": "Dausa", "lat": 26.5600, "lng": 76.3300, "area": 1350},
+    {"name": "Mahwa", "district": "Dausa", "lat": 27.0500, "lng": 76.9300, "area": 1300},
+    # Jaipur
+    {"name": "Chomu", "district": "Jaipur", "lat": 27.1700, "lng": 75.7200, "area": 1300},
+    {"name": "Kotputli", "district": "Jaipur", "lat": 27.7000, "lng": 76.2000, "area": 1400},
+    {"name": "Chaksu", "district": "Jaipur", "lat": 26.6000, "lng": 75.9500, "area": 1250},
+    {"name": "Bassi Jaipur", "district": "Jaipur", "lat": 26.8300, "lng": 76.0400, "area": 1200},
+    {"name": "Shahpura Jaipur", "district": "Jaipur", "lat": 27.3800, "lng": 75.9600, "area": 1350},
+    # Kota, Baran, Bundi, Jhalawar (Hadoti Agro Belt)
+    {"name": "Ramganj Mandi", "district": "Kota", "lat": 24.6500, "lng": 75.9500, "area": 1450},
+    {"name": "Sangod", "district": "Kota", "lat": 24.9200, "lng": 76.2800, "area": 1400},
+    {"name": "Digod", "district": "Kota", "lat": 25.2000, "lng": 76.1000, "area": 1350},
+    {"name": "Antah", "district": "Baran", "lat": 25.1500, "lng": 76.3000, "area": 1500},
+    {"name": "Mangrol", "district": "Baran", "lat": 25.3300, "lng": 76.5100, "area": 1400},
+    {"name": "Chhabra", "district": "Baran", "lat": 24.6600, "lng": 76.8400, "area": 1350},
+    {"name": "Atru", "district": "Baran", "lat": 24.8800, "lng": 76.6600, "area": 1300},
+    {"name": "Keshoraipatan", "district": "Bundi", "lat": 25.3100, "lng": 75.9600, "area": 1550},
+    {"name": "Nainwa", "district": "Bundi", "lat": 25.7700, "lng": 75.8500, "area": 1450},
+    {"name": "Hindoli", "district": "Bundi", "lat": 25.5800, "lng": 75.5000, "area": 1350},
+    {"name": "Jhalrapatan", "district": "Jhalawar", "lat": 24.5400, "lng": 76.1700, "area": 1400},
+    {"name": "Pirawa", "district": "Jhalawar", "lat": 24.1600, "lng": 76.0400, "area": 1350},
+    {"name": "Aklera", "district": "Jhalawar", "lat": 24.4100, "lng": 76.5700, "area": 1300},
+    {"name": "Khanpur Jhalawar", "district": "Jhalawar", "lat": 24.7300, "lng": 76.4000, "area": 1350},
+    # Central/Other Rajasthan
+    {"name": "Kishangarh Ajmer", "district": "Ajmer", "lat": 26.5700, "lng": 74.8700, "area": 1350},
+    {"name": "Beawar Rural", "district": "Ajmer", "lat": 26.1000, "lng": 74.3200, "area": 1250},
+    {"name": "Kekri", "district": "Ajmer", "lat": 25.9700, "lng": 75.1500, "area": 1300},
+    {"name": "Niwai", "district": "Tonk", "lat": 26.3600, "lng": 75.9300, "area": 1400},
+    {"name": "Malpura", "district": "Tonk", "lat": 26.2900, "lng": 75.3800, "area": 1350},
+    {"name": "Deoli Tonk", "district": "Tonk", "lat": 25.7600, "lng": 75.3800, "area": 1300},
+    {"name": "Gangapur City", "district": "Sawai Madhopur", "lat": 26.4700, "lng": 76.7200, "area": 1450},
+    {"name": "Bamanwas", "district": "Sawai Madhopur", "lat": 26.5500, "lng": 76.5600, "area": 1350},
+    {"name": "Bonli", "district": "Sawai Madhopur", "lat": 26.3300, "lng": 76.4300, "area": 1300},
+    {"name": "Merta", "district": "Nagaur", "lat": 26.6500, "lng": 74.0300, "area": 1450},
+    {"name": "Deedwana", "district": "Nagaur", "lat": 27.4000, "lng": 74.5700, "area": 1400},
+    {"name": "Kuchaman", "district": "Nagaur", "lat": 27.1500, "lng": 74.8500, "area": 1350},
+    {"name": "Bilara", "district": "Jodhpur", "lat": 26.1800, "lng": 73.7100, "area": 1400},
+    {"name": "Osian", "district": "Jodhpur", "lat": 26.7200, "lng": 72.9000, "area": 1300},
+    {"name": "Phalodi", "district": "Jodhpur", "lat": 27.1300, "lng": 72.3600, "area": 1250},
+    {"name": "Sojat", "district": "Pali", "lat": 25.9200, "lng": 73.6600, "area": 1350},
+    {"name": "Sumerpur", "district": "Pali", "lat": 25.1500, "lng": 73.0800, "area": 1300},
+    {"name": "Nimbahera", "district": "Chittorgarh", "lat": 24.6200, "lng": 74.6800, "area": 1400},
+    {"name": "Kapasan", "district": "Chittorgarh", "lat": 24.8800, "lng": 74.3100, "area": 1350},
+    {"name": "Gulabpura", "district": "Bhilwara", "lat": 25.9000, "lng": 74.6600, "area": 1350},
+    {"name": "Shahpura Bhilwara", "district": "Bhilwara", "lat": 25.6300, "lng": 74.9300, "area": 1300},
+
+    # =========================================================================
+    # HIMACHAL PRADESH (All 12 Districts)
+    # =========================================================================
+    # Kangra
+    {"name": "Nurpur", "district": "Kangra", "lat": 32.3000, "lng": 75.8900, "area": 1150},
+    {"name": "Palampur Rural", "district": "Kangra", "lat": 32.1100, "lng": 76.5400, "area": 1200},
+    {"name": "Dehra Gopipur", "district": "Kangra", "lat": 31.8800, "lng": 76.2200, "area": 1250},
+    {"name": "Jawali", "district": "Kangra", "lat": 32.1500, "lng": 75.9800, "area": 1100},
+    {"name": "Baijnath", "district": "Kangra", "lat": 32.0500, "lng": 76.6500, "area": 1050},
+    {"name": "Fatehpur Kangra", "district": "Kangra", "lat": 32.1000, "lng": 75.9000, "area": 1200},
+    {"name": "Indora", "district": "Kangra", "lat": 32.1300, "lng": 75.7100, "area": 1250},
+    # Mandi
+    {"name": "Sundernagar", "district": "Mandi", "lat": 31.5300, "lng": 76.9000, "area": 1200},
+    {"name": "Sarkaghat", "district": "Mandi", "lat": 31.7000, "lng": 76.7300, "area": 1150},
+    {"name": "Jogindernagar", "district": "Mandi", "lat": 31.9900, "lng": 76.7700, "area": 1100},
+    {"name": "Balh", "district": "Mandi", "lat": 31.6000, "lng": 76.9300, "area": 1300},
+    {"name": "Karsog", "district": "Mandi", "lat": 31.3800, "lng": 77.2000, "area": 1050},
+    # Una
+    {"name": "Haroli", "district": "Una", "lat": 31.4200, "lng": 76.2200, "area": 1250},
+    {"name": "Amb", "district": "Una", "lat": 31.6800, "lng": 76.1200, "area": 1200},
+    {"name": "Bangana", "district": "Una", "lat": 31.6200, "lng": 76.3300, "area": 1150},
+    {"name": "Gagret", "district": "Una", "lat": 31.6700, "lng": 76.0600, "area": 1100},
+    # Hamirpur
+    {"name": "Nadaun", "district": "Hamirpur, Himachal Pradesh", "lat": 31.7800, "lng": 76.3500, "area": 1200},
+    {"name": "Bhoranj", "district": "Hamirpur, Himachal Pradesh", "lat": 31.6800, "lng": 76.6200, "area": 1150},
+    {"name": "Barsar", "district": "Hamirpur, Himachal Pradesh", "lat": 31.5300, "lng": 76.4700, "area": 1100},
+    {"name": "Sujanpur HP", "district": "Hamirpur, Himachal Pradesh", "lat": 31.8300, "lng": 76.5000, "area": 1050},
+    # Bilaspur
+    {"name": "Ghumarwin", "district": "Bilaspur", "lat": 31.4400, "lng": 76.7100, "area": 1250},
+    {"name": "Jhandutta", "district": "Bilaspur", "lat": 31.3700, "lng": 76.6300, "area": 1150},
+    {"name": "Sri Naina Devi Ji", "district": "Bilaspur", "lat": 31.3000, "lng": 76.5400, "area": 1000},
+    # Solan
+    {"name": "Nalagarh", "district": "Solan", "lat": 31.0400, "lng": 76.7200, "area": 1350},
+    {"name": "Baddi Rural", "district": "Solan", "lat": 30.9600, "lng": 76.7900, "area": 1200},
+    {"name": "Kandaghat", "district": "Solan", "lat": 30.9600, "lng": 77.1100, "area": 1050},
+    {"name": "Arki", "district": "Solan", "lat": 31.1500, "lng": 76.9700, "area": 1100},
+    # Sirmaur
+    {"name": "Paonta Sahib", "district": "Sirmaur", "lat": 30.4400, "lng": 77.6200, "area": 1400},
+    {"name": "Nahan Rural", "district": "Sirmaur", "lat": 30.5600, "lng": 77.2900, "area": 1200},
+    {"name": "Rajgarh Sirmaur", "district": "Sirmaur", "lat": 30.8500, "lng": 77.3000, "area": 1100},
+    {"name": "Pachhad", "district": "Sirmaur", "lat": 30.7200, "lng": 77.2400, "area": 1050},
+    # Kullu
+    {"name": "Banjar", "district": "Kullu", "lat": 31.6300, "lng": 77.3400, "area": 1050},
+    {"name": "Anni", "district": "Kullu", "lat": 31.4200, "lng": 77.4700, "area": 1100},
+    {"name": "Nirmand", "district": "Kullu", "lat": 31.4300, "lng": 77.5800, "area": 1000},
+    # Shimla
+    {"name": "Rampur Bushahr", "district": "Shimla", "lat": 31.4500, "lng": 77.6300, "area": 1150},
+    {"name": "Rohru", "district": "Shimla", "lat": 31.2000, "lng": 77.7500, "area": 1100},
+    {"name": "Theog", "district": "Shimla", "lat": 31.1200, "lng": 77.3500, "area": 1050},
+    {"name": "Jubbal", "district": "Shimla", "lat": 31.1100, "lng": 77.6600, "area": 1000},
+    # Chamba, Kinnaur, Lahaul and Spiti
+    {"name": "Bhattiyat", "district": "Chamba", "lat": 32.4800, "lng": 75.9000, "area": 1100},
+    {"name": "Churah", "district": "Chamba", "lat": 32.7500, "lng": 76.0800, "area": 1050},
+    {"name": "Bharmour", "district": "Chamba", "lat": 32.4400, "lng": 76.5400, "area": 950},
+    {"name": "Kalpa", "district": "Kinnaur", "lat": 31.5400, "lng": 78.2500, "area": 900},
+    {"name": "Reckong Peo Rural", "district": "Kinnaur", "lat": 31.5400, "lng": 78.2700, "area": 850},
+    {"name": "Nichar", "district": "Kinnaur", "lat": 31.5600, "lng": 77.9700, "area": 800},
+    {"name": "Keylong", "district": "Lahaul and Spiti", "lat": 32.5700, "lng": 77.0300, "area": 800},
+    {"name": "Udaipur HP", "district": "Lahaul and Spiti", "lat": 32.7300, "lng": 76.6600, "area": 750},
+    {"name": "Kaza", "district": "Lahaul and Spiti", "lat": 32.2200, "lng": 78.0700, "area": 700},
+
+    # =========================================================================
+    # UTTARAKHAND (All 13 Districts)
+    # =========================================================================
+    # Udham Singh Nagar (Tarai Rice Belt)
+    {"name": "Kashipur", "district": "Udham Singh Nagar", "lat": 29.2100, "lng": 78.9600, "area": 1650},
+    {"name": "Rudrapur", "district": "Udham Singh Nagar", "lat": 28.9800, "lng": 79.4000, "area": 1600},
+    {"name": "Kichha", "district": "Udham Singh Nagar", "lat": 28.9200, "lng": 79.5100, "area": 1500},
+    {"name": "Sitarganj", "district": "Udham Singh Nagar", "lat": 28.9300, "lng": 79.7000, "area": 1550},
+    {"name": "Khatima", "district": "Udham Singh Nagar", "lat": 28.9200, "lng": 79.9700, "area": 1450},
+    {"name": "Bajpur", "district": "Udham Singh Nagar", "lat": 29.1500, "lng": 79.1500, "area": 1400},
+    {"name": "Gadarpur", "district": "Udham Singh Nagar", "lat": 29.0300, "lng": 79.2500, "area": 1350},
+    {"name": "Jaspur", "district": "Udham Singh Nagar", "lat": 29.2800, "lng": 78.8200, "area": 1500},
+    # Haridwar (Plains / Agro Belt)
+    {"name": "Roorkee", "district": "Haridwar", "lat": 29.8500, "lng": 77.8900, "area": 1550},
+    {"name": "Laksar", "district": "Haridwar", "lat": 29.7500, "lng": 78.0200, "area": 1600},
+    {"name": "Bhagwanpur", "district": "Haridwar", "lat": 29.9300, "lng": 77.8100, "area": 1450},
+    {"name": "Manglaur", "district": "Haridwar", "lat": 29.7900, "lng": 77.8700, "area": 1400},
+    {"name": "Narsan", "district": "Haridwar", "lat": 29.7200, "lng": 77.8000, "area": 1350},
+    {"name": "Bahadrabad", "district": "Haridwar", "lat": 29.9100, "lng": 78.0500, "area": 1300},
+    # Dehradun
+    {"name": "Rishikesh Rural", "district": "Dehradun", "lat": 30.0800, "lng": 78.2600, "area": 1200},
+    {"name": "Vikasnagar", "district": "Dehradun", "lat": 30.4800, "lng": 77.7700, "area": 1400},
+    {"name": "Doiwala", "district": "Dehradun", "lat": 30.1800, "lng": 78.1200, "area": 1350},
+    {"name": "Chakrata", "district": "Dehradun", "lat": 30.7000, "lng": 77.8700, "area": 1050},
+    {"name": "Kalsi", "district": "Dehradun", "lat": 30.5300, "lng": 77.8500, "area": 1100},
+    # Nainital
+    {"name": "Haldwani Rural", "district": "Nainital", "lat": 29.2200, "lng": 79.5200, "area": 1450},
+    {"name": "Ramnagar Nainital", "district": "Nainital", "lat": 29.3900, "lng": 79.1200, "area": 1400},
+    {"name": "Kaladhungi", "district": "Nainital", "lat": 29.2800, "lng": 79.3500, "area": 1300},
+    {"name": "Lalkuan", "district": "Nainital", "lat": 29.0800, "lng": 79.5200, "area": 1350},
+    {"name": "Dhari Nainital", "district": "Nainital", "lat": 29.4100, "lng": 79.6200, "area": 1050},
+    # Pauri Garhwal & Tehri Garhwal
+    {"name": "Kotdwar", "district": "Pauri Garhwal", "lat": 29.7500, "lng": 78.5300, "area": 1350},
+    {"name": "Srinagar Garhwal", "district": "Pauri Garhwal", "lat": 30.2200, "lng": 78.7800, "area": 1150},
+    {"name": "Thalisain", "district": "Pauri Garhwal", "lat": 30.0200, "lng": 79.0500, "area": 1050},
+    {"name": "Narendra Nagar", "district": "Tehri Garhwal", "lat": 30.1600, "lng": 78.2900, "area": 1100},
+    {"name": "Chamba Tehri", "district": "Tehri Garhwal", "lat": 30.3400, "lng": 78.4000, "area": 1050},
+    {"name": "Devprayag", "district": "Tehri Garhwal", "lat": 30.1400, "lng": 78.6000, "area": 1000},
+    {"name": "Ghansali", "district": "Tehri Garhwal", "lat": 30.4300, "lng": 78.6500, "area": 950},
+    # Almora, Bageshwar, Pithoragarh, Chamoli, Rudraprayag, Uttarkashi, Champawat
+    {"name": "Ranikhet Rural", "district": "Almora", "lat": 29.6400, "lng": 79.4300, "area": 1100},
+    {"name": "Dwarahat", "district": "Almora", "lat": 29.7800, "lng": 79.4300, "area": 1050},
+    {"name": "Bhikiyasain", "district": "Almora", "lat": 29.7000, "lng": 79.2700, "area": 1000},
+    {"name": "Chaukhutiya", "district": "Almora", "lat": 29.8800, "lng": 79.3500, "area": 1050},
+    {"name": "Garur", "district": "Bageshwar", "lat": 29.8800, "lng": 79.6300, "area": 1050},
+    {"name": "Kapkot", "district": "Bageshwar", "lat": 29.9500, "lng": 79.9000, "area": 950},
+    {"name": "Didihat", "district": "Pithoragarh", "lat": 29.8000, "lng": 80.2500, "area": 1000},
+    {"name": "Dharchula", "district": "Pithoragarh", "lat": 29.8500, "lng": 80.5400, "area": 900},
+    {"name": "Gangolihat", "district": "Pithoragarh", "lat": 29.6600, "lng": 80.0500, "area": 950},
+    {"name": "Karnaprayag", "district": "Chamoli", "lat": 30.2600, "lng": 79.2200, "area": 1050},
+    {"name": "Gopeshwar Rural", "district": "Chamoli", "lat": 30.4100, "lng": 79.3300, "area": 950},
+    {"name": "Tharali", "district": "Chamoli", "lat": 30.0600, "lng": 79.4900, "area": 900},
+    {"name": "Ukhimath", "district": "Rudraprayag", "lat": 30.5200, "lng": 79.1000, "area": 950},
+    {"name": "Jakholi", "district": "Rudraprayag", "lat": 30.3400, "lng": 78.9800, "area": 900},
+    {"name": "Barkot", "district": "Uttarkashi", "lat": 30.8100, "lng": 78.2100, "area": 1050},
+    {"name": "Purola", "district": "Uttarkashi", "lat": 30.8800, "lng": 78.0800, "area": 1000},
+    {"name": "Chinyalisaur", "district": "Uttarkashi", "lat": 30.5500, "lng": 78.3300, "area": 950},
+    {"name": "Tanakpur", "district": "Champawat", "lat": 29.0700, "lng": 80.1100, "area": 1200},
+    {"name": "Lohaghat", "district": "Champawat", "lat": 29.4000, "lng": 80.0900, "area": 1050},
+
+    # =========================================================================
+    # DELHI / NCT
+    # =========================================================================
+    {"name": "Alipur", "district": "North Delhi", "lat": 28.8000, "lng": 77.1300, "area": 1050},
+    {"name": "Narela", "district": "North Delhi", "lat": 28.8500, "lng": 77.0900, "area": 1100},
+    {"name": "Bakhtawarpur", "district": "North Delhi", "lat": 28.8200, "lng": 77.1500, "area": 950},
+    {"name": "Burari Rural", "district": "North Delhi", "lat": 28.7500, "lng": 77.1900, "area": 900},
+    {"name": "Holambi Kalan", "district": "North Delhi", "lat": 28.8100, "lng": 77.0900, "area": 850},
+    {"name": "Hamidpur", "district": "North Delhi", "lat": 28.8300, "lng": 77.1300, "area": 800},
+    {"name": "Kanjhawala", "district": "North West Delhi", "lat": 28.7200, "lng": 77.0000, "area": 1150},
+    {"name": "Bawana", "district": "North West Delhi", "lat": 28.8000, "lng": 77.0300, "area": 1200},
+    {"name": "Mundka", "district": "North West Delhi", "lat": 28.6800, "lng": 77.0300, "area": 950},
+    {"name": "Pooth Kalan", "district": "North West Delhi", "lat": 28.7200, "lng": 77.0800, "area": 900},
+    {"name": "Karala", "district": "North West Delhi", "lat": 28.7300, "lng": 77.0400, "area": 850},
+    {"name": "Najafgarh", "district": "South West Delhi", "lat": 28.6100, "lng": 76.9800, "area": 1250},
+    {"name": "Kapashera", "district": "South West Delhi", "lat": 28.5200, "lng": 77.0800, "area": 900},
+    {"name": "Dhansa", "district": "South West Delhi", "lat": 28.5700, "lng": 76.8600, "area": 1050},
+    {"name": "Ujwa", "district": "South West Delhi", "lat": 28.5800, "lng": 76.9100, "area": 1000},
+    {"name": "Chhawla", "district": "South West Delhi", "lat": 28.5700, "lng": 77.0100, "area": 950},
+    {"name": "Dichaon Kalan", "district": "South West Delhi", "lat": 28.6400, "lng": 76.9700, "area": 920},
+    {"name": "Tikri Kalan", "district": "West Delhi", "lat": 28.6800, "lng": 76.9600, "area": 950},
+    {"name": "Nilothi", "district": "West Delhi", "lat": 28.6600, "lng": 77.0600, "area": 850},
+    {"name": "Bakkarwala", "district": "West Delhi", "lat": 28.6700, "lng": 77.0200, "area": 880},
+    {"name": "Sonia Vihar Rural", "district": "North East Delhi", "lat": 28.7300, "lng": 77.2500, "area": 800},
+    {"name": "Sabhapur", "district": "North East Delhi", "lat": 28.7500, "lng": 77.2400, "area": 750},
+    {"name": "Ghazipur Rural", "district": "East Delhi", "lat": 28.6200, "lng": 77.3300, "area": 700},
+    {"name": "Chilla Saroda", "district": "East Delhi", "lat": 28.6000, "lng": 77.3100, "area": 650},
+    {"name": "Fatehpur Beri", "district": "South Delhi", "lat": 28.4700, "lng": 77.1800, "area": 900},
+    {"name": "Asola", "district": "South Delhi", "lat": 28.4900, "lng": 77.2000, "area": 850},
+    {"name": "Bhati Rural", "district": "South Delhi", "lat": 28.4600, "lng": 77.2200, "area": 800},
+    {"name": "Dera Mandi", "district": "South Delhi", "lat": 28.4400, "lng": 77.1700, "area": 750},
+    {"name": "Madanpur Khadar Rural", "district": "South East Delhi", "lat": 28.5200, "lng": 77.3100, "area": 800},
+    {"name": "Jaitpur Rural", "district": "South East Delhi", "lat": 28.5100, "lng": 77.3300, "area": 750},
+    {"name": "Mandoli Rural", "district": "Shahdara", "lat": 28.6900, "lng": 77.3100, "area": 700},
+
+    # =========================================================================
+    # JAMMU & KASHMIR
+    # =========================================================================
+    # Jammu
+    {"name": "RS Pura", "district": "Jammu", "lat": 32.6000, "lng": 74.7300, "area": 1400},
+    {"name": "Bishnah", "district": "Jammu", "lat": 32.6100, "lng": 74.8600, "area": 1350},
+    {"name": "Akhnoor", "district": "Jammu", "lat": 32.9000, "lng": 74.7300, "area": 1300},
+    {"name": "Marh", "district": "Jammu", "lat": 32.7400, "lng": 74.7400, "area": 1250},
+    {"name": "Dansal", "district": "Jammu", "lat": 32.8800, "lng": 74.9600, "area": 1150},
+    {"name": "Khour", "district": "Jammu", "lat": 32.8200, "lng": 74.5200, "area": 1200},
+    {"name": "Miran Sahib", "district": "Jammu", "lat": 32.6300, "lng": 74.7900, "area": 1250},
+    # Samba
+    {"name": "Samba Rural", "district": "Samba", "lat": 32.5600, "lng": 75.1200, "area": 1250},
+    {"name": "Vijaypur", "district": "Samba", "lat": 32.5700, "lng": 75.0200, "area": 1300},
+    {"name": "Ramgarh Samba", "district": "Samba", "lat": 32.5200, "lng": 75.0500, "area": 1200},
+    {"name": "Ghagwal", "district": "Samba", "lat": 32.5300, "lng": 75.1900, "area": 1150},
+    {"name": "Bari Brahmana", "district": "Samba", "lat": 32.6400, "lng": 74.9300, "area": 1100},
+    # Kathua
+    {"name": "Hiranagar", "district": "Kathua", "lat": 32.4500, "lng": 75.2700, "area": 1350},
+    {"name": "Billawar", "district": "Kathua", "lat": 32.6100, "lng": 75.6000, "area": 1200},
+    {"name": "Basohli", "district": "Kathua", "lat": 32.5000, "lng": 75.8100, "area": 1150},
+    {"name": "Marheen", "district": "Kathua", "lat": 32.4100, "lng": 75.3300, "area": 1250},
+    {"name": "Nagri Parole", "district": "Kathua", "lat": 32.3300, "lng": 75.5100, "area": 1200},
+    # Udhampur & Reasi
+    {"name": "Ramnagar Udhampur", "district": "Udhampur", "lat": 32.8100, "lng": 75.3100, "area": 1150},
+    {"name": "Chenani", "district": "Udhampur", "lat": 33.0300, "lng": 75.2800, "area": 1100},
+    {"name": "Majalta", "district": "Udhampur", "lat": 32.7300, "lng": 75.2500, "area": 1050},
+    {"name": "Pouni", "district": "Reasi", "lat": 33.0500, "lng": 74.6800, "area": 1100},
+    {"name": "Katra Rural", "district": "Reasi", "lat": 32.9900, "lng": 74.9300, "area": 1000},
+    # Rajouri & Poonch
+    {"name": "Nowshera", "district": "Rajouri", "lat": 33.1500, "lng": 74.2400, "area": 1200},
+    {"name": "Sunderbani", "district": "Rajouri", "lat": 33.0500, "lng": 74.4900, "area": 1150},
+    {"name": "Kalakote", "district": "Rajouri", "lat": 33.2100, "lng": 74.4200, "area": 1100},
+    {"name": "Mendhar", "district": "Poonch", "lat": 33.6100, "lng": 74.1300, "area": 1150},
+    {"name": "Surankote", "district": "Poonch", "lat": 33.6400, "lng": 74.2600, "area": 1100},
+    # Kashmir Valley (Rice & Saffron Agricultural Hubs)
+    {"name": "Bijbehara", "district": "Anantnag", "lat": 33.8000, "lng": 75.1000, "area": 1300},
+    {"name": "Dooru", "district": "Anantnag", "lat": 33.5600, "lng": 75.2100, "area": 1250},
+    {"name": "Pahalgam Rural", "district": "Anantnag", "lat": 34.0100, "lng": 75.1900, "area": 1000},
+    {"name": "Kokernag", "district": "Anantnag", "lat": 33.5800, "lng": 75.3100, "area": 1150},
+    {"name": "Pampore", "district": "Pulwama", "lat": 34.0200, "lng": 74.9300, "area": 1350},
+    {"name": "Tral", "district": "Pulwama", "lat": 33.9300, "lng": 75.1200, "area": 1250},
+    {"name": "Awantipora", "district": "Pulwama", "lat": 33.9200, "lng": 75.0100, "area": 1300},
+    {"name": "Kakapora", "district": "Pulwama", "lat": 33.9800, "lng": 74.9500, "area": 1200},
+    {"name": "Sopore Rural", "district": "Baramulla", "lat": 34.3000, "lng": 74.4700, "area": 1350},
+    {"name": "Pattan", "district": "Baramulla", "lat": 34.1600, "lng": 74.5600, "area": 1300},
+    {"name": "Tangmarg", "district": "Baramulla", "lat": 34.0600, "lng": 74.4200, "area": 1150},
+    {"name": "Rafiabad", "district": "Baramulla", "lat": 34.3500, "lng": 74.4000, "area": 1250},
+    {"name": "Chadoora", "district": "Budgam", "lat": 33.9500, "lng": 74.8000, "area": 1300},
+    {"name": "Beerwah", "district": "Budgam", "lat": 34.0200, "lng": 74.5900, "area": 1250},
+    {"name": "Magam", "district": "Budgam", "lat": 34.0800, "lng": 74.5800, "area": 1200},
+    {"name": "Devsar", "district": "Kulgam", "lat": 33.6100, "lng": 75.0800, "area": 1250},
+    {"name": "Damhal Hanjipora", "district": "Kulgam", "lat": 33.5500, "lng": 74.8900, "area": 1200},
+    {"name": "Zainapora", "district": "Shopian", "lat": 33.7700, "lng": 74.9700, "area": 1200},
+    {"name": "Keller", "district": "Shopian", "lat": 33.6800, "lng": 74.7800, "area": 1150},
+    {"name": "Kangan", "district": "Ganderbal", "lat": 34.2600, "lng": 74.9000, "area": 1100},
+    {"name": "Tullamulla", "district": "Ganderbal", "lat": 34.2200, "lng": 74.7200, "area": 1150},
+    {"name": "Sumbal", "district": "Bandipora", "lat": 34.2300, "lng": 74.6400, "area": 1250},
+    {"name": "Sonawari", "district": "Bandipora", "lat": 34.2000, "lng": 74.6000, "area": 1200},
+    {"name": "Handwara", "district": "Kupwara", "lat": 34.4000, "lng": 74.2800, "area": 1300},
+    {"name": "Langate", "district": "Kupwara", "lat": 34.3300, "lng": 74.3100, "area": 1250},
+
+    # =========================================================================
+    # CHANDIGARH & LADAKH
+    # =========================================================================
+    {"name": "Manimajra", "district": "Chandigarh", "lat": 30.7200, "lng": 76.8400, "area": 600},
+    {"name": "Dhanas", "district": "Chandigarh", "lat": 30.7700, "lng": 76.7600, "area": 550},
+    {"name": "Maloya", "district": "Chandigarh", "lat": 30.7400, "lng": 76.7100, "area": 500},
+    {"name": "Raipur Kalan", "district": "Chandigarh", "lat": 30.6700, "lng": 76.8200, "area": 520},
+    {"name": "Khuda Lahora", "district": "Chandigarh", "lat": 30.7800, "lng": 76.7600, "area": 480},
+    {"name": "Sarangpur", "district": "Chandigarh", "lat": 30.7700, "lng": 76.7700, "area": 500},
+    {"name": "Leh Rural", "district": "Leh", "lat": 34.1500, "lng": 77.5800, "area": 650},
+    {"name": "Diskit", "district": "Leh", "lat": 34.5500, "lng": 77.5500, "area": 600},
+    {"name": "Khaltsi", "district": "Leh", "lat": 34.3200, "lng": 76.8800, "area": 550},
+    {"name": "Kargil Rural", "district": "Kargil", "lat": 34.5500, "lng": 76.1300, "area": 600},
+    {"name": "Sankoo", "district": "Kargil", "lat": 34.2900, "lng": 75.9500, "area": 550},
+    {"name": "Zanskar", "district": "Kargil", "lat": 33.4800, "lng": 76.8800, "area": 500},
+
+    # =========================================================================
+    # OTHER INDIAN STATES (Preserved for Pan-India Coverage)
+    # =========================================================================
+    # Madhya Pradesh
     {"name": "Itarsi", "district": "Hoshangabad", "lat": 22.6100, "lng": 77.7600, "area": 1500},
     {"name": "Pipariya", "district": "Hoshangabad", "lat": 22.7600, "lng": 78.3500, "area": 1600},
     {"name": "Ashta", "district": "Sehore", "lat": 23.0200, "lng": 76.7200, "area": 1300},
@@ -100,7 +884,7 @@ VILLAGES_DATA = [
     {"name": "Dabra", "district": "Gwalior", "lat": 25.9000, "lng": 78.3300, "area": 1350},
     {"name": "Sihora", "district": "Jabalpur", "lat": 23.4900, "lng": 80.1100, "area": 1250},
 
-    # --- MAHARASHTRA ---
+    # Maharashtra
     {"name": "Hinjawadi", "district": "Pune", "lat": 18.5913, "lng": 73.7389, "area": 700},
     {"name": "Baramati", "district": "Pune", "lat": 18.1500, "lng": 74.5800, "area": 1400},
     {"name": "Shirur", "district": "Pune", "lat": 18.8200, "lng": 74.3700, "area": 1200},
@@ -111,7 +895,7 @@ VILLAGES_DATA = [
     {"name": "Rahuri", "district": "Ahmednagar", "lat": 19.3900, "lng": 74.6500, "area": 1400},
     {"name": "Saoner", "district": "Nagpur", "lat": 21.3800, "lng": 78.9200, "area": 1050},
 
-    # --- GUJARAT ---
+    # Gujarat
     {"name": "Petlad", "district": "Anand", "lat": 22.4700, "lng": 72.8000, "area": 1100},
     {"name": "Borsad", "district": "Anand", "lat": 22.4100, "lng": 72.9000, "area": 1050},
     {"name": "Kadi", "district": "Mehsana", "lat": 23.3000, "lng": 72.3300, "area": 1200},
@@ -119,7 +903,7 @@ VILLAGES_DATA = [
     {"name": "Gondal", "district": "Rajkot", "lat": 21.9600, "lng": 70.8000, "area": 1250},
     {"name": "Bardoli", "district": "Surat", "lat": 21.1200, "lng": 73.1100, "area": 1300},
 
-    # --- BIHAR ---
+    # Bihar
     {"name": "Sasaram", "district": "Rohtas", "lat": 24.9500, "lng": 84.0300, "area": 1600},
     {"name": "Nokha", "district": "Rohtas", "lat": 25.1800, "lng": 84.1500, "area": 1400},
     {"name": "Bikramganj", "district": "Rohtas", "lat": 25.2000, "lng": 84.2500, "area": 1350},
@@ -129,7 +913,7 @@ VILLAGES_DATA = [
     {"name": "Barh", "district": "Patna", "lat": 25.4800, "lng": 85.7100, "area": 1100},
     {"name": "Mokama", "district": "Patna", "lat": 25.4000, "lng": 85.9200, "area": 1150},
 
-    # --- WEST BENGAL ---
+    # West Bengal
     {"name": "Memari", "district": "Purba Bardhaman", "lat": 23.2000, "lng": 88.1100, "area": 1400},
     {"name": "Kalna", "district": "Purba Bardhaman", "lat": 23.2200, "lng": 88.3700, "area": 1300},
     {"name": "Katwa", "district": "Purba Bardhaman", "lat": 23.6500, "lng": 88.1300, "area": 1350},
@@ -137,7 +921,7 @@ VILLAGES_DATA = [
     {"name": "Singur", "district": "Hooghly", "lat": 22.8100, "lng": 88.2300, "area": 1100},
     {"name": "Berhampore", "district": "Murshidabad", "lat": 24.1000, "lng": 88.2500, "area": 1200},
 
-    # --- KARNATAKA ---
+    # Karnataka
     {"name": "Whitefield", "district": "Bengaluru", "lat": 12.9698, "lng": 77.7499, "area": 600},
     {"name": "Hoskote", "district": "Bengaluru", "lat": 13.0700, "lng": 77.8000, "area": 850},
     {"name": "Maddur", "district": "Mandya", "lat": 12.5800, "lng": 77.0400, "area": 1300},
@@ -145,80 +929,61 @@ VILLAGES_DATA = [
     {"name": "Sindhanur", "district": "Raichur", "lat": 15.7800, "lng": 76.7600, "area": 1600},
     {"name": "Siruguppa", "district": "Bellary", "lat": 15.6300, "lng": 76.9000, "area": 1450},
 
-    # --- ANDHRA PRADESH ---
+    # Andhra Pradesh
     {"name": "Gudivada", "district": "Krishna", "lat": 16.4400, "lng": 80.9900, "area": 1400},
     {"name": "Machilipatnam", "district": "Krishna", "lat": 16.1800, "lng": 81.1300, "area": 1200},
     {"name": "Tenali", "district": "Guntur", "lat": 16.2400, "lng": 80.6400, "area": 1350},
     {"name": "Bhimavaram", "district": "West Godavari", "lat": 16.5400, "lng": 81.5200, "area": 1500},
     {"name": "Tadepalligudem", "district": "West Godavari", "lat": 16.8100, "lng": 81.5200, "area": 1400},
 
-    # --- TELANGANA ---
+    # Telangana
     {"name": "Huzurabad", "district": "Karimnagar", "lat": 18.1900, "lng": 79.4000, "area": 1300},
     {"name": "Jammikunta", "district": "Karimnagar", "lat": 18.2800, "lng": 79.4700, "area": 1250},
     {"name": "Bodhan", "district": "Nizamabad", "lat": 18.6600, "lng": 77.9000, "area": 1400},
     {"name": "Miryalaguda", "district": "Nalgonda", "lat": 16.8700, "lng": 79.5600, "area": 1500},
     {"name": "Suryapet", "district": "Nalgonda", "lat": 17.1400, "lng": 79.6200, "area": 1350},
 
-    # --- TAMIL NADU ---
+    # Tamil Nadu
     {"name": "Kumbakonam", "district": "Thanjavur", "lat": 10.9600, "lng": 79.3800, "area": 1400},
     {"name": "Pattukkottai", "district": "Thanjavur", "lat": 10.4300, "lng": 79.3200, "area": 1300},
     {"name": "Mannargudi", "district": "Tiruvarur", "lat": 10.6600, "lng": 79.4500, "area": 1350},
     {"name": "Mayiladuthurai", "district": "Nagapattinam", "lat": 11.1000, "lng": 79.6500, "area": 1250},
 
-    # --- ODISHA ---
+    # Odisha
     {"name": "Attabira", "district": "Bargarh", "lat": 21.3600, "lng": 83.7800, "area": 1500},
     {"name": "Barpali", "district": "Bargarh", "lat": 21.1900, "lng": 83.5800, "area": 1350},
     {"name": "Kuchinda", "district": "Sambalpur", "lat": 21.7400, "lng": 84.3500, "area": 1100},
 
-    # --- CHHATTISGARH ---
+    # Chhattisgarh
     {"name": "Abhanpur", "district": "Raipur", "lat": 21.0500, "lng": 81.7500, "area": 1300},
     {"name": "Patan", "district": "Durg", "lat": 21.0300, "lng": 81.5300, "area": 1250},
     {"name": "Kurud", "district": "Dhamtari", "lat": 20.8300, "lng": 81.7200, "area": 1400},
 
-    # --- JHARKHAND ---
+    # Jharkhand
     {"name": "Kanke", "district": "Ranchi", "lat": 23.4300, "lng": 85.3200, "area": 950},
     {"name": "Barhi", "district": "Hazaribagh", "lat": 24.3000, "lng": 85.4200, "area": 900},
 
-    # --- UTTARAKHAND ---
-    {"name": "Kashipur", "district": "Udham Singh Nagar", "lat": 29.2100, "lng": 78.9600, "area": 1350},
-    {"name": "Rudrapur", "district": "Udham Singh Nagar", "lat": 28.9800, "lng": 79.4000, "area": 1400},
-    {"name": "Roorkee", "district": "Haridwar", "lat": 29.8500, "lng": 77.8900, "area": 1200},
-
-    # --- HIMACHAL PRADESH ---
-    {"name": "Nurpur", "district": "Kangra", "lat": 32.3000, "lng": 75.8900, "area": 850},
-    {"name": "Sundernagar", "district": "Mandi", "lat": 31.5300, "lng": 76.9000, "area": 800},
-    {"name": "Haroli", "district": "Una", "lat": 31.4200, "lng": 76.2200, "area": 900},
-
-    # --- ASSAM ---
+    # Assam
     {"name": "Kaliabor", "district": "Nagaon", "lat": 26.5400, "lng": 93.0000, "area": 1050},
     {"name": "Sarthebari", "district": "Barpeta", "lat": 26.3500, "lng": 91.1300, "area": 1000},
 
-    # --- KERALA ---
+    # Kerala & UT
     {"name": "Alathur", "district": "Palakkad", "lat": 10.6400, "lng": 76.5400, "area": 1100},
     {"name": "Chittur", "district": "Palakkad", "lat": 10.7000, "lng": 76.7200, "area": 1050},
     {"name": "Kuttanad", "district": "Alappuzha", "lat": 9.4500, "lng": 76.4500, "area": 1200},
-
-    # --- DELHI / NCR ---
-    {"name": "Alipur", "district": "North Delhi", "lat": 28.8000, "lng": 77.1300, "area": 850},
-    {"name": "Narela", "district": "North Delhi", "lat": 28.8500, "lng": 77.0900, "area": 900},
-    {"name": "Najafgarh", "district": "South West Delhi", "lat": 28.6100, "lng": 76.9800, "area": 950},
-
-    # --- CHANDIGARH & UTs ---
-    {"name": "Manimajra", "district": "Chandigarh", "lat": 30.7200, "lng": 76.8400, "area": 500},
     {"name": "Villianur", "district": "Puducherry", "lat": 11.9100, "lng": 79.7600, "area": 750},
-    {"name": "RS Pura", "district": "Jammu", "lat": 32.6000, "lng": 74.7300, "area": 1100},
 ]
 
-def seed():
+def seed() -> None:
     client = get_supabase_client()
     existing_resp = client.table("villages").select("name, district").execute()
-    existing_set = {(item["name"].lower().strip(), item["district"].lower().strip()) for item in existing_resp.data}
+    existing_set = {(str(item["name"]).lower().strip(), str(item["district"]).lower().strip()) for item in existing_resp.data}
     
-    print(f"Existing villages count: {len(existing_set)}")
+    print(f"Existing villages count in DB: {len(existing_set)}")
     
     to_insert = []
     for v in VILLAGES_DATA:
-        key = (v["name"].lower().strip(), v["district"].lower().strip())
+        key = (str(v["name"]).lower().strip(), str(v["district"]).lower().strip())
         if key not in existing_set:
             to_insert.append({
                 "id": str(uuid.uuid4()),
@@ -232,14 +997,14 @@ def seed():
             })
             existing_set.add(key)
             
-    print(f"Inserting {len(to_insert)} new villages across Indian states...")
+    print(f"Prepared {len(to_insert)} new villages across Indian states...")
     
-    # Insert in batches of 20
-    batch_size = 20
+    # Insert in batches of 30
+    batch_size = 30
     for i in range(0, len(to_insert), batch_size):
         batch = to_insert[i:i + batch_size]
-        res = client.table("villages").insert(batch).execute()
-        print(f"Batch {i//batch_size + 1} inserted ({len(batch)} items)")
+        client.table("villages").insert(batch).execute()
+        print(f"Batch {i // batch_size + 1}/{(len(to_insert) + batch_size - 1) // batch_size} inserted ({len(batch)} items)")
         
     total = client.table("villages").select("id").execute()
     print(f"Total villages now in DB: {len(total.data)}")

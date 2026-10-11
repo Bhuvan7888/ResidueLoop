@@ -231,7 +231,7 @@ export function BuyerProcurementAdvisor({
       </div>
 
       {/* Cost Breakdown by Source and Form Index (Collapsible / Banner) */}
-      {(showPriceIndexGuide || true) && (
+      {showPriceIndexGuide && (
         <div className="bg-surface border border-surface-border rounded-2xl p-4 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-bold uppercase tracking-wider text-copy-primary flex items-center gap-2">

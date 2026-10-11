@@ -1,6 +1,7 @@
 from app.core.security import get_supabase_client
 from app.core.config import get_settings
 from fastapi import HTTPException
+from typing import Any
 import uuid
 import datetime
 import math

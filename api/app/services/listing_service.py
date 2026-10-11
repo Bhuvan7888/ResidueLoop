@@ -195,7 +195,7 @@ async def get_all_listings(farmer_id: str | None = None, status_filter: str | No
             badge = "Recommended to Buy"
             reasons = [
                 f"Form: {tier_info['name']} ({tier_info['range']}).",
-                f"Finely chopped combine SMS straw, optimal for baling and boiler combustion.",
+                "Finely chopped combine SMS straw, optimal for baling and boiler combustion.",
                 f"Offered at ₹{price_per_tonne:,.0f}/t (Benchmark: ₹{benchmark_rate:,.0f}/t). Baler: {baler_name}."
             ]
         elif stubble_form == "brick_kiln" or "brick_kiln" in meta.get("intended_purposes", []):

@@ -1,7 +1,6 @@
 import logging
 import datetime
 import re
-import uuid
 import json
 import httpx
 from typing import Any, Dict
