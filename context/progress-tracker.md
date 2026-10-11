@@ -123,7 +123,15 @@ This tracker records verified evidence only. Earlier completion claims were inde
     4. 🏅 `My Impact & Honours`: Personal scoreboard and official "Clean Air Guardian Impact Certificate" with verifiable ID and 1-click WhatsApp/Social sharing to celebrate citizen contribution.
   - Upgraded Stripe Dummy Gateway modal with real-time impact equivalency feedback (`₹X funds Y acres and stops Z tonnes CO2`) and automated NGO call telemetry.
   - Attained 100% key parity across `en.json`, `hi.json`, and `pa.json` (815 keys each, 0 diffs).
-  - Verified static quality: `npm run typecheck` (0 errors), `npm test` (17 tests passed), `npm run lint` (0 errors), `npm run build` (built in 586ms), `poetry run pytest` (34 tests passed).
+- [x] Revamped NGO Ground Operations Command & Machinery Portal (2026-10-11):
+  - Designed Executive Ground Operations Header: Added active field network telemetry badge, live refresh controls, dynamic eco-impact counters (Rescued Farmland, Straw Diverted, PM2.5 Prevented, Families Supported), and 1-tap copyable audit summary.
+  - Implemented 4-Tab Task-Oriented Workflow:
+    1. 📋 `Field Requests`: Filterable by All, Pending Review, Approved & Ready, Declined, with instant search by farmer name, village, or purpose. Displays farmer phone shortcut, village tag, 48h urgent burn countdown, and inline approval/decline controls.
+    2. 🚜 `Machinery Disbursements`: Visual payee classification breakdown (Baler Operators, Hauler / Transport, Farmer Direct Subsidies) and structured audit table. Includes expandable disbursement form with payee selector, amount presets, and working balance safety check.
+    3. 📊 `Audit Ledger`: Dual-stream accounting combining citizen clean air donation inflows with field clearance outflows, exportable summary, and verified status badges.
+    4. 🔔 `Ground Alerts`: Real-time telemetry feed with timestamps for farmer applications, donor contributions, and machine dispatches.
+  - Attained 100% key and semantic parity across `en.json`, `hi.json`, and `pa.json` (90 keys in NGO namespace, 0 diffs).
+  - Verified static quality: `npm run typecheck` (0 errors), `npm test` (17 tests passed), `npm run lint` (0 errors), `npm run build` (built cleanly), `poetry run pytest` (34 tests passed).
 
 ## Recovery Decisions
 
