@@ -32,7 +32,7 @@ type HarvestTimingKey = 'now' | '1wk' | '2wk' | 'custom'
 type StrawConditionKey = 'standing' | 'chopped' | 'baled'
 
 export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProps) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const [error, setError] = useState<string | null>(null)
   const [showCustomDate, setShowCustomDate] = useState(false)
   const [showAdvancedPrice, setShowAdvancedPrice] = useState(false)
@@ -110,21 +110,18 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
   const handleConditionSelect = (cond: StrawConditionKey) => {
     setSelectedCondition(cond)
     if (cond === 'standing') {
-      // Standing in field: loose straw, buyer will cut and bale
       form.setValue('stubbleForm', 'farm_gate_loose')
       form.setValue('qualityGrade', 'grade_b')
       form.setValue('combineSmsUsed', false)
       form.setValue('intendedPurposes', ['biomass_plant', 'thermal_power', 'brick_kiln'])
       form.setValue('expectedPricePerTonne', 1600)
     } else if (cond === 'chopped') {
-      // Chopped by combine SMS
       form.setValue('stubbleForm', 'delivered_bales')
       form.setValue('qualityGrade', 'grade_a_sms')
       form.setValue('combineSmsUsed', true)
       form.setValue('intendedPurposes', ['paper_packaging', 'thermal_power', 'briquettes_pellets'])
       form.setValue('expectedPricePerTonne', 1950)
     } else if (cond === 'baled') {
-      // Already baled
       form.setValue('stubbleForm', 'delivered_bales')
       form.setValue('qualityGrade', 'grade_a_plus')
       form.setValue('combineSmsUsed', false)
@@ -155,7 +152,9 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
       <div className="bg-surface border-2 border-surface-border rounded-3xl p-6 space-y-5 shadow-xs">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-brand">चरण 1 / Step 1</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-brand">
+              {t('farmer.step_1_badge', 'Step 1')}
+            </span>
             <h3 className="text-xl font-bold text-copy-primary mt-0.5">
               📍 {t('farmer.step_1_title', '1. Select Plot & Harvest Time')}
             </h3>
@@ -171,7 +170,7 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
         {plots.length > 1 ? (
           <div>
             <label className="block text-xs font-bold uppercase text-copy-secondary mb-2">
-              {t('listing.select_plot', 'खेत चुनें / Select Plot')}
+              {t('listing.select_plot', 'Select Plot')}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {plots.map((plot) => {
@@ -199,12 +198,16 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
             <div className="flex items-center gap-2">
               <span className="text-xl">🌾</span>
               <div>
-                <span className="text-xs text-copy-secondary font-medium">पंजीकृत खेत / Registered Plot:</span>
-                <div className="font-bold text-sm text-copy-primary">{selectedPlot?.name || 'खेत #1'} ({acres} {t('listing.acres', 'acres')})</div>
+                <span className="text-xs text-copy-secondary font-medium">
+                  {t('farmer.selected_plot_label', 'Registered Plot')}:
+                </span>
+                <div className="font-bold text-sm text-copy-primary">
+                  {selectedPlot?.name || t('farmer.selected_plot_default', 'Plot #1')} ({acres} {t('listing.acres', 'acres')})
+                </div>
               </div>
             </div>
             <span className="text-xs px-2.5 py-1 rounded-full bg-state-success-dim text-state-success font-semibold border border-state-success/30">
-              ✓ चयनित
+              ✓ {t('farmer.selected_badge', 'Selected')}
             </span>
           </div>
         )}
@@ -215,20 +218,20 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
             ✨ {t('farmer.calculator_title', 'Zero-Math Automatic Estimate')}
           </div>
           <div className="text-xl sm:text-2xl font-black text-copy-primary pt-1">
-            🌾 {t('farmer.est_straw', 'Estimated Stubble')}: ~{estMin.toFixed(0)} {t('common.to', 'से')} {estMax.toFixed(0)} {t('listing.tonnes', 'टन')}
+            🌾 {t('farmer.est_straw', 'Estimated Stubble')}: ~{estMin.toFixed(0)} {t('farmer.range_to', 'to')} {estMax.toFixed(0)} {t('listing.tonnes', 'tonnes')}
           </div>
           <div className="text-2xl sm:text-3xl font-black text-state-success">
             💵 {t('farmer.est_earnings', 'Estimated Earnings')}: ₹{minPayout.toLocaleString('en-IN')} – ₹{maxPayout.toLocaleString('en-IN')}
           </div>
           <p className="text-xs text-copy-secondary pt-1 font-medium">
-            🛡️ {t('farmer.no_math_guarantee', 'कटाई व उठान पर सीधे बैंक खाते में पूरा भुगतान।')}
+            🛡️ {t('farmer.no_math_guarantee', 'Direct bank payout at harvest without deductions.')}
           </p>
         </div>
 
         {/* ================= HARVEST TIMING (3 PICTURE CARDS) ================= */}
         <div className="space-y-2 pt-2">
           <label className="block text-xs font-bold uppercase text-copy-secondary">
-            🗓️ कटाई का समय / Harvest Time
+            🗓️ {t('farmer.harvest_time_label', 'Harvest Time')}
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Card 1: Ready Now */}
@@ -243,14 +246,18 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-2xl">🟢</span>
-                {selectedTiming === 'now' && <span className="text-xs font-bold text-state-success">✓ चुना गया</span>}
+                {selectedTiming === 'now' && (
+                  <span className="text-xs font-bold text-state-success">
+                    ✓ {t('farmer.selected_badge', 'Selected')}
+                  </span>
+                )}
               </div>
               <div>
                 <h4 className="font-bold text-sm text-copy-primary">
-                  {t('farmer.harvest_now_title', 'आज / कल तैयार')}
+                  {t('farmer.harvest_now_title', 'Ready Now')}
                 </h4>
                 <p className="text-xs text-copy-secondary mt-0.5">
-                  {t('farmer.harvest_now_desc', 'तुरंत उठान हेतु तैयार')}
+                  {t('farmer.harvest_now_desc', 'Ready for immediate pickup')}
                 </p>
               </div>
             </button>
@@ -267,14 +274,18 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-2xl">🟡</span>
-                {selectedTiming === '1wk' && <span className="text-xs font-bold text-brand">✓ चुना गया</span>}
+                {selectedTiming === '1wk' && (
+                  <span className="text-xs font-bold text-brand">
+                    ✓ {t('farmer.selected_badge', 'Selected')}
+                  </span>
+                )}
               </div>
               <div>
                 <h4 className="font-bold text-sm text-copy-primary">
-                  {t('farmer.harvest_1wk_title', '1 हफ्ते में')}
+                  {t('farmer.harvest_1wk_title', 'Within 1 Week')}
                 </h4>
                 <p className="text-xs text-copy-secondary mt-0.5">
-                  {t('farmer.harvest_1wk_desc', 'अगले 7 दिनों में कटाई')}
+                  {t('farmer.harvest_1wk_desc', 'Harvest in next 7 days')}
                 </p>
               </div>
             </button>
@@ -291,20 +302,24 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-2xl">🔵</span>
-                {selectedTiming === '2wk' && <span className="text-xs font-bold text-accent-primary">✓ चुना गया</span>}
+                {selectedTiming === '2wk' && (
+                  <span className="text-xs font-bold text-accent-primary">
+                    ✓ {t('farmer.selected_badge', 'Selected')}
+                  </span>
+                )}
               </div>
               <div>
                 <h4 className="font-bold text-sm text-copy-primary">
-                  {t('farmer.harvest_2wk_title', '2 हफ्ते में')}
+                  {t('farmer.harvest_2wk_title', 'Within 2 Weeks')}
                 </h4>
                 <p className="text-xs text-copy-secondary mt-0.5">
-                  {t('farmer.harvest_2wk_desc', '14 दिनों के अंदर कटाई')}
+                  {t('farmer.harvest_2wk_desc', 'Harvest in next 14 days')}
                 </p>
               </div>
             </button>
           </div>
 
-          {/* Optional Custom Date Link */}
+          {/* Custom Date Link */}
           <div className="pt-1 flex items-center justify-between">
             <button
               type="button"
@@ -314,10 +329,10 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
               }}
               className="text-xs text-brand font-semibold hover:underline cursor-pointer"
             >
-              📅 {t('farmer.custom_date_toggle', 'अन्य तारीख चुनें')}
+              📅 {t('farmer.custom_date_toggle', 'Pick a custom date')}
             </button>
             <span className="text-xs text-copy-muted font-mono">
-              तारीख: {form.watch('harvestDate')}
+              {t('farmer.date_label', 'Date')}: {form.watch('harvestDate')}
             </span>
           </div>
 
@@ -336,14 +351,14 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
       {/* ================= STEP 2: STRAW CONDITION (3 PICTURE CARDS) ================= */}
       <div className="bg-surface border-2 border-surface-border rounded-3xl p-6 space-y-4 shadow-xs">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-brand">चरण 2 / Step 2</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-brand">
+            {t('farmer.step_2_badge', 'Step 2')}
+          </span>
           <h3 className="text-xl font-bold text-copy-primary mt-0.5">
             🌾 {t('farmer.step_2_title', '2. Straw Condition')}
           </h3>
           <p className="text-xs text-copy-secondary mt-1">
-            {i18n.language === 'hi' 
-              ? 'आपकी पराली किस स्थिति में है? सही विकल्प चुनते ही उचित खरीदार से मिलान होगा।' 
-              : 'Choose condition. Matches directly with suitable balers, paper mills & power plants.'}
+            {t('farmer.straw_condition_desc', 'Choose condition. Matches directly with suitable balers, paper mills & power plants.')}
           </p>
         </div>
 
@@ -362,16 +377,16 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
                 🌾
               </div>
               <h4 className="font-bold text-base text-copy-primary">
-                {t('farmer.condition_standing_title', 'खड़ी पराली')}
+                {t('farmer.condition_standing_title', 'Standing in Field')}
               </h4>
               <p className="text-xs text-copy-secondary mt-1.5 leading-relaxed">
-                {t('farmer.condition_standing_desc', 'खरीदार खुद मशीन से काटेगा और गांठें बनाएगा')}
+                {t('farmer.condition_standing_desc', 'Buyer will cut and bale directly in field')}
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-surface-border-subtle flex items-center justify-between">
               <span className="text-xs font-bold text-brand">~₹1,500 - ₹1,700/t</span>
               <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${selectedCondition === 'standing' ? 'bg-brand text-on-brand' : 'bg-surface text-copy-muted'}`}>
-                {selectedCondition === 'standing' ? '✓ चुना' : 'चुनें'}
+                {selectedCondition === 'standing' ? `✓ ${t('farmer.selected_badge', 'Selected')}` : t('farmer.select_cta', 'Select')}
               </span>
             </div>
           </div>
@@ -390,16 +405,16 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
                 🚜
               </div>
               <h4 className="font-bold text-base text-copy-primary">
-                {t('farmer.condition_chopped_title', 'कटी हुई पराली')}
+                {t('farmer.condition_chopped_title', 'Chopped by SMS')}
               </h4>
               <p className="text-xs text-copy-secondary mt-1.5 leading-relaxed">
-                {t('farmer.condition_chopped_desc', 'कंबाइन एसएमएस से बारीक कटी हुई')}
+                {t('farmer.condition_chopped_desc', 'Chopped finely by combine SMS')}
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-surface-border-subtle flex items-center justify-between">
               <span className="text-xs font-bold text-state-success">~₹1,800 - ₹2,100/t</span>
               <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${selectedCondition === 'chopped' ? 'bg-brand text-on-brand' : 'bg-surface text-copy-muted'}`}>
-                {selectedCondition === 'chopped' ? '✓ चुना' : 'चुनें'}
+                {selectedCondition === 'chopped' ? `✓ ${t('farmer.selected_badge', 'Selected')}` : t('farmer.select_cta', 'Select')}
               </span>
             </div>
           </div>
@@ -418,16 +433,16 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
                 📦
               </div>
               <h4 className="font-bold text-base text-copy-primary">
-                {t('farmer.condition_baled_title', 'गांठें तैयार')}
+                {t('farmer.condition_baled_title', 'Already Baled')}
               </h4>
               <p className="text-xs text-copy-secondary mt-1.5 leading-relaxed">
-                {t('farmer.condition_baled_desc', 'गांठें बंधी तैयार हैं, तुरंत लोडिंग हेतु')}
+                {t('farmer.condition_baled_desc', 'Bales ready for direct loading & transport')}
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-surface-border-subtle flex items-center justify-between">
               <span className="text-xs font-bold text-accent-primary">~₹2,100 - ₹2,400/t</span>
               <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${selectedCondition === 'baled' ? 'bg-brand text-on-brand' : 'bg-surface text-copy-muted'}`}>
-                {selectedCondition === 'baled' ? '✓ चुना' : 'चुनें'}
+                {selectedCondition === 'baled' ? `✓ ${t('farmer.selected_badge', 'Selected')}` : t('farmer.select_cta', 'Select')}
               </span>
             </div>
           </div>
@@ -440,13 +455,13 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
             onClick={() => setShowAdvancedPrice(!showAdvancedPrice)}
             className="text-xs text-copy-secondary hover:text-copy-primary flex items-center gap-1.5 cursor-pointer font-medium"
           >
-            <span>⚙️</span> {t('farmer.custom_price_toggle', 'उन्नत दर विकल्प')} {showAdvancedPrice ? '▲' : '▼'}
+            <span>⚙️</span> {t('farmer.custom_price_toggle', 'Advanced Price Options')} {showAdvancedPrice ? '▲' : '▼'}
           </button>
 
           {showAdvancedPrice && (
             <div className="mt-3 p-4 bg-bg-subtle rounded-2xl border border-surface-border space-y-3">
               <label className="block text-xs font-semibold text-copy-primary">
-                इच्छित दर / Desired Rate (₹/tonne):
+                {t('farmer.desired_rate', 'Desired Rate (₹/tonne):')}
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -459,7 +474,7 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
                   onClick={() => form.setValue('expectedPricePerTonne', benchmarkPrice)}
                   className="text-xs px-3 py-2 rounded-xl bg-surface border border-surface-border text-copy-secondary hover:text-copy-primary"
                 >
-                  बेंचमार्क दर रीसेट करें (₹{benchmarkPrice})
+                  {t('farmer.reset_benchmark', 'Reset to Benchmark Rate (₹{{price}})', { price: benchmarkPrice })}
                 </button>
               </div>
             </div>
@@ -484,11 +499,7 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
         >
           {form.formState.isSubmitting
             ? t('listing.confirming', 'Confirming Listing...')
-            : i18n.language === 'hi'
-            ? '🌾 पराली लिस्ट करें और खरीदार पाएं'
-            : i18n.language === 'pa'
-            ? '🌾 ਪਰਾਲੀ ਲਿਸਟ ਕਰੋ ਅਤੇ ਖਰੀਦਦਾਰ ਲੱਭੋ'
-            : '🌾 Publish Straw Listing & Match Buyers'}
+            : `🌾 ${t('farmer.publish_listing_btn', 'Publish Straw Listing & Match Buyers')}`}
         </button>
       </div>
     </form>

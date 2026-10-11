@@ -58,6 +58,10 @@ This tracker records verified evidence only. Earlier completion claims were inde
   - Integrated Zero-Math Live Calculator in `NewListingForm.tsx` auto-deriving straw yield (~2-2.5 t/acre) and guaranteed payout range directly from acres without manual math.
   - Retained 100% key parity across all 3 languages (551 keys each, 0 diffs).
 - [x] Verified static quality: `npm run typecheck` (0 errors), `npm test` (13 tests passed), `npm run lint` (0 errors), `npm run build` (built in 599ms); `poetry run pytest` (29 tests passed).
+- [x] Fixed English Mode & Farmer Localization Cleanup (2026-10-11):
+  - Eliminated bilingual text mashups (`/`) and hardcoded Hindi fallbacks in `NewListingForm.tsx` and `FarmerDashboard.tsx`.
+  - Replaced Hindi fallbacks in `t()` calls (`~110 से 165 tonnes`, `चरण 1 / Step 1`, `✓ चुना गया`, `तारीख:`, Big 3 Actions) with English defaults mapped to comprehensive i18n keys across `en.json`, `hi.json`, and `pa.json`.
+  - Verified 100% key parity (568 keys in each translation dictionary) and clean rendering in English, Hindi, and Punjabi modes.
 
 ## Recovery Decisions
 

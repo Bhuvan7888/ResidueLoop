@@ -351,7 +351,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
               <button
                 onClick={() => {
                   if (!isVerified) {
-                    setActionMsg(i18n.language === 'hi' ? '⚠️ सत्यापित पहचान आवश्यक! लिस्टिंग बनाने से पहले कृपया ऊपर अपना पहचान प्रमाण जमा करें।' : '⚠️ Verified ID required! Please submit and verify your ID proof before creating a listing.')
+                    setActionMsg(i18n.language === 'hi' ? '⚠️ सत्यापित पहचान आवश्यक! लिस्टिंग बनाने से पहले कृपया ऊपर अपना पहचान प्रमाण जमा करें।' : i18n.language === 'pa' ? '⚠️ ਤਸਦੀਕਸ਼ੁਦਾ ਪਛਾਣ ਲੋੜੀਂਦੀ ਹੈ! ਕਿਰਪਾ ਕਰਕੇ ਲਿਸਟਿੰਗ ਬਣਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਆਪਣੀ ਪਛਾਣ ਦਾ ਸਬੂਤ ਜਮ੍ਹਾਂ ਕਰੋ।' : '⚠️ Verified ID required! Please submit and verify your ID proof before creating a listing.')
                     return
                   }
                   setView('listing')
@@ -366,7 +366,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
               </button>
               {!isVerified && (
                 <span className="absolute bottom-full left-0 mb-1.5 hidden group-hover:block w-56 p-2 bg-surface text-copy-primary text-xs rounded-xl shadow-lg border border-surface-border z-20">
-                  {i18n.language === 'hi' ? 'लिस्टिंग बनाने के लिए सत्यापित पहचान आवश्यक है।' : 'Verified ID required to create listings.'}
+                  {i18n.language === 'hi' ? 'लिस्टिंग बनाने के लिए सत्यापित पहचान आवश्यक है।' : i18n.language === 'pa' ? 'ਲਿਸਟਿੰਗ ਬਣਾਉਣ ਲਈ ਤਸਦੀਕਸ਼ੁਦਾ ਪਛਾਣ ਲੋੜੀਂਦੀ ਹੈ।' : 'Verified ID required to create listings.'}
                 </span>
               )}
             </div>
@@ -420,9 +420,9 @@ export function FarmerDashboard({ userId }: { userId: string }) {
       {view === 'listing' && (
         plots.length === 0 ? (
           <div className="bg-surface border border-surface-border rounded-2xl p-6 text-center space-y-3">
-            <h4 className="text-lg font-medium text-copy-primary">{i18n.language === 'hi' ? 'कोई खेत पंजीकृत नहीं है' : 'No plots registered'}</h4>
-            <p className="text-copy-secondary text-sm">{i18n.language === 'hi' ? 'लिस्टिंग बनाने से पहले कृपया ऊपर "आपके खेत" अनुभाग में कम से कम एक खेत जोड़ें।' : 'Please register at least one plot in the "Your Plots" section before creating a listing.'}</p>
-            <button onClick={() => setView('dashboard')} className="px-4 py-2 bg-brand text-on-brand rounded-xl text-sm font-medium">{i18n.language === 'hi' ? 'डैशबोर्ड पर वापस' : 'Back to Dashboard'}</button>
+            <h4 className="text-lg font-medium text-copy-primary">{i18n.language === 'hi' ? 'कोई खेत पंजीकृत नहीं है' : i18n.language === 'pa' ? 'ਕੋਈ ਖੇਤ ਰਜਿਸਟਰਡ ਨਹੀਂ ਹੈ' : 'No plots registered'}</h4>
+            <p className="text-copy-secondary text-sm">{i18n.language === 'hi' ? 'लिस्टिंग बनाने से पहले कृपया ऊपर "आपके खेत" अनुभाग में कम से कम एक खेत जोड़ें।' : i18n.language === 'pa' ? 'ਲਿਸਟਿੰਗ ਬਣਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਕਿਰਪਾ ਕਰਕੇ ਉੱਪਰ "ਤੁਹਾਡੇ ਖੇਤ" ਸੈਕਸ਼ਨ ਵਿੱਚ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਖੇਤ ਸ਼ਾਮਲ ਕਰੋ।' : 'Please register at least one plot in the "Your Plots" section before creating a listing.'}</p>
+            <button onClick={() => setView('dashboard')} className="px-4 py-2 bg-brand text-on-brand rounded-xl text-sm font-medium">{i18n.language === 'hi' ? 'डैशबोर्ड पर वापस' : i18n.language === 'pa' ? 'ਡੈਸ਼ਬੋਰਡ ਵੱਲ ਵਾਪਸ' : 'Back to Dashboard'}</button>
           </div>
         ) : (
           <NewListingForm 
@@ -452,19 +452,19 @@ export function FarmerDashboard({ userId }: { userId: string }) {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-extrabold text-copy-primary flex items-center gap-2">
-                <span>🌾</span> {i18n.language === 'hi' ? 'मुख्य कार्य / त्वरित सहायता' : i18n.language === 'pa' ? 'ਮੁੱਖ ਕਾਰਜ / ਤੁਰੰਤ ਸਹਾਇਤਾ' : 'Main Actions / Quick Tasks'}
+                <span>🌾</span> {t('farmer.main_actions_title', 'Main Actions')}
               </h3>
               <span className="text-xs text-copy-secondary font-medium">
-                {i18n.language === 'hi' ? '3 आसान कदम' : i18n.language === 'pa' ? '3 ਆਸਾਨ ਕਦਮ' : '3 Simple Tasks'}
+                {t('farmer.three_simple_steps', '3 Simple Steps')}
               </span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Card 1: 🌾 1. पराली बेचें */}
+              {/* Card 1: 🌾 1. Sell Stubble */}
               <div
                 onClick={() => {
                   if (!isVerified) {
-                    setActionMsg(i18n.language === 'hi' ? '⚠️ सत्यापित पहचान आवश्यक! लिस्टिंग बनाने से पहले कृपया ऊपर अपना पहचान प्रमाण जमा करें।' : '⚠️ Verified ID required! Please submit and verify your ID proof before creating a listing.')
+                    setActionMsg(i18n.language === 'hi' ? '⚠️ सत्यापित पहचान आवश्यक! लिस्टिंग बनाने से पहले कृपया ऊपर अपना पहचान प्रमाण जमा करें।' : i18n.language === 'pa' ? '⚠️ ਤਸਦੀਕਸ਼ੁਦਾ ਪਛਾਣ ਲੋੜੀਂਦੀ ਹੈ! ਕਿਰਪਾ ਕਰਕੇ ਲਿਸਟਿੰਗ ਬਣਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਆਪਣੀ ਪਛਾਣ ਦਾ ਸਬੂਤ ਜਮ੍ਹਾਂ ਕਰੋ।' : '⚠️ Verified ID required! Please submit and verify your ID proof before creating a listing.')
                     return
                   }
                   setView('listing')
@@ -477,22 +477,22 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                   </div>
                   <div>
                     <h4 className="text-lg font-bold text-copy-primary group-hover:text-brand transition-colors">
-                      {t('farmer.big_action_sell_title', '1. पराली बेचें')}
+                      {t('farmer.big_action_sell_title', '1. Sell Stubble')}
                     </h4>
                     <p className="text-xs text-copy-secondary mt-1 leading-relaxed">
-                      {t('farmer.big_action_sell_desc', '2 आसान चरणों में अपनी पराली का खरीदार पाएं')}
+                      {t('farmer.big_action_sell_desc', 'Find verified buyers in 2 simple steps')}
                     </p>
                   </div>
                 </div>
                 <div className="mt-5 pt-4 border-t border-surface-border-subtle flex items-center justify-between">
                   <span className="text-xs font-bold text-brand">
-                    {listings.length > 0 ? `${listings.length} ${t('farmer.active_listings_count', 'सक्रिय लिस्टिंग')}` : t('farmer.start_listing_cta', '+ नई लिस्टिंग बनाएं')}
+                    {listings.length > 0 ? `${listings.length} ${t('farmer.active_listings_count', 'Active Listings')}` : t('farmer.start_listing_cta', '+ Create New Listing')}
                   </span>
                   <span className="text-sm font-bold text-brand group-hover:translate-x-1 transition-transform">➔</span>
                 </div>
               </div>
 
-              {/* Card 2: 🚚 2. ट्रॉली / पिकअप कब आएगी? */}
+              {/* Card 2: 🚚 2. When is Pickup? */}
               <div
                 onClick={() => {
                   document.getElementById('pickups-section')?.scrollIntoView({ behavior: 'smooth' })
@@ -505,12 +505,12 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                   </div>
                   <div>
                     <h4 className="text-lg font-bold text-copy-primary">
-                      {t('farmer.big_action_pickup_title', '2. ट्रॉली / पिकअप कब आएगी?')}
+                      {t('farmer.big_action_pickup_title', '2. When is Pickup?')}
                     </h4>
                     <p className="text-xs text-copy-secondary mt-1 leading-relaxed">
                       {nextPickupDate 
-                        ? `${t('farmer.scheduled_on', 'निर्धारित तिथि')}: ${nextPickupDate}` 
-                        : t('farmer.big_action_pickup_desc', 'खरीदार व गाड़ी की लाइव स्थिति देखें')}
+                        ? `${t('farmer.scheduled_on', 'Scheduled for')}: ${nextPickupDate}` 
+                        : t('farmer.big_action_pickup_desc', 'Live truck arrival & pickup schedule')}
                     </p>
                   </div>
                 </div>
@@ -518,11 +518,11 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                 {/* Truck Progress Bar */}
                 <div className="mt-5 pt-4 border-t border-surface-border-subtle space-y-2">
                   <div className="flex items-center justify-between text-[11px] font-bold text-copy-secondary">
-                    <span className={pickupStep >= 1 ? 'text-brand' : ''}>🌾 {t('status.matched', 'मिलान')}</span>
+                    <span className={pickupStep >= 1 ? 'text-brand' : ''}>🌾 {t('status.matched', 'Matched')}</span>
                     <span>➔</span>
-                    <span className={pickupStep >= 2 ? 'text-brand' : ''}>🚜 {t('status.pooled', 'पूलिंग')}</span>
+                    <span className={pickupStep >= 2 ? 'text-brand' : ''}>🚜 {t('status.pooled', 'Pooled')}</span>
                     <span>➔</span>
-                    <span className={pickupStep >= 3 ? 'text-state-success' : ''}>🚚 {t('status.completed', 'उठान')}</span>
+                    <span className={pickupStep >= 3 ? 'text-state-success' : ''}>🚚 {t('status.completed', 'Completed')}</span>
                   </div>
                   <div className="w-full bg-bg-subtle rounded-full h-2 overflow-hidden border border-surface-border-subtle">
                     <div 
@@ -533,7 +533,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                 </div>
               </div>
 
-              {/* Card 3: 💰 3. मेरे पैसे / भुगतान */}
+              {/* Card 3: 💰 3. My Money & Payouts */}
               <div
                 onClick={() => {
                   document.getElementById('pickups-section')?.scrollIntoView({ behavior: 'smooth' })
@@ -546,10 +546,10 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                   </div>
                   <div>
                     <h4 className="text-lg font-bold text-copy-primary">
-                      {t('farmer.big_action_money_title', '3. मेरे पैसे / भुगतान')}
+                      {t('farmer.big_action_money_title', '3. My Money & Payouts')}
                     </h4>
                     <p className="text-xs text-copy-secondary mt-1 leading-relaxed">
-                      {t('farmer.big_action_money_desc', 'उठान होते ही सीधे बैंक खाते में भुगतान')}
+                      {t('farmer.big_action_money_desc', 'Direct bank transfer upon pickup')}
                     </p>
                   </div>
                 </div>
@@ -559,11 +559,11 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                       ₹{totalReceived.toLocaleString('en-IN')}
                     </div>
                     <div className="text-[11px] text-copy-muted font-medium mt-0.5">
-                      {totalPending > 0 ? `₹${totalPending.toLocaleString('en-IN')} ${t('farmer.pending_payout', 'प्रक्रिया में')}` : t('farmer.payout_up_to_date', 'खाता अद्यतन')}
+                      {totalPending > 0 ? `₹${totalPending.toLocaleString('en-IN')} ${t('farmer.pending_payout', 'In Progress')}` : t('farmer.payout_up_to_date', 'Account Up to Date')}
                     </div>
                   </div>
                   <span className="text-xs px-2.5 py-1 rounded-full font-bold bg-state-success-dim text-state-success border border-state-success/30">
-                    {totalReceived > 0 ? t('farmer.paid_badge', 'भुगतान प्राप्त') : t('farmer.zero_deductions', '100% सुरक्षित')}
+                    {totalReceived > 0 ? t('farmer.paid_badge', 'Payment Received') : t('farmer.zero_deductions', '100% Guaranteed')}
                   </span>
                 </div>
               </div>
@@ -595,7 +595,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                         <div>
                           <div className="flex items-center space-x-2 flex-wrap gap-y-1">
                             <p className="font-semibold text-copy-primary">
-                              {acresDisplay} {t('listing.acres', 'एकड़')} • {listing.est_tonnes ? `${listing.est_tonnes.toFixed(1)} ${t('listing.tonnes', 'टन')}` : ''}
+                              {acresDisplay} {t('listing.acres', 'acres')} • {listing.est_tonnes ? `${listing.est_tonnes.toFixed(1)} ${t('listing.tonnes', 'tonnes')}` : ''}
                             </p>
                             <span className={`px-2.5 py-0.5 text-xs rounded-full font-medium ${
                               isMatched || isPooled ? 'bg-state-success-dim text-state-success' :
@@ -669,7 +669,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                             {t('farmer.market_benchmark')}
                           </span>
                           <strong className="text-state-success text-xs mt-0.5 block">
-                            ₹{(listing.price_per_tonne || (listing.combine_sms_used ? 1850 : 600)).toLocaleString()}/{t('listing.tonnes', 'टन')}
+                            ₹{(listing.price_per_tonne || (listing.combine_sms_used ? 1850 : 600)).toLocaleString()}/{t('listing.tonnes', 'tonnes')}
                           </strong>
                           <span className="text-[11px] text-copy-secondary">
                             {t('farmer.est_payout')} ₹{Math.round(listing.total_price || (listing.est_tonnes || 0) * (listing.price_per_tonne || 600)).toLocaleString()}
@@ -818,7 +818,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                             <button
                               onClick={() => {
                                 if (!isVerified) {
-                                  setActionMsg(i18n.language === 'hi' ? '⚠️ सत्यापित पहचान आवश्यक! लिस्टिंग बनाने से पहले कृपया ऊपर अपना पहचान प्रमाण जमा करें।' : '⚠️ Verified ID required! Please submit and verify your ID proof before creating a listing.')
+                                  setActionMsg(i18n.language === 'hi' ? '⚠️ सत्यापित पहचान आवश्यक! लिस्टिंग बनाने से पहले कृपया ऊपर अपना पहचान प्रमाण जमा करें।' : i18n.language === 'pa' ? '⚠️ ਤਸਦੀਕਸ਼ੁਦਾ ਪਛਾਣ ਲੋੜੀਂਦੀ ਹੈ! ਕਿਰਪਾ ਕਰਕੇ ਲਿਸਟਿੰਗ ਬਣਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਆਪਣੀ ਪਛਾਣ ਦਾ ਸਬੂਤ ਜਮ੍ਹਾਂ ਕਰੋ।' : '⚠️ Verified ID required! Please submit and verify your ID proof before creating a listing.')
                                   return
                                 }
                                 setView('listing')

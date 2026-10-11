@@ -855,7 +855,7 @@ export function FarmerSetup() {
                     {getStateDisplay(st, i18n.language)}
                   </option>
                 ))}
-                <option value="Other">{i18n.language === 'hi' ? 'अन्य (Other)' : i18n.language === 'pa' ? 'ਹੋਰ (Other)' : 'Other'}</option>
+                <option value="Other">{i18n.language === 'hi' ? 'अन्य' : i18n.language === 'pa' ? 'ਹੋਰ' : 'Other'}</option>
               </select>
             </label>
 
@@ -971,7 +971,7 @@ export function FarmerSetup() {
                     {getStateDisplay(st, i18n.language)}
                   </option>
                 ))}
-                <option value="Other">{i18n.language === 'hi' ? 'अन्य (Other)' : i18n.language === 'pa' ? 'ਹੋਰ (Other)' : 'Other'}</option>
+                <option value="Other">{i18n.language === 'hi' ? 'अन्य' : i18n.language === 'pa' ? 'ਹੋਰ' : 'Other'}</option>
               </select>
             </label>
 
@@ -1119,7 +1119,7 @@ export function FarmerSetup() {
               {t('farmer.id_type')}
               <input
                 className="mt-1 w-full rounded-xl border border-surface-border p-2.5 focus:ring-2 focus:ring-accent-primary outline-none"
-                placeholder={i18n.language === 'hi' ? 'आधार / वोटर आईडी' : 'Aadhaar / Voter ID'}
+                placeholder={i18n.language === 'hi' ? 'आधार / वोटर कार्ड' : i18n.language === 'pa' ? 'ਆਧਾਰ / ਵੋਟਰ ਕਾਰਡ' : 'Aadhaar / Voter ID'}
                 {...documentForm.register('idType')}
               />
               {documentForm.formState.errors.idType && (
