@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.services.whatsapp_service import process_inbound_message, ACTIVE_SESSIONS
 
-client = TestClient(app)
+client = TestClient(app, base_url="https://residueloop.in")
 
 
 def test_meta_webhook_verification_handshake():

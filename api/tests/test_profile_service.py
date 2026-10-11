@@ -45,7 +45,7 @@ def test_create_profile_rejects_a_second_role_selection(mock_client_factory: Mag
 
 
 def test_profile_creation_requires_a_bearer_token() -> None:
-    response = TestClient(app, base_url="http://localhost").post(
+    response = TestClient(app, base_url="https://residueloop.in").post(
         "/api/v1/profiles", json={"role": "farmer"}
     )
 
