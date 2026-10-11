@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, Header, HTTPException
 from typing import Annotated
+from pydantic import BaseModel
 import logging
 from app.services import whatsapp_service
 from app.core.config import get_settings
@@ -56,3 +57,18 @@ async def twilio_webhook(
     await whatsapp_service.process_inbound_message(from_number, body_text)
     
     return {"status": "ok"}
+
+
+class SimulateMessageRequest(BaseModel):
+    phone: str
+    message: str
+
+
+@router.post("/simulate")
+async def simulate_message(payload: SimulateMessageRequest) -> dict[str, str]:
+    """
+    Simulates sending an inbound WhatsApp message for in-app demo & testing.
+    """
+    await whatsapp_service.process_inbound_message(payload.phone, payload.message)
+    return {"status": "ok"}
+

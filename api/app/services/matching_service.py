@@ -1,39 +1,88 @@
 from app.core.security import get_supabase_client
+from app.core.config import get_settings
 from fastapi import HTTPException
 import uuid
 import datetime
+import math
+
+def _calculate_distance_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    # Haversine distance
+    r = 6371.0
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    delta_phi = math.radians(lat2 - lat1)
+    delta_lambda = math.radians(lon2 - lon1)
+    a = math.sin(delta_phi / 2.0)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2.0)**2
+    c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
+    return r * c
 
 async def match_listing(user_id: str, listing_id: str) -> None:
     client = get_supabase_client()
+    settings = get_settings()
     
     # Check ownership
     listing_res = client.table("listings").select("*, plots(*)").eq("id", listing_id).single().execute()
     if not listing_res.data or listing_res.data["plots"]["farmer_id"] != user_id:
         raise HTTPException(status_code=403, detail="Forbidden")
         
-    # MOCK DB logic:
-    # 1. Fetch open demand_posts / buyers
-    # 2. Score = weighted sum of distance, price, capacity
-    # 3. Pick top buyer and baler
-    
-    # Mock finding a buyer and baler
-    buyers_res = client.table("buyers").select("*").limit(1).execute()
-    balers_res = client.table("balers").select("*").limit(1).execute()
+    plot = listing_res.data["plots"]
+    harvest_date_str = listing_res.data.get("harvest_date")
+    try:
+        plot_lon, plot_lat = plot.get("centre", {}).get("coordinates", [75.2, 30.8])
+    except Exception:
+        plot_lat, plot_lon = 30.8, 75.2
+
+    # 1. Fetch available buyers & balers
+    buyers_res = client.table("buyers").select("*").execute()
+    balers_res = client.table("balers").select("*").execute()
     
     if not buyers_res.data or not balers_res.data:
         # Cannot match
         return
         
-    buyer = buyers_res.data[0]
+    # 2. Weighted scoring for buyers
+    # Score = w_price * norm(price) + w_dist * (1 - norm(dist)) + w_cap * norm(cap)
+    best_buyer = None
+    best_buyer_score = -float("inf")
+
+    w_dist = settings.matching_weight_distance
+    w_price = settings.matching_weight_price
+    w_cap = settings.matching_weight_capacity
+
+    for b in buyers_res.data:
+        b_lat = float(b.get("lat") or 30.8)
+        b_lng = float(b.get("lng") or 75.2)
+        dist = _calculate_distance_km(plot_lat, plot_lon, b_lat, b_lng)
+        # Normalize: distance (assume max 100km), price (assume range 1000-3000), capacity (50-500)
+        norm_dist = min(dist / 100.0, 1.0)
+        norm_price = min(max((float(b.get("price_per_tonne") or 1500) - 1000) / 2000.0, 0.0), 1.0)
+        norm_cap = min(float(b.get("capacity") or 100) / 500.0, 1.0)
+
+        score = (w_price * norm_price) + (w_dist * (1.0 - norm_dist)) + (w_cap * norm_cap)
+        if score > best_buyer_score:
+            best_buyer_score = score
+            best_buyer = b
+
+    buyer = best_buyer or buyers_res.data[0]
     baler = balers_res.data[0]
     
-    # Insert into `offers`
+    # 3. Calculate pickup window based on harvest date
+    try:
+        h_date = datetime.datetime.strptime(harvest_date_str, "%Y-%m-%d").date()
+    except Exception:
+        h_date = datetime.date.today() + datetime.timedelta(days=7)
+
+    pickup_start = (h_date + datetime.timedelta(days=2)).isoformat()
+    pickup_end = (h_date + datetime.timedelta(days=5)).isoformat()
+
+    # 4. Insert into `offers`
     client.table("offers").insert({
         "listing_id": listing_id,
         "buyer_id": buyer["profile_id"],
         "baler_id": baler["id"],
         "status": "pending",
-        "price_per_tonne": buyer["price_per_tonne"]
+        "price_per_tonne": buyer["price_per_tonne"],
+        "pickup_start": pickup_start,
+        "pickup_end": pickup_end
     }).execute()
     
     # Mark listing as matched
@@ -122,7 +171,7 @@ async def accept_offer(user_id: str, offer_id: str) -> None:
 
     if status == "ready":
         # Create/ensure pickups for all listings belonging to this ready pool
-        pool_listings = client.table("listings").select("id").eq("pool_id", pool_id).execute()
+        pool_listings = client.table("listings").select("id, farmer_id").eq("pool_id", pool_id).execute()
         for pl in pool_listings.data or []:
             client.table("pickups").upsert({
                 "pool_id": pool_id,
@@ -130,6 +179,27 @@ async def accept_offer(user_id: str, offer_id: str) -> None:
                 "baler_id": baler_id,
                 "payment_status": "pending"
             }, on_conflict="listing_id").execute()
+
+            # Notify each pooled farmer
+            if pl.get("farmer_id"):
+                try:
+                    client.table("notifications").insert({
+                        "profile_id": pl["farmer_id"],
+                        "message": f"🎉 Your village straw pool has reached target capacity! Scheduled pickup date fixed for {pickup_date}.",
+                        "read": False
+                    }).execute()
+                except Exception:
+                    pass
+
+        # Notify buyer
+        try:
+            client.table("notifications").insert({
+                "profile_id": buyer_id,
+                "message": f"🚛 Village Straw Pool Ready! Target load met. Scheduled pickup fixed for {pickup_date}.",
+                "read": False
+            }).execute()
+        except Exception:
+            pass
 
 async def decline_offer(user_id: str, offer_id: str) -> None:
     client = get_supabase_client()

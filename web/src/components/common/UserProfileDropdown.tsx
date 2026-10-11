@@ -292,7 +292,7 @@ export function UserProfileDropdown({ onSignOut }: UserProfileDropdownProps) {
           <p className="text-[10px] font-semibold text-copy-secondary uppercase tracking-wider">
             Switch Portal Role View
           </p>
-          <div className="grid grid-cols-3 gap-1.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
             <button
               type="button"
               disabled={role === 'farmer'}
@@ -337,6 +337,21 @@ export function UserProfileDropdown({ onSignOut }: UserProfileDropdownProps) {
               }`}
             >
               🌱 Donor
+            </button>
+            <button
+              type="button"
+              disabled={role === 'ngo'}
+              onClick={async () => {
+                await signInDevUser('ngo')
+                window.location.reload()
+              }}
+              className={`py-1.5 px-2 rounded-xl text-xs font-semibold text-center transition-all ${
+                role === 'ngo'
+                  ? 'bg-brand text-on-brand font-bold shadow-xs cursor-default'
+                  : 'bg-bg-subtle hover:bg-surface border border-surface-border text-copy-primary hover:border-brand/40'
+              }`}
+            >
+              🏛️ NGO
             </button>
           </div>
         </div>

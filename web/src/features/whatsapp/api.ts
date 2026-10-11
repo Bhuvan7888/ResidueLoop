@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { apiRequest } from '@/lib/api-client'
 
 export async function getMessages(profileId: string) {
   const { data, error } = await supabase
@@ -10,3 +11,11 @@ export async function getMessages(profileId: string) {
   if (error) throw error
   return data
 }
+
+export async function simulateWhatsappMessage(phone: string, message: string) {
+  return apiRequest('/whatsapp/simulate', {
+    method: 'POST',
+    body: { phone, message },
+  })
+}
+

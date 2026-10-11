@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 
 const weightSchema = z.object({
   actual_tonnes: z.number().min(0.1, 'Must be greater than 0'),
+  quality_notes: z.string().optional(),
 })
 
 interface WeightFormProps {
@@ -45,6 +46,16 @@ export function WeightForm({ onSubmit, onCancel }: WeightFormProps) {
         {form.formState.errors.actual_tonnes && (
           <p className="text-state-error text-sm mt-1">{form.formState.errors.actual_tonnes.message}</p>
         )}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-copy-primary mb-1">{t('pickup.quality_notes', 'Quality Notes')}</label>
+        <textarea
+          rows={2}
+          placeholder={t('pickup.quality_notes_placeholder', 'e.g. Clean straw, 12% moisture, tightly baled')}
+          {...form.register('quality_notes')}
+          className="w-full rounded-xl border border-surface-border p-2 focus:ring-2 focus:ring-accent-primary outline-none text-sm resize-none"
+        />
       </div>
 
       <div className="flex space-x-3">

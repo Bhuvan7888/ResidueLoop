@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { apiRequest } from '@/lib/api-client'
 
-export async function updatePickupWeight(pickupId: string, data: { actual_tonnes: number }) {
+export async function updatePickupWeight(pickupId: string, data: { actual_tonnes: number; quality_notes?: string }) {
   return apiRequest(`/pickups/${pickupId}/weight`, { body: data, method: 'PATCH' })
 }
 

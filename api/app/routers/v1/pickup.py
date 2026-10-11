@@ -9,6 +9,7 @@ router = APIRouter(prefix="/pickups", tags=["pickups"])
 
 class WeightUpdate(BaseModel):
     actual_tonnes: float
+    quality_notes: str | None = None
 
 class PaymentUpdate(BaseModel):
     payment_status: Literal["pending", "received", "not_received"]
@@ -20,7 +21,7 @@ async def update_weight(
     background_tasks: BackgroundTasks,
     user_id: str = Depends(require_role(["buyer"]))
 ) -> dict[str, Any]:
-    listing_id = await update_pickup_weight(user_id, pickup_id, payload.actual_tonnes)
+    listing_id = await update_pickup_weight(user_id, pickup_id, payload.actual_tonnes, payload.quality_notes)
     
     # Queue background verification job
     background_tasks.add_task(run_plot_verification, listing_id)

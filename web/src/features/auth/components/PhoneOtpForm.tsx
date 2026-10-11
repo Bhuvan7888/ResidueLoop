@@ -106,7 +106,7 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
             <p className="text-[11px] font-semibold text-copy-secondary uppercase tracking-wider text-center">
               ⚡ 1-Click Demo Login (Instant Access)
             </p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <button
                 type="button"
                 onClick={async () => {
@@ -153,6 +153,22 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
               >
                 <span className="text-lg">🌱</span>
                 <span>Donor</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await signInDevUser('ngo')
+                    onSuccess()
+                  } catch (err: unknown) {
+                    setError(err instanceof Error ? err.message : 'NGO login failed')
+                  }
+                }}
+                className="p-2.5 rounded-xl border border-surface-border bg-surface hover:border-brand/50 hover:bg-bg-subtle text-xs font-semibold text-copy-primary flex flex-col items-center gap-1 shadow-xs transition-all active:scale-95"
+              >
+                <span className="text-lg">🏛️</span>
+                <span>NGO</span>
               </button>
             </div>
           </div>

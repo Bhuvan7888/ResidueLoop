@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     llm_api_key: str | None = None
     id_document_encryption_key: str | None = None
     mock_id_review: bool = True
+    matching_weight_distance: float = 0.35
+    matching_weight_price: float = 0.35
+    matching_weight_capacity: float = 0.20
+    matching_weight_availability: float = 0.10
+    pool_radius_km: float = 15.0
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

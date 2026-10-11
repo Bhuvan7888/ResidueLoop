@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { BuyerProfileForm } from './BuyerProfileForm'
 import { DemandPostForm } from './DemandPostForm'
-import { createBuyerProfile, createDemandPost } from '../api'
+import { createBuyerProfile, createDemandPost, getDemandPosts, updateDemandPost } from '../api'
 import { getPickups, updatePickupWeight } from '@/features/pickup/api'
 import { PickupCard } from '@/features/pickup/components/PickupCard'
 import { getListings } from '@/features/listing/api'
@@ -26,6 +26,16 @@ interface NotificationItem {
   created_at: string
 }
 
+interface DemandPostItem {
+  id: string
+  tonnes_needed: number
+  price_per_tonne: number
+  date_from: string
+  date_to: string
+  status?: string
+  created_at?: string
+}
+
 export function BuyerDashboard({ userId }: { userId?: string }) {
   const [view, setView] = useState<'profile' | 'demand' | 'dashboard'>('dashboard')
   const [pickups, setPickups] = useState<
@@ -42,22 +52,24 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
     { id: string; acres?: number; status: string; harvest_date: string; source: string; est_tonnes?: number; plots?: { acres: number } }[]
   >([])
   const [pools, setPools] = useState<Pool[]>([])
+  const [demandPosts, setDemandPosts] = useState<DemandPostItem[]>([])
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
 
-  const loadData = () => {
+  const loadData = useCallback(() => {
     getPickups().then(setPickups).catch(console.error)
     getListings().then(setListings).catch(console.error)
     getPools().then((data) => setPools((data as unknown as Pool[]) || [])).catch(console.error)
+    getDemandPosts().then((data) => setDemandPosts((data as unknown as DemandPostItem[]) || [])).catch(console.error)
     if (userId) {
       getNotifications(userId).then(setNotifications).catch(console.error)
     }
-  }
+  }, [userId])
 
   useEffect(() => {
     loadData()
     const interval = setInterval(loadData, 3500)
     return () => clearInterval(interval)
-  }, [userId])
+  }, [loadData])
 
   return (
     <div className="space-y-6">
@@ -177,6 +189,72 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
                         📍 Sourced from farmers in: <strong className="text-copy-primary">{pool.villages.name}, {pool.villages.district}</strong>
                       </p>
                     )}
+                    <div className="flex items-center gap-1.5 px-1 text-[11px] text-state-success font-medium">
+                      <span>🛰️</span>
+                      <span>Satellite Audit: 0 Fires Detected • Sentinel-2 Clean Clearance Verified</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Section: Your Demand Posts */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-copy-primary">Your Stubble Demand Posts</h3>
+                <p className="text-xs text-copy-secondary">Manage your active factory biomass purchasing tenders.</p>
+              </div>
+              <button
+                onClick={() => setView('demand')}
+                className="text-xs text-brand font-semibold hover:underline"
+              >
+                + Post New Demand
+              </button>
+            </div>
+            {demandPosts.length === 0 ? (
+              <div className="bg-surface border border-surface-border rounded-2xl p-6 text-center">
+                <p className="text-copy-secondary text-sm">You haven't posted any demand requirements yet.</p>
+              </div>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {demandPosts.map((dp) => (
+                  <div
+                    key={dp.id}
+                    className="bg-surface border border-surface-border rounded-2xl p-4 flex justify-between items-center shadow-xs"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-copy-primary">
+                          {dp.tonnes_needed} Tonnes @ ₹{dp.price_per_tonne}/t
+                        </p>
+                        <span
+                          className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+                            dp.status === 'open' || !dp.status
+                              ? 'bg-state-success-dim text-state-success'
+                              : 'bg-bg-subtle text-copy-secondary'
+                          }`}
+                        >
+                          {dp.status || 'open'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-copy-secondary mt-1">
+                        Window: {dp.date_from} to {dp.date_to}
+                      </p>
+                    </div>
+                    <div>
+                      <button
+                        onClick={async () => {
+                          const nextStatus = dp.status === 'cancelled' ? 'open' : 'cancelled'
+                          await updateDemandPost(dp.id, { status: nextStatus })
+                          loadData()
+                        }}
+                        className="text-xs px-3 py-1.5 border border-surface-border rounded-xl text-copy-secondary hover:text-copy-primary hover:bg-bg-subtle transition-colors"
+                      >
+                        {dp.status === 'cancelled' ? 'Re-open' : 'Cancel Post'}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

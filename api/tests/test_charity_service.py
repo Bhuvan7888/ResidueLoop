@@ -114,3 +114,71 @@ async def test_create_donation_notifies_donor_and_farmer(mock_client_factory: Ma
 
     assert res["id"] == "don-1"
     assert res["amount"] == 500.0
+
+
+@pytest.mark.asyncio
+@patch("app.services.charity_service.get_supabase_client")
+async def test_get_ranked_villages(mock_client_factory: MagicMock) -> None:
+    from app.services.charity_service import get_ranked_villages
+    client = MagicMock()
+    mock_client_factory.return_value = client
+
+    tables = {"villages": MagicMock()}
+    client.table.side_effect = lambda t: tables.get(t, MagicMock())
+
+    tables["villages"].select.return_value.execute.return_value.data = [
+        {"id": "v-1", "name": "Ajitwal", "lat": 30.8, "lon": 75.3},
+        {"id": "v-2", "name": "Dharamkot", "lat": 30.9, "lon": 75.2},
+    ]
+
+    ranked = await get_ranked_villages(28.7041, 77.1025)
+    assert len(ranked) == 2
+    assert "influence_score" in ranked[0]
+    assert "distance_km" in ranked[0]
+    assert ranked[0]["influence_score"] >= ranked[1]["influence_score"]
+
+
+@pytest.mark.asyncio
+@patch("app.services.charity_service.get_supabase_client")
+async def test_create_disbursement(mock_client_factory: MagicMock) -> None:
+    from app.services.charity_service import create_disbursement
+    client = MagicMock()
+    mock_client_factory.return_value = client
+
+    tables = {
+        "assistance_requests": MagicMock(),
+        "disbursements": MagicMock(),
+    }
+    client.table.side_effect = lambda t: tables.get(t, MagicMock())
+
+    # Mock assistance request approved
+    tables["assistance_requests"].select.return_value.eq.return_value.single.return_value.execute.return_value.data = {
+        "ngo_id": "ngo-1",
+        "status": "approved",
+    }
+
+    # Mock disbursement insert
+    tables["disbursements"].insert.return_value.execute.return_value.data = [
+        {
+            "id": "disb-1",
+            "ngo_id": "ngo-1",
+            "request_id": "req-1",
+            "payee_name": "Majha Balers CHC",
+            "payee_type": "baler",
+            "amount": 2500.0,
+            "note": "Paddy stubble cleanly baled",
+        }
+    ]
+
+    res = await create_disbursement(
+        ngo_id="ngo-1",
+        request_id="req-1",
+        payee_name="Majha Balers CHC",
+        amount=2500.0,
+        payee_type="baler",
+        note="Paddy stubble cleanly baled",
+    )
+
+    assert res["id"] == "disb-1"
+    assert res["payee_type"] == "baler"
+    assert res["amount"] == 2500.0

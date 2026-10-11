@@ -103,5 +103,86 @@
     "plot_saved": "ਖੇਤ ਸੰਭਾਲਿਆ ਗਿਆ। ਤੁਸੀਂ ਹੋਰ ਖੇਤ ਜੋੜ ਸਕਦੇ ਹੋ।",
     "id_status": "ਆਈਡੀ ਸਮੀਖਿਆ ਸਥਿਤੀ: {{status}}।",
     "villages_error": "ਪਿੰਡ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੇ। ਦਿੱਤੀ Supabase ਮਾਈਗ੍ਰੇਸ਼ਨ ਚਲਾਓ, ਫਿਰ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+  },
+  "status": {
+    "pending": "ਬਕਾਇਆ",
+    "accepted": "ਸਵੀਕਾਰ ਕੀਤਾ",
+    "declined": "ਅਸਵੀਕਾਰ ਕੀਤਾ",
+    "open": "ਮਾਰਕੀਟਪਲੇਸ ਵਿੱਚ ਖੁੱਲ੍ਹਾ",
+    "matched": "ਮੇਲ ਖਾਂਦਾ",
+    "pooled": "ਪਿੰਡ ਪੂਲ ਵਿੱਚ ਸ਼ਾਮਲ",
+    "completed": "ਮੁਕੰਮਲ",
+    "verified": "ਸੈਟੇਲਾਈਟ ਦੁਆਰਾ ਪ੍ਰਮਾਣਿਤ ਸਾਫ਼",
+    "fire_detected": "ਅੱਗ ਦਾ ਪਤਾ ਲੱਗਿਆ",
+    "inconclusive": "ਅਨਿਸ਼ਚਿਤ (ਬੱਦਲਵਾਈ)",
+    "received": "ਪ੍ਰਾਪਤ ਹੋਇਆ",
+    "not_received": "ਪ੍ਰਾਪਤ ਨਹੀਂ ਹੋਇਆ",
+    "submitted": "ਜਮ੍ਹਾਂ ਕੀਤਾ",
+    "approved": "ਮਨਜ਼ੂਰ",
+    "disbursed": "ਜਾਰੀ ਕੀਤਾ"
+  },
+  "matching": {
+    "offer_price": "ਪੇਸ਼ਕਸ਼: ₹{{price}} / ਟਨ",
+    "status": "ਸਥਿਤੀ",
+    "pool_progress": "ਪਿੰਡ ਪਰਾਲੀ ਪੂਲ ਦੀ ਪ੍ਰਗਤੀ",
+    "collected": "ਇਕੱਠਾ ਹੋਇਆ",
+    "goal": "ਟੀਚਾ ਲੋਡ",
+    "scheduled_pickup": "ਤੈਅ ਕੀਤੀ ਪਿਕਅੱਪ ਮਿਤੀ",
+    "buyer": "ਖਰੀਦਦਾਰ",
+    "baler": "ਨਿਰਧਾਰਤ ਬੇਲਰ",
+    "window": "ਪਿਕਅੱਪ ਸਮਾਂ ਸੀਮਾ",
+    "more_farmers_needed": "ਪਿਕਅੱਪ ਮਿਤੀ ਤੈਅ ਕਰਨ ਲਈ ਹੋਰ {{count}} ਕਿਸਾਨਾਂ ਦੇ ਲੋਡ ਦੀ ਲੋੜ ਹੈ"
+  },
+  "listing": {
+    "select_plot": "ਖੇਤ ਚੁਣੋ",
+    "select_plot_placeholder": "ਰਜਿਸਟਰਡ ਖੇਤ ਚੁਣੋ...",
+    "acres": "ਏਕੜ",
+    "estimated_yield": "ਅੰਦਾਜ਼ਨ ਪਰਾਲੀ ਦਾ ਝਾੜ",
+    "tonnes": "ਟਨ",
+    "estimate_badge": "ਅੰਦਾਜ਼ਾ",
+    "confirming": "ਪੁਸ਼ਟੀ ਹੋ ਰਹੀ ਹੈ...",
+    "confirm": "ਲਿਸਟਿੰਗ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ",
+    "blocked_unverified": "ਪ੍ਰਮਾਣਿਤ ਆਈਡੀ ਲਾਜ਼ਮੀ ਹੈ",
+    "id_required_msg": "ਪਰਾਲੀ ਲਿਸਟ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਤੁਹਾਨੂੰ ਆਪਣਾ ਆਈਡੀ ਸਬੂਤ ਪ੍ਰਮਾਣਿਤ ਕਰਵਾਉਣਾ ਪਵੇਗਾ।"
+  },
+  "pickup": {
+    "scheduled_date": "ਤੈਅ ਕੀਤੀ ਪਿਕਅੱਪ ਮਿਤੀ",
+    "status": "ਭੁਗਤਾਨ ਸਥਿਤੀ",
+    "amount_due": "ਕੁੱਲ ਬਕਾਇਆ ਰਕਮ",
+    "update_weight": "ਕੰਡੇ ਦੇ ਵਜ਼ਨ ਦਾ ਵੇਰਵਾ ਦਰਜ ਕਰੋ",
+    "actual_weight": "ਅਸਲ ਵਜ਼ਨ (ਟਨ)",
+    "quality_notes": "ਗੁਣਵੱਤਾ ਨੋਟਸ",
+    "quality_notes_placeholder": "ਜਿਵੇਂ: ਸਾਫ਼ ਸੁੱਕੀ ਪਰਾਲੀ, 12% ਨਮੀ, ਚੰਗੀ ਤਰ੍ਹਾਂ ਬੱਝੀ ਹੋਈ",
+    "received": "ਪ੍ਰਾਪਤ ਹੋਇਆ",
+    "not_received": "ਪ੍ਰਾਪਤ ਨਹੀਂ ਹੋਇਆ",
+    "save": "ਸੰਭਾਲੋ"
+  },
+  "verification": {
+    "title": "ਸੈਟੇਲਾਈਟ ਪ੍ਰਮਾਣੀਕਰਨ",
+    "pending": "ਪਿਕਅੱਪ ਮੁਕੰਮਲ ਹੋਣ ਦੀ ਉਡੀਕ ਵਿੱਚ",
+    "checked_on": "{{date}} ਨੂੰ ਜਾਂਚਿਆ ਗਿਆ",
+    "firms_hits": "ਨਾਸਾ FIRMS ਅੱਗ ਦੇ ਚਿੰਨ੍ਹ: {{count}}",
+    "nbr_drop": "Sentinel-2 ਸੜਨ ਦਾ ਬਦਲਾਅ (NBR): {{drop}}",
+    "confidence": "ਭਰੋਸੇਯੋਗਤਾ: {{level}}",
+    "inconclusive_reason": "ਬੱਦਲਾਂ ਕਾਰਨ ਸੈਟੇਲਾਈਟ ਫੋਟੋ ਸਾਫ਼ ਨਹੀਂ ਆਈ। ਦੁਬਾਰਾ ਜਾਂਚ ਤੈਅ ਕੀਤੀ ਗਈ ਹੈ।",
+    "verdict": {
+      "verified": "ਸਾਫ਼ ਪ੍ਰਮਾਣਿਤ",
+      "fire_detected": "ਅੱਗ ਦਾ ਪਤਾ ਲੱਗਾ",
+      "inconclusive": "ਅਨਿਸ਼ਚਿਤ"
+    },
+    "run_check": "ਸੈਟੇਲਾਈਟ ਜਾਂਚ ਚਲਾਓ",
+    "scenario_clean": "ਸਾਫ਼ (ਪ੍ਰਮਾਣਿਤ)",
+    "scenario_fire": "ਅੱਗ ਮਿਲੀ",
+    "scenario_inconclusive": "ਬੱਦਲਵਾਈ (ਅਨਿਸ਼ਚਿਤ)"
+  },
+  "heatmap": {
+    "title": "ਖੇਤਰੀ ਮੰਗ ਅਤੇ ਸਪਲਾਈ ਦਾ ਨਕਸ਼ਾ",
+    "subtitle": "ਪਿੰਡ ਪੱਧਰੀ। ਉਦਯੋਗਿਕ ਮੰਗ ਬਨਾਮ ਕਿਸਾਨ ਪਰਾਲੀ ਸਪਲਾਈ।",
+    "legend_demand": "ਭਰਿਆ ਚੱਕਰ: ਖਰੀਦਦਾਰ ਮੰਗ",
+    "legend_supply": "ਘੇਰਾ: ਖੁੱਲ੍ਹੀਆਂ ਲਿਸਟਿੰਗਾਂ ਅਤੇ ਪੂਲ ਤੋਂ ਸਪਲਾਈ",
+    "legend_unfilled": "ਨਿਸ਼ਾਨਬੱਧ: ਅਧੂਰੀ ਮੰਗ ਵਾਲਾ ਜ਼ੋਨ",
+    "unfilled_label": "{{name}}: {{tonnes}} ਟਨ ਬਾਕੀ",
+    "error": "ਨਕਸ਼ੇ ਦਾ ਡਾਟਾ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕਿਆ।",
+    "no_zones": "ਇਸ ਵੇਲੇ ਕੋਈ ਅਧੂਰੀ ਮੰਗ ਨਹੀਂ ਹੈ।"
   }
 }

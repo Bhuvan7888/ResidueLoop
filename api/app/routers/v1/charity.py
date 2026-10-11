@@ -27,11 +27,25 @@ class RequestStatusUpdate(BaseModel):
 class DisbursementCreate(BaseModel):
     payee_name: str
     amount: float
+    payee_type: Optional[str] = "baler"
+    note: Optional[str] = None
+
+CITY_COORDINATES = {
+    "delhi": (28.7041, 77.1025),
+    "chandigarh": (30.7333, 76.7794),
+    "ludhiana": (30.9010, 75.8573),
+    "amritsar": (31.6340, 74.8723),
+    "bathinda": (30.2110, 74.9455),
+}
 
 @router.get("/villages/ranked")
 async def fetch_ranked_villages(city: str = "Delhi") -> list[dict[str, Any]]:
-    # Mocking Delhi lat/lon
-    lat, lon = 28.7041, 77.1025
+    city_clean = city.lower().strip()
+    lat, lon = CITY_COORDINATES.get("delhi", (28.7041, 77.1025))
+    for k, coords in CITY_COORDINATES.items():
+        if k in city_clean:
+            lat, lon = coords
+            break
     return await get_ranked_villages(lat, lon)
 
 @router.get("/campaigns")
@@ -80,5 +94,12 @@ async def record_disbursement(
     payload: DisbursementCreate,
     user_id: str = Depends(require_role(["ngo"])),
 ) -> dict[str, Any]:
-    res = await create_disbursement(user_id, request_id, payload.payee_name, payload.amount)
+    res = await create_disbursement(
+        user_id,
+        request_id,
+        payload.payee_name,
+        payload.amount,
+        payload.payee_type or "baler",
+        payload.note,
+    )
     return {"data": res}

@@ -45,10 +45,21 @@ export function submitIdVerification(payload: IdVerificationPayload): Promise<{ 
 export async function getFarmerProfile(userId: string) {
   const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
   const { data: farmer } = await supabase.from('farmers').select('*').eq('profile_id', userId).maybeSingle()
+  const { data: idVerif } = await supabase
+    .from('id_verifications')
+    .select('status, rejection_reason')
+    .eq('farmer_id', userId)
+    .order('reviewed_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
   return {
     name: profile?.name,
+    phone: profile?.phone,
     language: profile?.language,
     villageId: farmer?.village_id,
-    idStatus: farmer?.id_status,
+    idStatus: farmer?.id_status || idVerif?.status || 'not_submitted',
+    rejectionReason: idVerif?.rejection_reason || null,
   }
 }
+

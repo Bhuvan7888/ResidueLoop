@@ -12,11 +12,12 @@ export async function signInWithOtp(phone: string, captchaToken?: string) {
   return data
 }
 
-export async function signInDevUser(role: 'farmer' | 'buyer' | 'donor' = 'farmer') {
+export async function signInDevUser(role: 'farmer' | 'buyer' | 'donor' | 'ngo' = 'farmer') {
   const emailMap = {
     farmer: 'dev@residueloop.test',
     buyer: 'buyer@residueloop.test',
     donor: 'donor@residueloop.test',
+    ngo: 'ngo@residueloop.test',
   }
   const { data, error } = await supabase.auth.signInWithPassword({
     email: emailMap[role],

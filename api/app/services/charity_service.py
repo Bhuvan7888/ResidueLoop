@@ -2,6 +2,15 @@ from app.core.security import get_supabase_client
 from fastapi import HTTPException
 from typing import Any, cast
 import datetime
+import math
+
+def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    r = 6371.0
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2)**2
+    return 2 * r * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 async def get_ranked_villages(target_lat: float, target_lon: float) -> list[dict[str, Any]]:
     client = get_supabase_client()
@@ -10,11 +19,23 @@ async def get_ranked_villages(target_lat: float, target_lon: float) -> list[dict
     
     ranked = []
     for v in villages:
+        v_lat = float(v.get("lat") or v.get("latitude") or 30.5)
+        v_lon = float(v.get("lon") or v.get("longitude") or 75.5)
+        dist = haversine_km(v_lat, v_lon, target_lat, target_lon)
+        score = round(max(30.0, min(99.0, 96.0 - (dist * 0.12))), 1)
+        if score >= 80.0:
+            label = "High Direct Impact"
+        elif score >= 60.0:
+            label = "Moderate Influence"
+        else:
+            label = "Low Exposure"
         ranked.append({
             "village": v,
-            "influence_score": 85.0,
-            "label": "likely influence"
+            "influence_score": score,
+            "label": label,
+            "distance_km": round(dist, 1)
         })
+    ranked.sort(key=lambda x: x["influence_score"], reverse=True)
     return ranked
 
 async def get_crowdfunding_campaigns() -> list[dict[str, Any]]:
@@ -218,7 +239,7 @@ async def update_request_status(ngo_id: str, request_id: str, status: str) -> No
     client.table("assistance_requests").update({"status": status}).eq("id", request_id).execute()
 
 async def create_disbursement(
-    ngo_id: str, request_id: str, payee_name: str, amount: float
+    ngo_id: str, request_id: str, payee_name: str, amount: float, payee_type: str = "baler", note: str | None = None
 ) -> dict[str, Any]:
     client = get_supabase_client()
     res = client.table("assistance_requests").select("ngo_id, status").eq("id", request_id).single().execute()
@@ -231,6 +252,8 @@ async def create_disbursement(
         "ngo_id": ngo_id,
         "request_id": request_id,
         "payee_name": payee_name,
-        "amount": amount
+        "amount": amount,
+        "payee_type": payee_type,
+        "note": note or f"Clearance disbursement to {payee_type}"
     }).execute()
     return cast(dict[str, Any], disb_res.data[0])

@@ -33,9 +33,15 @@ export async function updateRequestStatus(requestId: string, status: 'approved' 
   return apiRequest(`/charity/requests/${requestId}/status`, { body: { status }, method: 'PATCH' })
 }
 
-export async function recordDisbursement(requestId: string, payeeName: string, amount: number) {
+export async function recordDisbursement(
+  requestId: string,
+  payeeName: string,
+  amount: number,
+  payeeType: 'baler' | 'transport provider' | 'farmer' = 'baler',
+  note?: string
+) {
   return apiRequest(`/charity/requests/${requestId}/disbursements`, {
-    body: { payee_name: payeeName, amount },
+    body: { payee_name: payeeName, amount, payee_type: payeeType, note },
     method: 'POST',
   })
 }
@@ -57,6 +63,26 @@ export async function getNgoRequests(ngoId: string) {
   const { data, error } = await supabase.from('assistance_requests').select('*, farmers(profiles(name)), listings(acres, price_per_tonne)').eq('ngo_id', ngoId).order('created_at', { ascending: false })
   if (error) throw error
   return data
+}
+
+export async function getNgoDisbursements(ngoId: string) {
+  const { data, error } = await supabase
+    .from('disbursements')
+    .select('*, assistance_requests(purpose, farmers(profiles(name)))')
+    .eq('ngo_id', ngoId)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data || []
+}
+
+export async function getNgoDonations(ngoId: string) {
+  const { data, error } = await supabase
+    .from('donations')
+    .select('*, donor:profiles(name), villages(name)')
+    .eq('ngo_id', ngoId)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data || []
 }
 
 export async function getNgoLedger(ngoId: string) {

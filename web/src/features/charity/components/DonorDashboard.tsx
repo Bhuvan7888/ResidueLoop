@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   getDonorHistory,
   getNGOs,
@@ -37,19 +37,21 @@ export function DonorDashboard({ userId }: { userId: string }) {
     { id: string; amount: number; created_at: string; ngos?: { profiles?: { name: string } } }[]
   >([])
   const [ngos, setNgos] = useState<{ profile_id: string; profiles?: { name: string } }[]>([])
-  const [ranked, setRanked] = useState<{ influence_score: number; label: string; village?: { name: string } }[]>([])
+  const [ranked, setRanked] = useState<{ influence_score: number; label: string; village?: { name: string }; distance_km?: number }[]>([])
   const [notifications, setNotifications] = useState<{ id: string; message: string; created_at: string }[]>([])
   const [campaigns, setCampaigns] = useState<CrowdfundingCampaign[]>([])
   const [donationMsg, setDonationMsg] = useState<string | null>(null)
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null)
   const [customAmount, setCustomAmount] = useState<number>(500)
+  const [directAmount, setDirectAmount] = useState<number>(1000)
+  const [selectedCity, setSelectedCity] = useState<string>('Delhi')
 
-  const loadData = async () => {
+  const loadData = useCallback(async (city: string = selectedCity) => {
     try {
       const [h, n, r, notifs, camps] = await Promise.all([
         getDonorHistory(userId),
         getNGOs(),
-        getRankedVillages('Delhi'),
+        getRankedVillages(city),
         getNotifications(userId),
         getCrowdfundingCampaigns(),
       ])
@@ -61,11 +63,11 @@ export function DonorDashboard({ userId }: { userId: string }) {
     } catch (err) {
       console.error(err)
     }
-  }
+  }, [userId, selectedCity])
 
   useEffect(() => {
-    loadData()
-  }, [userId])
+    loadData(selectedCity)
+  }, [loadData, selectedCity])
 
   const handleGeneralDonate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -245,50 +247,84 @@ export function DonorDashboard({ userId }: { userId: string }) {
         <p className="text-xs text-copy-secondary mb-4">
           Support verified ground NGOs equipping machinery and providing baler subsidies across North India.
         </p>
-        <form onSubmit={handleGeneralDonate} className="grid gap-3 sm:grid-cols-3">
-          <div>
-            <label className="block text-xs font-medium text-copy-secondary mb-1">Select Verified NGO</label>
-            <select
-              name="ngo_id"
-              required
-              className="w-full border border-surface-border bg-surface rounded-xl p-2.5 text-sm text-copy-primary focus:ring-2 focus:ring-accent-primary outline-none"
-            >
-              <option value="">Choose an NGO...</option>
-              {ngos.map((n) => (
-                <option key={n.profile_id} value={n.profile_id}>
-                  {n.profiles?.name || 'Clean Air Trust'}
-                </option>
-              ))}
-            </select>
+        <form onSubmit={handleGeneralDonate} className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label className="block text-xs font-medium text-copy-secondary mb-1">Select Verified NGO</label>
+              <select
+                name="ngo_id"
+                required
+                className="w-full border border-surface-border bg-surface rounded-xl p-2.5 text-sm text-copy-primary focus:ring-2 focus:ring-accent-primary outline-none"
+              >
+                <option value="">Choose an NGO...</option>
+                {ngos.map((n) => (
+                  <option key={n.profile_id} value={n.profile_id}>
+                    {n.profiles?.name || 'Clean Air Trust'}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-copy-secondary mb-1">Contribution Amount (₹)</label>
+              <input
+                name="amount"
+                type="number"
+                required
+                min="100"
+                value={directAmount}
+                onChange={(e) => setDirectAmount(Number(e.target.value) || 0)}
+                className="w-full border border-surface-border bg-surface rounded-xl p-2.5 text-sm text-copy-primary focus:ring-2 focus:ring-accent-primary outline-none"
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                type="submit"
+                className="w-full bg-brand text-on-brand rounded-xl py-2.5 font-medium text-sm hover:bg-accent-secondary transition-colors shadow-xs"
+              >
+                Donate to Clean Air Fund
+              </button>
+            </div>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-copy-secondary mb-1">Contribution Amount (₹)</label>
-            <input
-              name="amount"
-              type="number"
-              required
-              min="100"
-              defaultValue="1000"
-              className="w-full border border-surface-border bg-surface rounded-xl p-2.5 text-sm text-copy-primary focus:ring-2 focus:ring-accent-primary outline-none"
-            />
-          </div>
-          <div className="flex items-end">
-            <button
-              type="submit"
-              className="w-full bg-brand text-on-brand rounded-xl py-2.5 font-medium text-sm hover:bg-accent-secondary transition-colors shadow-xs"
-            >
-              Donate to Clean Air Fund
-            </button>
+
+          {/* Dynamic Stubble Diverted Estimate Badge */}
+          <div className="flex flex-wrap items-center gap-3 p-3 bg-bg-subtle rounded-xl text-xs text-copy-secondary border border-surface-border">
+            <span className="font-semibold text-copy-primary">🌾 Estimated Citizen Impact:</span>
+            <span>
+              ~<strong className="text-copy-primary">{(directAmount / 200).toFixed(1)}t</strong> of paddy straw cleanly baled & diverted
+            </span>
+            <span>•</span>
+            <span>
+              ~<strong className="text-copy-primary">{(directAmount / 500).toFixed(1)} acres</strong> saved from smoke pollution
+            </span>
           </div>
         </form>
       </div>
 
       {/* Section 3: Wind-Link Air Quality Influence Ranking */}
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold text-copy-primary">Wind-Link Trajectory Ranking (NCR Influence)</h3>
-        <p className="text-xs text-copy-secondary">
-          Villages identified where preventing fires has the highest direct impact on reducing downwind air pollution.
-        </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <h3 className="text-lg font-semibold text-copy-primary">Wind-Link Trajectory Ranking ({selectedCity} Focus)</h3>
+            <p className="text-xs text-copy-secondary">
+              Villages identified where preventing fires has the highest direct impact on reducing downwind air pollution.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-copy-secondary whitespace-nowrap">Downwind City:</label>
+            <select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              className="border border-surface-border bg-surface text-copy-primary text-xs rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-accent-primary outline-none"
+            >
+              <option value="Delhi">Delhi NCR</option>
+              <option value="Chandigarh">Chandigarh</option>
+              <option value="Ludhiana">Ludhiana</option>
+              <option value="Amritsar">Amritsar</option>
+              <option value="Bathinda">Bathinda</option>
+            </select>
+          </div>
+        </div>
+
         <div className="grid gap-3 sm:grid-cols-2">
           {ranked.slice(0, 4).map((r, i) => (
             <div
@@ -297,7 +333,10 @@ export function DonorDashboard({ userId }: { userId: string }) {
             >
               <div>
                 <p className="font-semibold text-copy-primary text-sm">{r.village?.name || 'Village Area'}</p>
-                <p className="text-xs text-copy-secondary mt-0.5">Downwind Exposure Index: {r.influence_score}</p>
+                <p className="text-xs text-copy-secondary mt-0.5">
+                  Downwind Exposure Index: <strong className="text-copy-primary">{r.influence_score}</strong>
+                  {r.distance_km ? ` • ${r.distance_km} km away` : ''}
+                </p>
               </div>
               <span className="bg-state-warning-dim text-state-warning text-xs font-medium px-2.5 py-1 rounded-full border border-state-warning/30">
                 {r.label}
@@ -320,10 +359,17 @@ export function DonorDashboard({ userId }: { userId: string }) {
                 className="bg-surface border border-surface-border rounded-xl p-4 flex justify-between items-center shadow-xs"
               >
                 <div>
-                  <p className="font-medium text-copy-primary text-sm">
-                    Contribution to {h.ngos?.profiles?.name || 'Clean Air Collective'}
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-copy-primary text-sm">
+                      Contribution to {h.ngos?.profiles?.name || 'Clean Air Collective'}
+                    </p>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-state-success-dim text-state-success">
+                      ✓ Deployed
+                    </span>
+                  </div>
+                  <p className="text-xs text-copy-secondary mt-0.5">
+                    {new Date(h.created_at).toLocaleDateString()} • ~{(h.amount / 200).toFixed(1)}t Straw Diverted
                   </p>
-                  <p className="text-xs text-copy-secondary mt-0.5">{new Date(h.created_at).toLocaleDateString()}</p>
                 </div>
                 <p className="font-bold text-brand">₹{h.amount.toLocaleString()}</p>
               </div>

@@ -9,3 +9,4 @@
 **/*.py[cod]
 node_modules/
 dist/
+*.tsbuildinfo

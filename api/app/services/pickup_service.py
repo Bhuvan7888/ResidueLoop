@@ -1,7 +1,7 @@
 from app.core.security import get_supabase_client
 from fastapi import HTTPException
 
-async def update_pickup_weight(user_id: str, pickup_id: str, actual_tonnes: float) -> str:
+async def update_pickup_weight(user_id: str, pickup_id: str, actual_tonnes: float, quality_notes: str | None = None) -> str:
     client = get_supabase_client()
     
     # 1. Check ownership (buyer of the pool)
@@ -13,12 +13,16 @@ async def update_pickup_weight(user_id: str, pickup_id: str, actual_tonnes: floa
     price = offers[0]["price_per_tonne"] if offers else 1500.0
     amount_due = actual_tonnes * price
     
-    client.table("pickups").update({
+    update_data = {
         "actual_tonnes": actual_tonnes,
         "amount_due": amount_due,
         "completed_at": "now()",
         "payment_status": "received"
-    }).eq("id", pickup_id).execute()
+    }
+    if quality_notes:
+        update_data["quality_notes"] = quality_notes
+
+    client.table("pickups").update(update_data).eq("id", pickup_id).execute()
 
     farmer_id = pickup_res.data.get("listings", {}).get("farmer_id")
     if farmer_id:

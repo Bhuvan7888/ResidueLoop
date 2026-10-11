@@ -103,5 +103,86 @@
     "plot_saved": "Plot saved. You can add another plot.",
     "id_status": "ID review status: {{status}}.",
     "villages_error": "We could not load villages. Run the supplied Supabase migration, then try again."
+  },
+  "status": {
+    "pending": "Pending",
+    "accepted": "Accepted",
+    "declined": "Declined",
+    "open": "Open (Marketplace)",
+    "matched": "Matched",
+    "pooled": "Pooled",
+    "completed": "Completed",
+    "verified": "Verified Clean",
+    "fire_detected": "Fire Detected",
+    "inconclusive": "Inconclusive (Cloud)",
+    "received": "Received",
+    "not_received": "Not Received",
+    "submitted": "Submitted",
+    "approved": "Approved",
+    "disbursed": "Disbursed"
+  },
+  "matching": {
+    "offer_price": "Offer: ₹{{price}} / tonne",
+    "status": "Status",
+    "pool_progress": "Village Straw Pool Progress",
+    "collected": "pooled",
+    "goal": "target load",
+    "scheduled_pickup": "Fixed Pickup Date",
+    "buyer": "Buyer",
+    "baler": "Assigned Baler",
+    "window": "Pickup Window",
+    "more_farmers_needed": "{{count}} more farmer load(s) needed to fix pickup date"
+  },
+  "listing": {
+    "select_plot": "Select Plot",
+    "select_plot_placeholder": "Select a registered plot...",
+    "acres": "acres",
+    "estimated_yield": "Estimated Straw Yield",
+    "tonnes": "tonnes",
+    "estimate_badge": "Estimate",
+    "confirming": "Confirming...",
+    "confirm": "Confirm Listing",
+    "blocked_unverified": "Verified ID Required",
+    "id_required_msg": "You must complete and verify your ID proof before creating residue listings."
+  },
+  "pickup": {
+    "scheduled_date": "Scheduled Pickup Date",
+    "status": "Payment Status",
+    "amount_due": "Total Amount Due",
+    "update_weight": "Record Weighbridge Details",
+    "actual_weight": "Actual Weighed Tonnes",
+    "quality_notes": "Quality Notes",
+    "quality_notes_placeholder": "e.g. Clean straw, 12% moisture, tightly baled",
+    "received": "Received",
+    "not_received": "Not Received",
+    "save": "Save"
+  },
+  "verification": {
+    "title": "Satellite Verification",
+    "pending": "Verification pending pickup completion",
+    "checked_on": "Checked on {{date}}",
+    "firms_hits": "NASA FIRMS fire hits: {{count}}",
+    "nbr_drop": "Sentinel-2 burn scar change (NBR): {{drop}}",
+    "confidence": "Confidence: {{level}}",
+    "inconclusive_reason": "Optical overpass obscured by cloud cover. Automated recheck scheduled.",
+    "verdict": {
+      "verified": "Verified Clean",
+      "fire_detected": "Fire Detected",
+      "inconclusive": "Inconclusive"
+    },
+    "run_check": "Run Satellite Check",
+    "scenario_clean": "Clean (Verified)",
+    "scenario_fire": "Fire Detected",
+    "scenario_inconclusive": "Cloudy (Inconclusive)"
+  },
+  "heatmap": {
+    "title": "Regional Demand & Supply Map",
+    "subtitle": "Village level. Industrial demand vs farmer straw supply.",
+    "legend_demand": "Filled circle: buyer demand",
+    "legend_supply": "Ring: supply from open listings and pools",
+    "legend_unfilled": "Outlined and labelled: unfilled demand zone",
+    "unfilled_label": "{{name}}: {{tonnes}} t unfilled",
+    "error": "Could not load map data.",
+    "no_zones": "No unfilled demand right now."
   }
 }
