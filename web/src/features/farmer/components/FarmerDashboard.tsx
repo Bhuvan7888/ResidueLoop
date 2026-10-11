@@ -229,6 +229,26 @@ export function FarmerDashboard({ userId }: { userId: string }) {
   const isVerified = farmerProfile?.idStatus === 'verified'
   const idStatus = farmerProfile?.idStatus || 'not_submitted'
 
+  const totalReceived = pickups
+    .filter((p) => p.payment_status === 'received')
+    .reduce((sum, p) => sum + (p.amount_due || 0), 0)
+
+  const totalPending = pickups
+    .filter((p) => p.payment_status !== 'received')
+    .reduce((sum, p) => sum + (p.amount_due || 0), 0) || (listings.length > 0 && totalReceived === 0 ? listings.reduce((sum, l) => sum + ((l.est_tonnes || 10) * (l.price_per_tonne || 1900)), 0) : 0)
+
+  const hasCompleted = pickups.some((p) => p.payment_status === 'received')
+  const hasPickupWeighed = pickups.some((p) => p.actual_tonnes && p.actual_tonnes > 0)
+  const hasScheduled = pickups.some((p) => p.pools?.pickup_date)
+  const hasPooled = listings.some((l) => l.status === 'pooled') || pools.length > 0
+  const hasMatched = listings.some((l) => l.status === 'matched') || offers.length > 0
+
+  const pickupStep = hasCompleted ? 3 : (hasPickupWeighed || hasScheduled) ? 3 : hasPooled ? 2 : hasMatched ? 1 : 0
+  const latestPickup = pickups[0]
+  const nextPickupDate = latestPickup?.pools?.pickup_date 
+    ? new Date(latestPickup.pools.pickup_date).toLocaleDateString(i18n.language === 'hi' ? 'hi-IN' : i18n.language === 'pa' ? 'pa-IN' : 'en-IN', { day: 'numeric', month: 'short' })
+    : null
+
   const handleQuickCharityList = async (listingId: string) => {
     try {
       await requestAssistance({ listing_id: listingId, purpose: 'Urgent citizen crowdfunding clearance to avoid burning' })
@@ -428,6 +448,128 @@ export function FarmerDashboard({ userId }: { userId: string }) {
 
       {view === 'dashboard' && (
         <div className="space-y-8">
+          {/* ================= THE BIG 3 ACTIONS HOME SCREEN ================= */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-extrabold text-copy-primary flex items-center gap-2">
+                <span>🌾</span> {i18n.language === 'hi' ? 'मुख्य कार्य / त्वरित सहायता' : i18n.language === 'pa' ? 'ਮੁੱਖ ਕਾਰਜ / ਤੁਰੰਤ ਸਹਾਇਤਾ' : 'Main Actions / Quick Tasks'}
+              </h3>
+              <span className="text-xs text-copy-secondary font-medium">
+                {i18n.language === 'hi' ? '3 आसान कदम' : i18n.language === 'pa' ? '3 ਆਸਾਨ ਕਦਮ' : '3 Simple Tasks'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Card 1: 🌾 1. पराली बेचें */}
+              <div
+                onClick={() => {
+                  if (!isVerified) {
+                    setActionMsg(i18n.language === 'hi' ? '⚠️ सत्यापित पहचान आवश्यक! लिस्टिंग बनाने से पहले कृपया ऊपर अपना पहचान प्रमाण जमा करें।' : '⚠️ Verified ID required! Please submit and verify your ID proof before creating a listing.')
+                    return
+                  }
+                  setView('listing')
+                }}
+                className="group relative bg-surface border-2 border-brand/40 hover:border-brand rounded-3xl p-6 text-left transition-all hover:shadow-md hover:scale-[1.01] flex flex-col justify-between cursor-pointer"
+              >
+                <div className="space-y-3">
+                  <div className="w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+                    🌾
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-copy-primary group-hover:text-brand transition-colors">
+                      {t('farmer.big_action_sell_title', '1. पराली बेचें')}
+                    </h4>
+                    <p className="text-xs text-copy-secondary mt-1 leading-relaxed">
+                      {t('farmer.big_action_sell_desc', '2 आसान चरणों में अपनी पराली का खरीदार पाएं')}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-5 pt-4 border-t border-surface-border-subtle flex items-center justify-between">
+                  <span className="text-xs font-bold text-brand">
+                    {listings.length > 0 ? `${listings.length} ${t('farmer.active_listings_count', 'सक्रिय लिस्टिंग')}` : t('farmer.start_listing_cta', '+ नई लिस्टिंग बनाएं')}
+                  </span>
+                  <span className="text-sm font-bold text-brand group-hover:translate-x-1 transition-transform">➔</span>
+                </div>
+              </div>
+
+              {/* Card 2: 🚚 2. ट्रॉली / पिकअप कब आएगी? */}
+              <div
+                onClick={() => {
+                  document.getElementById('pickups-section')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+                className="bg-surface border-2 border-surface-border hover:border-accent-primary/60 rounded-3xl p-6 flex flex-col justify-between transition-all hover:shadow-md cursor-pointer"
+              >
+                <div className="space-y-3">
+                  <div className="w-14 h-14 rounded-2xl bg-accent-primary/10 flex items-center justify-center text-3xl">
+                    🚚
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-copy-primary">
+                      {t('farmer.big_action_pickup_title', '2. ट्रॉली / पिकअप कब आएगी?')}
+                    </h4>
+                    <p className="text-xs text-copy-secondary mt-1 leading-relaxed">
+                      {nextPickupDate 
+                        ? `${t('farmer.scheduled_on', 'निर्धारित तिथि')}: ${nextPickupDate}` 
+                        : t('farmer.big_action_pickup_desc', 'खरीदार व गाड़ी की लाइव स्थिति देखें')}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Truck Progress Bar */}
+                <div className="mt-5 pt-4 border-t border-surface-border-subtle space-y-2">
+                  <div className="flex items-center justify-between text-[11px] font-bold text-copy-secondary">
+                    <span className={pickupStep >= 1 ? 'text-brand' : ''}>🌾 {t('status.matched', 'मिलान')}</span>
+                    <span>➔</span>
+                    <span className={pickupStep >= 2 ? 'text-brand' : ''}>🚜 {t('status.pooled', 'पूलिंग')}</span>
+                    <span>➔</span>
+                    <span className={pickupStep >= 3 ? 'text-state-success' : ''}>🚚 {t('status.completed', 'उठान')}</span>
+                  </div>
+                  <div className="w-full bg-bg-subtle rounded-full h-2 overflow-hidden border border-surface-border-subtle">
+                    <div 
+                      className="bg-brand h-full rounded-full transition-all duration-500" 
+                      style={{ width: pickupStep === 0 ? '15%' : pickupStep === 1 ? '45%' : pickupStep === 2 ? '75%' : '100%' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: 💰 3. मेरे पैसे / भुगतान */}
+              <div
+                onClick={() => {
+                  document.getElementById('pickups-section')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+                className="bg-surface border-2 border-state-success/40 hover:border-state-success rounded-3xl p-6 flex flex-col justify-between transition-all hover:shadow-md cursor-pointer"
+              >
+                <div className="space-y-3">
+                  <div className="w-14 h-14 rounded-2xl bg-state-success/10 flex items-center justify-center text-3xl">
+                    💰
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-copy-primary">
+                      {t('farmer.big_action_money_title', '3. मेरे पैसे / भुगतान')}
+                    </h4>
+                    <p className="text-xs text-copy-secondary mt-1 leading-relaxed">
+                      {t('farmer.big_action_money_desc', 'उठान होते ही सीधे बैंक खाते में भुगतान')}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-5 pt-4 border-t border-surface-border-subtle flex items-center justify-between">
+                  <div>
+                    <div className="text-2xl font-black text-state-success">
+                      ₹{totalReceived.toLocaleString('en-IN')}
+                    </div>
+                    <div className="text-[11px] text-copy-muted font-medium mt-0.5">
+                      {totalPending > 0 ? `₹${totalPending.toLocaleString('en-IN')} ${t('farmer.pending_payout', 'प्रक्रिया में')}` : t('farmer.payout_up_to_date', 'खाता अद्यतन')}
+                    </div>
+                  </div>
+                  <span className="text-xs px-2.5 py-1 rounded-full font-bold bg-state-success-dim text-state-success border border-state-success/30">
+                    {totalReceived > 0 ? t('farmer.paid_badge', 'भुगतान प्राप्त') : t('farmer.zero_deductions', '100% सुरक्षित')}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Section 1: Listings & Pooling */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-copy-primary">{t('farmer.listings_title')}</h3>
@@ -696,7 +838,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
           </div>
           
           {/* Section 4: Pickups & Instant Payments */}
-          <div className="space-y-4">
+          <div id="pickups-section" className="space-y-4">
             <h3 className="text-lg font-medium text-copy-primary">{t('farmer.pickups_title')}</h3>
             {pickups.length === 0 ? (
               <div className="bg-surface border border-surface-border rounded-2xl p-6 text-center">

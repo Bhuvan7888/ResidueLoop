@@ -52,7 +52,12 @@ This tracker records verified evidence only. Earlier completion claims were inde
 - [x] Replaced with clean, actionable plot cards displaying acreage, GPS coordinates, linked paddy straw listing status or "+ List Straw" action CTA, and lightweight plain-language status badges.
 - [x] Preserved technical `VerificationCard` in `SatelliteAuditModal.tsx` for buyer zero-burn compliance audits where telemetry inspection is required.
 - [x] Maintained 100% key parity across `en.json`, `hi.json`, and `pa.json` (520 keys, 0 diffs).
-- [x] Verified static quality: `npm run typecheck` (0 errors), `npm test` (13 tests passed), `npm run lint` (0 errors), `npm run build` (built in 515ms); `poetry run pytest` (25 tests passed).
+- [x] Implemented Farmer Low-Literacy UX Revamp (2026-10-11):
+  - Added "The Big 3 Actions" Home Screen in `FarmerDashboard.tsx` with big visual cards: 🌾 1. "Sell Stubble", 🚚 2. "When is Pickup?" with live truck progress bar, and 💰 3. "My Money & Payouts" with bold received/pending amounts.
+  - Revamped `NewListingForm.tsx` into a simple 2-step visual wizard with large, tappable picture cards for Straw Condition (Standing, Chopped by SMS, Baled) and Harvest Timing (Ready Now, 1 Week, 2 Weeks).
+  - Integrated Zero-Math Live Calculator in `NewListingForm.tsx` auto-deriving straw yield (~2-2.5 t/acre) and guaranteed payout range directly from acres without manual math.
+  - Retained 100% key parity across all 3 languages (551 keys each, 0 diffs).
+- [x] Verified static quality: `npm run typecheck` (0 errors), `npm test` (13 tests passed), `npm run lint` (0 errors), `npm run build` (built in 599ms); `poetry run pytest` (29 tests passed).
 
 ## Recovery Decisions
 
