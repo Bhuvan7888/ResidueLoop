@@ -12,6 +12,13 @@ This tracker records verified evidence only. Earlier completion claims were inde
 - Repair the hosted Supabase migration chain, API mutation boundary, and browser flows now that D4 is cleared.
 - Deliver an original, token-based public landing and consistent auth/workspace shell without changing the blocked database plan.
 
+## Phone And Password Authentication — 2026-10-12
+
+- [x] Replaced the browser phone-OTP and CAPTCHA flow with Supabase phone-and-password sign-in and account creation. The browser still sends only E.164 `+91` phone numbers, and the existing JWT/API role boundary is unchanged.
+- [x] Removed the Twilio-dependent login path, the CAPTCHA public variable, the Turnstile package, and the production-visible fixed-account role switcher.
+- [x] Added phone/password API and validation tests. `npm run typecheck`, `npm run lint` (five pre-existing fast-refresh warnings only), `npm test` (18 tests), and `npm run build` pass on 2026-10-12.
+- [ ] Live account creation and sign-in are blocked on Supabase dashboard configuration: enable Phone, disable phone confirmation, and keep email and anonymous sign-in disabled. This flow intentionally does not verify phone-number ownership and is suitable only for the requested free demo.
+
 ## Frontend Experience Refresh — 2026-10-10
 
 - [x] Added a public `/` landing route and moved the protected dashboard route to `/app`; sign-in, role selection, and authenticated redirects now target `/app`.

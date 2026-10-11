@@ -159,7 +159,7 @@ Project-specific components built on top (not inside `ui/`, in `web/src/componen
 ## Layout Patterns
 
 - Navbar: top bar on the cream background with a bottom border. Brand wordmark on the left, role-specific links in the middle, language switch and account menu on the right. On small screens the links collapse into a `sheet`. Like the reference, keep it to a few short links.
-- Login page (the hero): two columns on desktop. Left: eyebrow, large serif headline, one supporting sentence, and a short tagline. Right: a `rounded-2xl` card with the +91 phone field, then the 6-box OTP input with a visible resend countdown. On mobile the headline sits above the card. Decorative straw and leaf illustrations sit in the margins.
+- Login page (the hero): two columns on desktop. Left: eyebrow, large serif headline, one supporting sentence, and a short tagline. Right: a `rounded-2xl` card with the +91 phone field, password field, and a clear switch between sign-in and account creation. On mobile the headline sits above the card. Decorative straw and leaf illustrations sit in the margins.
 - Role picker: three large cards (Farmer, Buyer, Donor), each with a feature icon, one line of text, and a single tap to select.
 - Dashboards: a vertical stack of `rounded-2xl` cards under a serif page title. The next action for the user is the first card.
 - Detail views (pool detail, support request review): slide-over panel on the right on desktop, full-screen `sheet` on mobile.

@@ -8,7 +8,7 @@ ResidueLoop is a web platform that helps Punjab farmers sell paddy straw instead
 
 ## Goals
 
-1. Let users sign in with a phone number OTP and choose or be assigned one of four roles: farmer, buyer, donor, NGO.
+1. Let users sign in with a phone number and password and choose or be assigned one of four roles: farmer, buyer, donor, NGO.
 2. Let farmers create a profile, add plots, and submit an ID proof for verification.
 3. Let verified farmers list residue and receive a matched offer from a buyer and baler.
 4. Pool farmers by village so buyers receive full truckloads on one pickup day.
@@ -23,7 +23,7 @@ ResidueLoop is a web platform that helps Punjab farmers sell paddy straw instead
 
 | Phase | Name                    | Contents                                                                                                                                                         |
 | ----- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1     | Web application         | Phone OTP login, four roles, farmer profile and ID verification, listings, matching, pooling, pickup and weighing, payment status, satellite verification, charity |
+| 1     | Web application         | Phone-and-password login, four roles, farmer profile and ID verification, listings, matching, pooling, pickup and weighing, payment status, satellite verification, charity |
 | 2     | WhatsApp and market view | WhatsApp two-way sync with the app, buyer demand heatmap                                                                                                         |
 | 3     | Prediction and stretch  | Burn-risk and supply forecast, Punjabi voice notes, HYSPLIT trajectories, real payment integration, real ID verification partner                                 |
 
@@ -31,7 +31,7 @@ Work on Phase 1 only until the Phase 1 success criteria pass. Phase 2 and 3 item
 
 ## Core User Flow
 
-1. User opens the login page and signs in with a phone number and a one-time password.
+1. User opens the login page and signs in with a phone number and password.
 2. A first-time user chooses a role (Farmer, Buyer, or Donor) and completes a short profile. NGO accounts are pre-seeded and recognised by phone number.
 3. Farmer adds plots and submits an ID proof. The ID status becomes Verified (mocked review in the hackathon build).
 4. Verified farmer lists residue from a plot and confirms the tonnage estimate.
@@ -51,9 +51,9 @@ Every flow starts at the same login page. Expected results are written after eac
 
 1. User opens the app. If not signed in, every protected route redirects to the login page.
 2. User picks a display language (English or Punjabi) on the login page.
-3. User enters a 10-digit Indian mobile number. The app adds +91 and sends an OTP. Result: OTP screen appears.
-4. User enters the 6-digit OTP. Result: signed in and redirected by role.
-5. Wrong OTP shows an inline error. Expired OTP shows a resend option. Resend is blocked during a cooldown.
+3. User enters a 10-digit Indian mobile number and password. The app adds +91. Result: signed in and redirected by role.
+4. A first-time user chooses Create account, enters a password, and is signed in without phone-number ownership verification.
+5. An incorrect phone number or password shows an inline error.
 6. First-time user (no profile) sees a role picker: Farmer, Buyer, Donor. Role is saved once and cannot be changed in the app.
 7. A phone number matching a seeded NGO account skips the role picker and opens the NGO dashboard.
 8. Sign out returns to the login page.
@@ -106,7 +106,7 @@ Every flow starts at the same login page. Expected results are written after eac
 
 ### Authentication And Roles
 
-- Phone number OTP sign-in and route protection by role.
+- Phone number and password sign-in and route protection by role.
 - First-sign-in role selection for farmer, buyer, donor. NGO accounts are seeded.
 - Language selection (English, Punjabi).
 
@@ -186,7 +186,7 @@ Every flow starts at the same login page. Expected results are written after eac
 
 ## Success Criteria
 
-1. A user can sign in with a phone number OTP and land on the correct role dashboard.
+1. A user can sign in with a phone number and password and land on the correct role dashboard.
 2. A farmer can add a plot, submit an ID, and reach Verified status.
 3. A verified farmer can list residue, receive an offer, and join a village pool.
 4. A buyer can post demand, enter weights at pickup, and see payment status.

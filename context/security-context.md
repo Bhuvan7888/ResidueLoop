@@ -9,7 +9,7 @@ Security rules for every unit. They are requirements, not suggestions. Apply the
 | DNS hijacking, spoofing, subdomain takeover         | DNS And Network Layer                        |
 | DDoS and request floods                             | DNS And Network Layer, API Hardening         |
 | DNS rebinding, host header attacks, SSRF            | DNS And Network Layer                        |
-| OTP abuse, SMS pumping, account takeover            | Authentication Hardening                     |
+| Password guessing and account takeover               | Authentication Hardening                     |
 | Broken access control, IDOR                         | Authorization                                |
 | Injection, XSS, CSRF                                | Web And API Hardening                        |
 | Malicious file uploads                              | File Uploads                                 |
@@ -46,10 +46,9 @@ Flood and abuse protection:
 ## Authentication Hardening
 
 - Supabase Auth: enable only the Phone provider. Disable email sign-ups and anonymous sign-ins. Set the allowed redirect URLs to the real web origin only.
-- Allow only +91 numbers. Reject other country codes before an SMS is sent. This blocks SMS pumping to premium numbers.
-- Turn on CAPTCHA protection for OTP requests (Supabase supports hCaptcha and Cloudflare Turnstile).
-- Set Supabase auth rate limits for SMS and OTP verification attempts. Show a resend cooldown in the UI. Show the same message whether or not the number is registered.
-- OTP test numbers exist only in the hackathon build and are removed before production.
+- Allow only +91 numbers. Reject other country codes before authentication is attempted.
+- Set Supabase password-sign-in rate limits and monitor failed sign-ins. Return the same error for an unknown number and an incorrect password.
+- Phone confirmation is intentionally disabled for the free demo. This means phone-number ownership is not verified and must not be represented as verified identity.
 - The API verifies the Supabase JWT on every request: signature, algorithm pinned to what the project uses, `aud`, and `exp`. It rejects anything else.
 - Supabase JS keeps the session in browser storage by default, so a strict CSP and no raw HTML rendering are mandatory to prevent token theft through XSS.
 - Because tokens travel in the `Authorization` header and not in cookies, CSRF does not apply. If cookies are ever introduced, use `SameSite=Lax` or stricter and CSRF tokens.

@@ -8,7 +8,7 @@
 | UI               | Tailwind + shadcn/ui                          | Component composition and styling                                             |
 | Maps             | MapLibre GL JS + MapTiler tiles               | Plot pins, village map, wind-link map, demand heatmap (Phase 2)               |
 | i18n             | react-i18next                                 | English and Punjabi UI strings                                                |
-| Auth             | Supabase Auth (phone OTP)                     | User identity, OTP sign-in, JWT sessions                                      |
+| Auth             | Supabase Auth (phone and password)            | User identity, password sign-in, JWT sessions                                 |
 | Database         | Supabase Postgres + PostGIS                   | Relational metadata, geospatial data, row level security                      |
 | File storage     | Supabase Storage (private bucket)             | ID proof documents                                                            |
 | Live updates     | Supabase Realtime                             | Pool progress and activity timeline updates                                   |
@@ -20,19 +20,19 @@
 | LLM (Ph. 2)      | LLM API with strict JSON schema output        | Parse WhatsApp text into structured fields                                    |
 | Hosting          | Vercel (web), Render or Railway (API, worker) | Deployment                                                                    |
 
-## Authentication Decision: Supabase Auth With Phone OTP
+## Authentication Decision: Supabase Auth With Phone And Password
 
 Supabase Auth is the single identity system. Reasons:
 
 - The user identity (`auth.users.id`) is the same ID used in row level security policies, so database access control and login cannot drift apart.
-- It supports phone OTP out of the box, with test phone numbers and fixed OTPs for development and demos, so no real SMS is sent during the hackathon.
-- A Send SMS Hook lets production route OTP messages through a regional SMS provider that supports Indian DLT-compliant templates.
-- No second identity service (Firebase or Twilio Verify) to sync with the database.
+- It keeps `auth.users.id` as the same identity used by database row-level security and the API.
+- It avoids per-message SMS costs and does not require Twilio or a second identity service.
+- It supports phone and password credentials directly, so Supabase still issues the same JWT sessions consumed by the API.
 
 Rules:
 
-- Hackathon build: configure Supabase test phone numbers with fixed OTPs. Say so in the pitch.
-- Production: replace test OTPs with a real SMS provider through the Supabase dashboard or the Send SMS Hook. Test OTPs are removed before production.
+- Phone confirmation is disabled in the hosted Supabase Phone provider so first-time users receive a session without an OTP.
+- This flow does not verify ownership of a phone number. It is suitable only for the user-requested free demo; production identity verification requires a verified channel.
 - Phone numbers are stored in E.164 format (+91XXXXXXXXXX).
 - The browser uses only the Supabase anon key. The service role key exists only in the API and jobs environment.
 

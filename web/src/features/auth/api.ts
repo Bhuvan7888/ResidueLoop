@@ -1,37 +1,19 @@
 import { supabase } from '@/lib/supabase'
 import { apiRequest } from '@/lib/api-client'
 
-export async function signInWithOtp(phone: string, captchaToken?: string) {
-  const { data, error } = await supabase.auth.signInWithOtp({
-    phone,
-    options: {
-      captchaToken
-    }
-  })
-  if (error) throw error
-  return data
-}
-
-export async function signInDevUser(role: 'farmer' | 'buyer' | 'donor' | 'ngo' = 'farmer') {
-  const emailMap = {
-    farmer: 'dev@residueloop.test',
-    buyer: 'buyer@residueloop.test',
-    donor: 'donor@residueloop.test',
-    ngo: 'ngo@residueloop.test',
-  }
+export async function signInWithPhonePassword(phone: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: emailMap[role],
-    password: 'devpassword123'
+    phone,
+    password,
   })
   if (error) throw error
   return data
 }
 
-export async function verifyOtp(phone: string, token: string) {
-  const { data, error } = await supabase.auth.verifyOtp({
+export async function signUpWithPhonePassword(phone: string, password: string) {
+  const { data, error } = await supabase.auth.signUp({
     phone,
-    token,
-    type: 'sms'
+    password,
   })
   if (error) throw error
   return data

@@ -1,7 +1,7 @@
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { PhoneOtpForm } from '@/features/auth/components/PhoneOtpForm'
+import { PhonePasswordForm } from '@/features/auth/components/PhonePasswordForm'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { FieldIllustration } from '@/components/common/FieldIllustration'
 import { LanguageSwitch } from '@/components/common/LanguageSwitch'
@@ -38,7 +38,7 @@ export function Login() {
             <p className="landing-eyebrow">{t('auth.sign_in_eyebrow')}</p>
             <h2>{t('auth.brand')}</h2>
           </div>
-          <PhoneOtpForm onSuccess={() => navigate('/app')} />
+          <PhonePasswordForm onSuccess={() => navigate('/app')} />
         </div>
       </main>
     </div>
