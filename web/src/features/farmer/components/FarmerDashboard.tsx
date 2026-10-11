@@ -255,6 +255,12 @@ export function FarmerDashboard({ userId }: { userId: string }) {
     ? new Date(latestPickup.pools.pickup_date).toLocaleDateString(i18n.language === 'hi' ? 'hi-IN' : i18n.language === 'pa' ? 'pa-IN' : 'en-IN', { day: 'numeric', month: 'short' })
     : null
 
+  const topOfferRate = offers.length > 0 
+    ? Math.max(...offers.map((o) => o.price_per_tonne || 0), 0)
+    : matchedDeals.length > 0
+    ? Math.max(...matchedDeals.map((d) => d.price_per_tonne || 0), 0)
+    : 0
+
   const handleQuickCharityList = async (listingId: string) => {
     try {
       await requestAssistance({ listing_id: listingId, purpose: 'Urgent citizen crowdfunding clearance to avoid burning' })
@@ -476,18 +482,19 @@ export function FarmerDashboard({ userId }: { userId: string }) {
               </div>
             </div>
           )}
-          {/* ================= THE BIG 3 ACTIONS HOME SCREEN ================= */}
+
+          {/* ================= THE MAIN ACTIONS HOME SCREEN ================= */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-extrabold text-copy-primary flex items-center gap-2">
                 <span>🌾</span> {t('farmer.main_actions_title', 'Main Actions')}
               </h3>
               <span className="text-xs text-copy-secondary font-medium">
-                {t('farmer.three_simple_steps', '3 Simple Steps')}
+                {t('farmer.four_simple_steps', '4 Simple Steps')}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Card 1: 🌾 1. Sell Stubble */}
               <div
                 onClick={() => {
@@ -520,7 +527,63 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                 </div>
               </div>
 
-              {/* Card 2: 🚚 2. When is Pickup? */}
+              {/* Card 2: 🤝 2. Buyer Offers For You */}
+              <div
+                onClick={() => {
+                  document.getElementById('offers-section')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+                className="group relative bg-surface border-2 border-accent-primary/40 hover:border-accent-primary rounded-3xl p-6 text-left transition-all hover:shadow-md hover:scale-[1.01] flex flex-col justify-between cursor-pointer"
+              >
+                <div className="space-y-3">
+                  <div className="w-14 h-14 rounded-2xl bg-accent-primary/10 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+                    🤝
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-copy-primary group-hover:text-accent-primary transition-colors">
+                      {t('farmer.big_action_offers_title', '2. Buyer Offers For You')}
+                    </h4>
+                    <p className="text-xs text-copy-secondary mt-1 leading-relaxed">
+                      {t('farmer.big_action_offers_desc', 'Review & accept prices from verified buyers')}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 pt-4 border-t border-surface-border-subtle flex items-center justify-between">
+                  {offers.length > 0 || matchedDeals.length > 0 ? (
+                    <>
+                      <div>
+                        <div className="text-2xl font-black text-accent-primary flex items-baseline gap-0.5">
+                          {topOfferRate > 0 ? `₹${topOfferRate.toLocaleString('en-IN')}` : `${offers.length + matchedDeals.length}`}
+                          {topOfferRate > 0 && <span className="text-xs font-semibold text-copy-secondary">/t</span>}
+                        </div>
+                        <div className="text-[11px] text-copy-muted font-medium mt-0.5">
+                          {offers.length > 0 
+                            ? `${offers.length} ${t('farmer.offers_available_desc', 'verified offers ready')}`
+                            : `${matchedDeals.length} ${t('farmer.confirmed_deals', 'Deals Active')}`}
+                        </div>
+                      </div>
+                      <span className="text-xs px-2.5 py-1 rounded-full font-bold bg-accent-primary/15 text-accent-primary border border-accent-primary/30 flex items-center gap-1 group-hover:bg-accent-primary group-hover:text-on-brand transition-colors">
+                        <span className="w-1.5 h-1.5 rounded-full bg-accent-primary animate-pulse"></span>
+                        {t('farmer.review_now', 'Review')} ➔
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <div className="text-xs font-bold text-copy-secondary">
+                          {listings.length > 0 ? t('farmer.matching_active', 'Matching Active...') : t('farmer.create_listing_first', 'List Straw First')}
+                        </div>
+                        <div className="text-[11px] text-copy-muted font-medium mt-0.5">
+                          {listings.length > 0 ? t('farmer.searching_buyers', 'Checking verified buyers') : t('farmer.start_to_receive', 'Offers appear here')}
+                        </div>
+                      </div>
+                      <span className="text-sm font-bold text-accent-primary group-hover:translate-x-1 transition-transform">➔</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Card 3: 🚚 3. When is Pickup? */}
               <div
                 onClick={() => {
                   document.getElementById('pickups-section')?.scrollIntoView({ behavior: 'smooth' })
@@ -533,7 +596,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                   </div>
                   <div>
                     <h4 className="text-lg font-bold text-copy-primary">
-                      {t('farmer.big_action_pickup_title', '2. When is Pickup?')}
+                      {t('farmer.big_action_pickup_title', '3. When is Pickup?')}
                     </h4>
                     <p className="text-xs text-copy-secondary mt-1 leading-relaxed">
                       {nextPickupDate 
@@ -561,7 +624,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                 </div>
               </div>
 
-              {/* Card 3: 💰 3. My Money & Payouts */}
+              {/* Card 4: 💰 4. My Money & Payouts */}
               <div
                 onClick={() => {
                   document.getElementById('pickups-section')?.scrollIntoView({ behavior: 'smooth' })
@@ -574,7 +637,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                   </div>
                   <div>
                     <h4 className="text-lg font-bold text-copy-primary">
-                      {t('farmer.big_action_money_title', '3. My Money & Payouts')}
+                      {t('farmer.big_action_money_title', '4. My Money & Payouts')}
                     </h4>
                     <p className="text-xs text-copy-secondary mt-1 leading-relaxed">
                       {t('farmer.big_action_money_desc', 'Direct bank transfer upon pickup')}
@@ -843,7 +906,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
           </div>
 
           {/* Section 2: Verified Matching Offers & Confirmed Deals */}
-          <div className="space-y-6">
+          <div id="offers-section" className="space-y-6 scroll-mt-6">
             {/* Active Confirmed Deals with Buyer Chat */}
             {matchedDeals.length > 0 && (
               <div className="space-y-3">
@@ -1037,7 +1100,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
           </div>
           
           {/* Section 4: Pickups & Instant Payments */}
-          <div id="pickups-section" className="space-y-4">
+          <div id="pickups-section" className="space-y-4 scroll-mt-6">
             <h3 className="text-lg font-medium text-copy-primary">{t('farmer.pickups_title')}</h3>
             {pickups.length === 0 ? (
               <div className="bg-surface border border-surface-border rounded-2xl p-6 text-center">

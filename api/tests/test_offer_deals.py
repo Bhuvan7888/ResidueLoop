@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 from app.main import app
 
-client = TestClient(app)
+client = TestClient(app, base_url="https://residueloop.in")
 
 
 def test_get_deals_endpoint_returns_data() -> None:

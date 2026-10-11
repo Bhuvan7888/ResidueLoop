@@ -105,6 +105,15 @@ This tracker records verified evidence only. Earlier completion claims were inde
     - Bottom Action Buttons: Aligned Cancel and Publish buttons to matching `h-14` (56px) height, flex centering, and flex-aligned `🌾` emoji with listing text.
   - Attained 100% key parity across `en.json`, `hi.json`, and `pa.json` (771 keys each, 0 diffs).
   - Verified static quality: `npm run typecheck` (0 errors), `npm test` (17 tests passed), `npm run lint` (0 errors), `npm run build` (clean production bundle), `poetry run pytest` (32 tests passed).
+- [x] Added Main Action Card for "Buyer Offers For You" on Farmer Dashboard (2026-10-11):
+  - Upgraded Main Actions home screen ribbon from 3 cards to 4 responsive visual cards:
+    1. 🌾 `1. Sell Stubble`: Instant listing trigger with active listings counter badge.
+    2. 🤝 `2. Buyer Offers For You`: Dedicated action card displaying real-time pending offers count, active confirmed deals, dynamic top offered rate (`₹topRate/t Top Rate`), pulse badge, and 1-tap smooth scrolling directly to `#offers-section`.
+    3. 🚚 `3. When is Pickup?`: Live truck arrival date and visual trolley progress bar.
+    4. 💰 `4. My Money & Payouts`: Instant bank transfer summary, received payouts, and guaranteed payment badge.
+  - Added `id="offers-section"` and `scroll-mt-6` to Section 2 in `FarmerDashboard.tsx` for smooth scrolling navigation.
+  - Maintained 100% key and semantic parity across `en.json`, `hi.json`, and `pa.json` (781 keys each, 0 diffs).
+  - Verified static quality: `npm run typecheck` (0 errors), `npm test` (17 tests passed), `npm run lint` (0 errors), `npm run build` (clean production bundle), `poetry run pytest` (34 tests passed).
 
 ## Recovery Decisions
 
