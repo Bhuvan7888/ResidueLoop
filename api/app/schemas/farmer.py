@@ -8,7 +8,7 @@ class FarmerProfileCreate(BaseModel):
 
     name: str = Field(min_length=1, max_length=120)
     village_id: str = Field(min_length=1)
-    language: Literal["en", "pa"]
+    language: Literal["en", "pa", "hi"]
 
 
 class PlotCreate(BaseModel):

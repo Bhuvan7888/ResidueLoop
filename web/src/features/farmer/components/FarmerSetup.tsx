@@ -516,7 +516,8 @@ export function FarmerSetup() {
   const submitProfile = async (values: z.infer<typeof profileSchema>) => {
     setFeedback(null)
     try {
-      await createFarmerProfile({ ...values, language: i18n.language === 'pa' ? 'pa' : 'en' })
+      const lang = i18n.language === 'pa' ? 'pa' : i18n.language === 'hi' ? 'hi' : 'en'
+      await createFarmerProfile({ ...values, language: lang })
       setFeedback({ type: 'success', text: t('farmer.profile_saved') || 'Profile saved successfully!' })
       await queryClient.invalidateQueries({ queryKey: ['farmerProfile', userId] })
       plotForm.setValue('villageId', values.villageId)

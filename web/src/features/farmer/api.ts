@@ -2,7 +2,7 @@ import { apiRequest } from '@/lib/api-client'
 import { supabase } from '@/lib/supabase'
 
 interface FarmerProfilePayload {
-  language: 'en' | 'pa'
+  language: 'en' | 'pa' | 'hi'
   name: string
   villageId: string
 }
