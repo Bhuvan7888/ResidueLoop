@@ -1,3 +1,6 @@
+import { useTranslation } from 'react-i18next'
+import { MessageSquare, CheckCircle2 } from 'lucide-react'
+
 interface Offer {
   id: string
   status: string
@@ -14,11 +17,10 @@ interface OfferCardProps {
   offer: Offer
   onAccept: (id: string) => Promise<void>
   onDecline: (id: string) => Promise<void>
+  onOpenChat?: (id: string) => void
 }
 
-import { useTranslation } from 'react-i18next'
-
-export function OfferCard({ offer, onAccept, onDecline }: OfferCardProps) {
+export function OfferCard({ offer, onAccept, onDecline, onOpenChat }: OfferCardProps) {
   const { t } = useTranslation()
   const buyerName = offer.buyers?.org_name || offer.buyer_name || t('matching.default_buyer', 'Industrial Biomass Buyer')
   const balerName = offer.balers?.name || offer.baler_name || t('matching.default_baler', 'Assigned Local Baler')
@@ -26,23 +28,27 @@ export function OfferCard({ offer, onAccept, onDecline }: OfferCardProps) {
     ? `${offer.pickup_start} — ${offer.pickup_end}`
     : t('matching.window_harvest', 'Within 3-5 days of harvest')
 
+  const isAccepted = offer.status === 'accepted'
   // 4-step progress: 1. Offer Received -> 2. Accept & Confirm -> 3. Trolley Dispatch -> 4. Direct Payment
-  const currentStep = offer.status === 'accepted' ? 2 : 1
+  const currentStep = isAccepted ? 2 : 1
 
   return (
-    <div className="bg-surface border-2 border-surface-border hover:border-brand/40 rounded-3xl p-6 shadow-xs space-y-4 transition-all">
+    <div className={`bg-surface border-2 rounded-3xl p-6 shadow-xs space-y-4 transition-all ${
+      isAccepted ? 'border-state-success/40 ring-1 ring-state-success/20' : 'border-surface-border hover:border-brand/40'
+    }`}>
       {/* Trust Banner & Status */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-brand/10 text-brand border border-brand/20 self-start">
           <span>🛡️</span>
-          <span>{t('matching.verified_buyer_banner', 'Verified Factory Buyer • Guaranteed Bank Payout')}</span>
+          <span>{isAccepted ? t('matching.confirmed_contract', '🤝 Confirmed Match • Verified Buyer') : t('matching.verified_buyer_banner', 'Verified Factory Buyer • Guaranteed Bank Payout')}</span>
         </div>
-        <span className={`px-3 py-1 text-xs rounded-full font-bold capitalize self-start sm:self-auto ${
+        <span className={`px-3 py-1 text-xs rounded-full font-bold capitalize self-start sm:self-auto flex items-center gap-1.5 ${
           offer.status === 'accepted' ? 'bg-state-success-dim text-state-success border border-state-success/30' :
           offer.status === 'declined' ? 'bg-state-error-dim text-state-error border border-state-error/30' :
           'bg-amber-100 text-amber-900 border border-amber-200'
         }`}>
-          {offer.status === 'accepted' ? '✓ ' : ''}{t(`status.${offer.status}`, offer.status)}
+          {isAccepted && <CheckCircle2 className="w-3.5 h-3.5" />}
+          <span>{t(`status.${offer.status}`, offer.status)}</span>
         </span>
       </div>
 
@@ -139,7 +145,7 @@ export function OfferCard({ offer, onAccept, onDecline }: OfferCardProps) {
         </div>
       </div>
       
-      {/* Friendly Action Buttons */}
+      {/* Action Buttons */}
       {offer.status === 'pending' && (
         <div className="flex flex-col sm:flex-row justify-end items-center gap-3 pt-2">
           <button
@@ -151,12 +157,34 @@ export function OfferCard({ offer, onAccept, onDecline }: OfferCardProps) {
           </button>
           <button
             type="button"
-            onClick={() => onAccept(offer.id)}
+            onClick={async () => {
+              await onAccept(offer.id)
+              onOpenChat?.(offer.id)
+            }}
             className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-brand text-on-brand hover:bg-accent-secondary text-sm font-extrabold shadow-md transition-all hover:scale-[1.01] cursor-pointer order-1 sm:order-2 flex items-center justify-center gap-2"
           >
             <span>✅</span>
             <span>{t('matching.accept_offer_cta', 'Accept Offer & Confirm Pickup')}</span>
           </button>
+        </div>
+      )}
+
+      {isAccepted && (
+        <div className="flex justify-between items-center pt-2 border-t border-surface-border/40 flex-wrap gap-2">
+          <p className="text-xs text-state-success font-medium flex items-center gap-1.5">
+            <span>🎉</span>
+            <span>{t('matching.accepted_notice', 'Deal accepted! Direct coordination active.')}</span>
+          </p>
+          {onOpenChat && (
+            <button
+              type="button"
+              onClick={() => onOpenChat(offer.id)}
+              className="px-4 py-2 rounded-xl bg-brand text-on-brand hover:bg-accent-secondary text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer ml-auto"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>{t('deal_chat.open_chat_button', 'Chat with Buyer & Details')}</span>
+            </button>
+          )}
         </div>
       )}
     </div>

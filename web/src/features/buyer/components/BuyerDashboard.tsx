@@ -7,7 +7,9 @@ import { createBuyerProfile, createDemandPost, getDemandPosts, updateDemandPost 
 import { getPickups, updatePickupWeight } from '@/features/pickup/api'
 import { PickupCard } from '@/features/pickup/components/PickupCard'
 import { getListings } from '@/features/listing/api'
-import { getPools } from '@/features/matching/api'
+import { getPools, getMatchedDeals, type MatchedDeal } from '@/features/matching/api'
+import { DealCard } from '@/features/matching/components/DealCard'
+import { DealChatModal } from '@/features/matching/components/DealChatModal'
 import { getNotifications } from '@/features/charity/api'
 import { PoolProgress } from '@/features/matching/components/PoolProgress'
 import { DemandHeatmap } from '@/features/heatmap/components/DemandHeatmap'
@@ -62,6 +64,8 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
   >([])
   const [listings, setListings] = useState<ListingWithAdvice[]>([])
   const [pools, setPools] = useState<Pool[]>([])
+  const [matchedDeals, setMatchedDeals] = useState<MatchedDeal[]>([])
+  const [selectedChatOfferId, setSelectedChatOfferId] = useState<string | null>(null)
   const [demandPosts, setDemandPosts] = useState<DemandPostItem[]>([])
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
 
@@ -71,6 +75,7 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
       .then((data) => setListings((data as unknown as ListingWithAdvice[]) || []))
       .catch(console.error)
     getPools().then((data) => setPools((data as unknown as Pool[]) || [])).catch(console.error)
+    getMatchedDeals({ userId, role: 'buyer' }).then((data) => setMatchedDeals(data || [])).catch(console.error)
     getDemandPosts().then((data) => setDemandPosts((data as unknown as DemandPostItem[]) || [])).catch(console.error)
     queryClient.invalidateQueries({ queryKey: ['heatmap'] })
     if (userId) {
@@ -175,6 +180,48 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
               onSelectVillageForFilter={(vName) => setSelectedVillageFilter(vName)}
               selectedVillageName={selectedVillageFilter}
             />
+          </div>
+
+          {/* Section: Active Stubble Contracts & Direct Farmer Chat */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h3 className="text-lg font-semibold text-copy-primary flex items-center gap-2">
+                  <span>🤝</span>
+                  <span>{t('buyer.deals_title', 'Active Stubble Contracts & Direct Farmer Chat')}</span>
+                </h3>
+                <p className="text-xs text-copy-secondary mt-0.5">
+                  {t('buyer.deals_subtitle', 'Coordinate tractor-baler dispatch, field directions, and payouts directly with matched farmers.')}
+                </p>
+              </div>
+              {matchedDeals.length > 0 && (
+                <span className="text-xs bg-state-success-dim text-state-success px-2.5 py-0.5 rounded-full font-bold">
+                  {matchedDeals.length} {t('buyer.active_deals_count', 'Active Deals')}
+                </span>
+              )}
+            </div>
+
+            {matchedDeals.length === 0 ? (
+              <div className="bg-surface border border-surface-border rounded-2xl p-6 text-center space-y-1">
+                <p className="text-copy-primary font-medium text-sm">
+                  {t('buyer.no_deals_yet', 'No active matched deals yet.')}
+                </p>
+                <p className="text-copy-secondary text-xs">
+                  {t('buyer.procure_hint', 'Procure stubble from the Smart Procurement Advisor below or from Multi-Farmer Straw Pools to start chatting with farmers.')}
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {matchedDeals.map((deal) => (
+                  <DealCard
+                    key={deal.id}
+                    deal={deal}
+                    userRole="buyer"
+                    onOpenChat={(id) => setSelectedChatOfferId(id)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Section 3: Active Multi-Farmer Straw Pools */}
@@ -364,6 +411,16 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
         villageName={auditModal?.villageName}
         district={auditModal?.district}
       />
+
+      {/* Direct Deal Chat Modal with Counterparty Details */}
+      {selectedChatOfferId && (
+        <DealChatModal
+          offerId={selectedChatOfferId}
+          currentUserRole="buyer"
+          currentUserId={userId}
+          onClose={() => setSelectedChatOfferId(null)}
+        />
+      )}
     </div>
   )
 }

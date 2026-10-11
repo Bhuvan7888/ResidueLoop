@@ -3,8 +3,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { NewListingForm } from '@/features/listing/components/NewListingForm'
 import { createListing, getPlots, getListings } from '@/features/listing/api'
-import { getOffers, handleOfferAction, getPools } from '@/features/matching/api'
+import { getOffers, handleOfferAction, getPools, getMatchedDeals, type MatchedDeal } from '@/features/matching/api'
 import { OfferCard } from '@/features/matching/components/OfferCard'
+import { DealCard } from '@/features/matching/components/DealCard'
+import { DealChatModal } from '@/features/matching/components/DealChatModal'
 import { PoolProgress } from '@/features/matching/components/PoolProgress'
 import { getPickups, updatePickupPayment } from '@/features/pickup/api'
 import { PickupCard } from '@/features/pickup/components/PickupCard'
@@ -201,6 +203,8 @@ export function FarmerDashboard({ userId }: { userId: string }) {
   const [offers, setOffers] = useState<
     { id: string; status: string; price_per_tonne: number; pickup_start?: string; pickup_end?: string; buyers?: { org_name: string }; balers?: { name: string } }[]
   >([])
+  const [matchedDeals, setMatchedDeals] = useState<MatchedDeal[]>([])
+  const [selectedChatOfferId, setSelectedChatOfferId] = useState<string | null>(null)
   const [pools, setPools] = useState<PoolData[]>([])
   const [pickups, setPickups] = useState<
     { id: string; pool_id: string; actual_tonnes: number | null; amount_due: number | null; payment_status: string; quality_notes?: string | null; pools: { pickup_date: string | null } }[]
@@ -211,6 +215,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
 
   const reloadData = useCallback(() => {
     getOffers().then((data) => setOffers((data as unknown as typeof offers) || [])).catch(console.error)
+    getMatchedDeals({ userId, role: 'farmer' }).then((data) => setMatchedDeals(data || [])).catch(console.error)
     getPickups().then(setPickups).catch(console.error)
     getPools().then((data) => setPools((data as unknown as PoolData[]) || [])).catch(console.error)
     getListings(userId).then(setListings).catch(console.error)
@@ -814,56 +819,90 @@ export function FarmerDashboard({ userId }: { userId: string }) {
             </div>
           </div>
 
-          {/* Section 2: Verified Matching Offers */}
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h3 className="text-xl font-bold text-copy-primary flex items-center gap-2">
-                  <span>🤝</span> {t('farmer.matched_offers_title', 'Buyer Offers For You')}
-                </h3>
-                <p className="text-xs text-copy-secondary mt-0.5">
-                  {t('farmer.matched_offers_desc', 'Verified factories and balers ready to buy your straw at fixed prices.')}
-                </p>
-              </div>
-              {offers.length > 0 && (
-                <span className="text-xs px-3 py-1 rounded-full font-bold bg-state-success-dim text-state-success border border-state-success/30 self-start sm:self-auto">
-                  {offers.length} {t('matching.verified_offer', 'Offers')}
-                </span>
-              )}
-            </div>
-
-            {offers.length === 0 ? (
-              <div className="bg-surface border-2 border-dashed border-surface-border rounded-3xl p-8 text-center space-y-3">
-                <div className="w-16 h-16 rounded-3xl bg-accent-primary/10 text-accent-primary flex items-center justify-center text-3xl mx-auto">
-                  🤝
+          {/* Section 2: Verified Matching Offers & Confirmed Deals */}
+          <div className="space-y-6">
+            {/* Active Confirmed Deals with Buyer Chat */}
+            {matchedDeals.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-copy-primary flex items-center gap-2">
+                      <span>🤝</span>
+                      <span>{t('farmer.active_deals_title', 'Active Confirmed Deals & Buyer Direct Chat')}</span>
+                    </h3>
+                    <p className="text-xs text-copy-secondary">
+                      {t('farmer.active_deals_desc', 'Direct live chat with industrial buyers, coordinate tractor-baler arrival, and track payouts.')}
+                    </p>
+                  </div>
+                  <span className="text-xs bg-state-success-dim text-state-success px-2.5 py-0.5 rounded-full font-bold">
+                    {matchedDeals.length} {t('farmer.confirmed_deals', 'Deals Active')}
+                  </span>
                 </div>
-                <div className="max-w-md mx-auto space-y-1">
-                  <h4 className="text-lg font-bold text-copy-primary">
-                    {t('farmer.no_offers_title', 'Looking for the best buyer offers')}
-                  </h4>
-                  <p className="text-xs text-copy-secondary leading-relaxed">
-                    {t('farmer.no_offers_desc', 'As soon as a verified factory or baler matches your location and harvest date, their offer will appear here.')}
-                  </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {matchedDeals.map((deal) => (
+                    <DealCard
+                      key={deal.id}
+                      deal={deal}
+                      userRole="farmer"
+                      onOpenChat={(id) => setSelectedChatOfferId(id)}
+                    />
+                  ))}
                 </div>
-              </div>
-            ) : (
-              <div className="grid gap-4">
-                {offers.map(offer => (
-                  <OfferCard 
-                    key={offer.id} 
-                    offer={offer} 
-                    onAccept={async (id) => {
-                      await handleOfferAction(id, 'accept')
-                      reloadData()
-                    }}
-                    onDecline={async (id) => {
-                      await handleOfferAction(id, 'decline')
-                      reloadData()
-                    }}
-                  />
-                ))}
               </div>
             )}
+
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-xl font-bold text-copy-primary flex items-center gap-2">
+                    <span>🤝</span> {t('farmer.matched_offers_title', 'Buyer Offers For You')}
+                  </h3>
+                  <p className="text-xs text-copy-secondary mt-0.5">
+                    {t('farmer.matched_offers_desc', 'Verified factories and balers ready to buy your straw at fixed prices.')}
+                  </p>
+                </div>
+                {offers.length > 0 && (
+                  <span className="text-xs px-3 py-1 rounded-full font-bold bg-state-success-dim text-state-success border border-state-success/30 self-start sm:self-auto">
+                    {offers.length} {t('matching.verified_offer', 'Offers')}
+                  </span>
+                )}
+              </div>
+
+              {offers.length === 0 ? (
+                <div className="bg-surface border-2 border-dashed border-surface-border rounded-3xl p-8 text-center space-y-3">
+                  <div className="w-16 h-16 rounded-3xl bg-accent-primary/10 text-accent-primary flex items-center justify-center text-3xl mx-auto">
+                    🤝
+                  </div>
+                  <div className="max-w-md mx-auto space-y-1">
+                    <h4 className="text-lg font-bold text-copy-primary">
+                      {t('farmer.no_offers_title', 'Looking for the best buyer offers')}
+                    </h4>
+                    <p className="text-xs text-copy-secondary leading-relaxed">
+                      {t('farmer.no_offers_desc', 'As soon as a verified factory or baler matches your location and harvest date, their offer will appear here.')}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {offers.map(offer => (
+                    <OfferCard 
+                      key={offer.id} 
+                      offer={offer} 
+                      onAccept={async (id) => {
+                        await handleOfferAction(id, 'accept')
+                        reloadData()
+                        setSelectedChatOfferId(id)
+                      }}
+                      onDecline={async (id) => {
+                        await handleOfferAction(id, 'decline')
+                        reloadData()
+                      }}
+                      onOpenChat={(id) => setSelectedChatOfferId(id)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Section 3: Registered Plots */}
@@ -1047,6 +1086,16 @@ export function FarmerDashboard({ userId }: { userId: string }) {
             </div>
           </div>
         </div>
+      )}
+
+      {selectedChatOfferId && (
+        <DealChatModal
+          offerId={selectedChatOfferId}
+          currentUserRole="farmer"
+          currentUserId={userId}
+          currentUserName={farmerProfile?.name || 'Farmer'}
+          onClose={() => setSelectedChatOfferId(null)}
+        />
       )}
     </div>
   )

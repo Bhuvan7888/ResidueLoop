@@ -177,19 +177,30 @@ async def accept_offer(user_id: str, offer_id: str) -> None:
     client = get_supabase_client()
     
     # Check ownership and fetch offer
-    offer_res = client.table("offers").select("*, listings(est_tonnes, plots(village_id, farmer_id))").eq("id", offer_id).single().execute()
-    if not offer_res.data or offer_res.data["listings"]["plots"]["farmer_id"] != user_id:
-        raise HTTPException(status_code=403, detail="Forbidden")
+    offer_res = client.table("offers").select("*, listings(est_tonnes, farmer_id, plots(village_id, farmer_id))").eq("id", offer_id).single().execute()
+    if not offer_res.data:
+        raise HTTPException(status_code=404, detail="Offer not found")
         
     offer = offer_res.data
-    
+    listings_data = offer.get("listings") or {}
+    if isinstance(listings_data, list):
+        listings_data = listings_data[0] if listings_data else {}
+    plots_data = (listings_data.get("plots") or {}) if isinstance(listings_data, dict) else {}
+    if isinstance(plots_data, list):
+        plots_data = plots_data[0] if plots_data else {}
+
+    farmer_id = plots_data.get("farmer_id") or listings_data.get("farmer_id")
+    buyer_id = offer.get("buyer_id")
+
+    if user_id != farmer_id and user_id != buyer_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+        
     # Update offer status to 'accepted'
     client.table("offers").update({"status": "accepted"}).eq("id", offer_id).execute()
     
-    village_id = offer["listings"]["plots"].get("village_id")
-    buyer_id = offer["buyer_id"]
-    baler_id = offer["baler_id"]
-    est_tonnes = offer["listings"]["est_tonnes"]
+    village_id = plots_data.get("village_id")
+    baler_id = offer.get("baler_id")
+    est_tonnes = listings_data.get("est_tonnes") or 25.0
     
     # Find open pool for buyer in village
     pool_res = client.table("pools").select("*").eq("buyer_id", buyer_id).eq("village_id", village_id).in_("status", ["forming"]).execute()
@@ -214,7 +225,7 @@ async def accept_offer(user_id: str, offer_id: str) -> None:
         }).eq("id", pool["id"]).execute()
         pool_id = pool["id"]
     else:
-        status = "ready" if est_tonnes >= target_load else "forming"
+        status = "ready" if float(est_tonnes) >= target_load else "forming"
         pickup_date = (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d") if status == "ready" else None
         
         pool_village_id = village_id if village_id else str(uuid.uuid4())
@@ -231,7 +242,8 @@ async def accept_offer(user_id: str, offer_id: str) -> None:
         pool_id = new_pool.data[0]["id"]
         
     # Link listing to pool
-    client.table("listings").update({"pool_id": pool_id, "status": "pooled"}).eq("id", offer["listing_id"]).execute()
+    if offer.get("listing_id"):
+        client.table("listings").update({"pool_id": pool_id, "status": "pooled"}).eq("id", offer["listing_id"]).execute()
 
     if status == "ready":
         # Create/ensure pickups for all listings belonging to this ready pool
@@ -278,12 +290,28 @@ async def accept_offer(user_id: str, offer_id: str) -> None:
         except Exception:
             pass
 
+
 async def decline_offer(user_id: str, offer_id: str) -> None:
     client = get_supabase_client()
     
-    offer_res = client.table("offers").select("*, listings(plots(farmer_id))").eq("id", offer_id).single().execute()
-    if not offer_res.data or offer_res.data["listings"]["plots"]["farmer_id"] != user_id:
+    offer_res = client.table("offers").select("*, listings(farmer_id, plots(farmer_id))").eq("id", offer_id).single().execute()
+    if not offer_res.data:
+        raise HTTPException(status_code=404, detail="Offer not found")
+        
+    offer = offer_res.data
+    listings_data = offer.get("listings") or {}
+    if isinstance(listings_data, list):
+        listings_data = listings_data[0] if listings_data else {}
+    plots_data = (listings_data.get("plots") or {}) if isinstance(listings_data, dict) else {}
+    if isinstance(plots_data, list):
+        plots_data = plots_data[0] if plots_data else {}
+
+    farmer_id = plots_data.get("farmer_id") or listings_data.get("farmer_id")
+    buyer_id = offer.get("buyer_id")
+
+    if user_id != farmer_id and user_id != buyer_id:
         raise HTTPException(status_code=403, detail="Forbidden")
         
     client.table("offers").update({"status": "declined"}).eq("id", offer_id).execute()
-    client.table("listings").update({"status": "open"}).eq("id", offer_res.data["listing_id"]).execute()
+    if offer.get("listing_id"):
+        client.table("listings").update({"status": "open"}).eq("id", offer["listing_id"]).execute()
