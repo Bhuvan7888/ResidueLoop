@@ -10,8 +10,10 @@ import {
   MapPin,
   ArrowUpDown,
   Search,
+  Filter,
 } from 'lucide-react'
 import { procureListing } from '../api'
+import { STUBBLE_MARKET_TIERS } from '@/features/listing/marketTiers'
 
 export interface ListingWithAdvice {
   id: string
@@ -31,12 +33,20 @@ export interface ListingWithAdvice {
   total_price?: number
   baler_name?: string
   buyer_org?: string
+  quality_grade?: string
+  stubble_form?: string
+  stubble_form_name?: string
+  market_price_range?: string
+  intended_purposes?: string[]
+  moisture_level?: string
   procurement_advice?: {
     decision: 'buy' | 'caution' | 'avoid'
     badge: string
     reasons: string[]
     quality_grade: string
     benchmark_diff?: string
+    stubble_form?: string
+    market_range?: string
   }
   plots?: {
     acres?: number
@@ -65,18 +75,20 @@ export function BuyerProcurementAdvisor({
   onOpenSatelliteAudit,
 }: BuyerProcurementAdvisorProps) {
   const [filterTab, setFilterTab] = useState<'all' | 'buy' | 'caution' | 'avoid'>('all')
+  const [purposeFilter, setPurposeFilter] = useState<string>('all')
   const [sortBy, setSortBy] = useState<'recommended' | 'price_low' | 'tonnes_high' | 'date'>('recommended')
   const [search, setSearch] = useState('')
   const [procuringId, setProcuringId] = useState<string | null>(null)
   const [actionSuccess, setActionSuccess] = useState<string | null>(null)
+  const [showPriceIndexGuide, setShowPriceIndexGuide] = useState(false)
 
-  // Compute counts
+  // Aggregate counts
   const counts = useMemo(() => {
     let buy = 0
     let caution = 0
     let avoid = 0
     listings.forEach((l) => {
-      const dec = l.procurement_advice?.decision
+      const dec = l.procurement_advice?.decision || 'caution'
       if (dec === 'buy') buy++
       else if (dec === 'caution') caution++
       else avoid++
@@ -102,13 +114,37 @@ export function BuyerProcurementAdvisor({
       result = result.filter((l) => {
         const vName = l.village_name || l.plots?.villages?.name || ''
         const fName = l.farmer_name || ''
-        return vName.toLowerCase().includes(q) || fName.toLowerCase().includes(q)
+        const formName = l.stubble_form_name || ''
+        return vName.toLowerCase().includes(q) || fName.toLowerCase().includes(q) || formName.toLowerCase().includes(q)
       })
     }
 
     // Tab filter
     if (filterTab !== 'all') {
       result = result.filter((l) => l.procurement_advice?.decision === filterTab)
+    }
+
+    // Industry / Purpose filter
+    if (purposeFilter !== 'all') {
+      result = result.filter((l) => {
+        const purposes = l.intended_purposes || []
+        if (purposeFilter === 'cattle_feed') {
+          return purposes.includes('cattle_feed') || l.quality_grade?.includes('grade_a_plus') || l.stubble_form === 'commercial_feed_grade'
+        }
+        if (purposeFilter === 'thermal_power') {
+          return purposes.includes('thermal_power') || purposes.includes('biomass_plant') || l.stubble_form === 'processed_pellets'
+        }
+        if (purposeFilter === 'paper_packaging') {
+          return purposes.includes('paper_packaging') || purposes.includes('paper_mill') || l.stubble_form === 'delivered_bales' || l.combine_sms_used
+        }
+        if (purposeFilter === 'brick_kiln') {
+          return purposes.includes('brick_kiln') || l.stubble_form === 'brick_kiln'
+        }
+        if (purposeFilter === 'farm_gate_loose') {
+          return l.stubble_form === 'farm_gate_loose' || !l.combine_sms_used
+        }
+        return true
+      })
     }
 
     // Sorting
@@ -121,7 +157,7 @@ export function BuyerProcurementAdvisor({
         return (b.est_tonnes || 0) - (a.est_tonnes || 0)
       }
       if (sortBy === 'price_low') {
-        return (a.price_per_tonne || 1500) - (b.price_per_tonne || 1500)
+        return (a.price_per_tonne || 1850) - (b.price_per_tonne || 1850)
       }
       if (sortBy === 'tonnes_high') {
         return (b.est_tonnes || 0) - (a.est_tonnes || 0)
@@ -133,13 +169,13 @@ export function BuyerProcurementAdvisor({
     })
 
     return result
-  }, [listings, selectedVillageFilter, search, filterTab, sortBy])
+  }, [listings, selectedVillageFilter, search, filterTab, purposeFilter, sortBy])
 
   const handleProcure = async (listing: ListingWithAdvice) => {
     setProcuringId(listing.id)
     setActionSuccess(null)
     try {
-      const price = listing.price_per_tonne || 1500
+      const price = listing.price_per_tonne || 1850
       await procureListing(listing.id, price)
       setActionSuccess(
         `🎉 Successfully generated purchase offer of ₹${price.toLocaleString()}/t for ${listing.est_tonnes || 25}t stubble from ${
@@ -166,273 +202,368 @@ export function BuyerProcurementAdvisor({
             </h3>
           </div>
           <p className="text-xs text-copy-secondary mt-0.5">
-            Automated quality grading based on combine Straw Management System (SMS), fair pricing index, and baling readiness.
+            Automated quality grading based on combine SMS, stubble form, moisture, and intended end-use compatibility.
           </p>
         </div>
 
-        {selectedVillageFilter && (
-          <div className="flex items-center gap-2 bg-brand/15 border border-brand text-brand px-3 py-1 rounded-xl text-xs font-semibold">
-            <span>Filtered by: {selectedVillageFilter}</span>
-            <button
-              onClick={onClearVillageFilter}
-              className="text-xs hover:opacity-80 underline cursor-pointer ml-1"
-            >
-              Clear Filter
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowPriceIndexGuide(!showPriceIndexGuide)}
+            className="text-xs px-3 py-1.5 rounded-xl border border-brand bg-brand/10 text-brand-text font-semibold hover:bg-brand/20 transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>💰</span>
+            <span>{showPriceIndexGuide ? 'Hide Price Index' : 'View Market Price Index'}</span>
+          </button>
+
+          {selectedVillageFilter && (
+            <div className="flex items-center gap-2 bg-brand/15 border border-brand text-brand px-3 py-1 rounded-xl text-xs font-semibold">
+              <span>Filtered: {selectedVillageFilter}</span>
+              <button
+                onClick={onClearVillageFilter}
+                className="text-xs hover:opacity-80 underline cursor-pointer ml-1"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
+      {/* Cost Breakdown by Source and Form Index (Collapsible / Banner) */}
+      {(showPriceIndexGuide || true) && (
+        <div className="bg-surface border border-surface-border rounded-2xl p-4 shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-copy-primary flex items-center gap-2">
+              <span>📊</span> Punjab Stubble Market Benchmark Rates by Source & Form
+            </h4>
+            <span className="text-[10px] text-copy-muted font-medium">
+              Source: BiofuelCircle, NDTV/ET Ground Rates, CEEW, NTPC Tenders & IndiaMART (2026)
+            </span>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5 text-xs">
+            {Object.values(STUBBLE_MARKET_TIERS).map((tier) => (
+              <div
+                key={tier.id}
+                onClick={() => setPurposeFilter(purposeFilter === tier.id ? 'all' : tier.id)}
+                className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                  purposeFilter === tier.id
+                    ? 'border-brand bg-brand/10 ring-2 ring-brand/40 shadow-xs'
+                    : 'border-surface-border-subtle bg-bg-subtle/40 hover:bg-bg-subtle'
+                }`}
+              >
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-base">{tier.icon}</span>
+                  <strong className="text-copy-primary text-xs leading-tight">{tier.shortName}</strong>
+                </div>
+                <div className="text-xs font-bold text-brand">{tier.priceUnit}</div>
+                <p className="text-[10px] text-copy-secondary mt-1 leading-normal line-clamp-2">
+                  {tier.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Success Notification */}
       {actionSuccess && (
-        <div className="bg-state-success-dim border border-state-success/30 rounded-xl p-3 text-xs text-state-success flex items-center justify-between">
-          <p className="font-semibold">{actionSuccess}</p>
-          <button onClick={() => setActionSuccess(null)} className="font-bold text-xs uppercase">
+        <div className="p-3.5 rounded-xl bg-state-success-dim border border-state-success/30 text-state-success text-xs font-semibold flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Check className="w-4 h-4 shrink-0" />
+            <span>{actionSuccess}</span>
+          </div>
+          <button onClick={() => setActionSuccess(null)} className="text-xs font-bold hover:opacity-75">
             ✕
           </button>
         </div>
       )}
 
-      {/* Filter Tabs & Search Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5 bg-surface border border-surface-border p-2.5 rounded-2xl shadow-xs">
-        {/* Tabs */}
-        <div className="flex flex-wrap gap-1 text-xs">
-          <button
-            onClick={() => setFilterTab('all')}
-            className={`px-3 py-1.5 rounded-xl font-medium transition-colors ${
-              filterTab === 'all'
-                ? 'bg-copy-primary text-base shadow-xs'
-                : 'bg-bg-subtle text-copy-secondary hover:bg-surface-border'
-            }`}
-          >
-            All Lots ({counts.all})
-          </button>
-          <button
-            onClick={() => setFilterTab('buy')}
-            className={`px-3 py-1.5 rounded-xl font-medium transition-colors flex items-center gap-1.5 ${
-              filterTab === 'buy'
-                ? 'bg-state-success text-white shadow-xs'
-                : 'bg-state-success-dim text-state-success hover:bg-state-success/20'
-            }`}
-          >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Recommended to Buy ({counts.buy})</span>
-          </button>
-          <button
-            onClick={() => setFilterTab('caution')}
-            className={`px-3 py-1.5 rounded-xl font-medium transition-colors flex items-center gap-1.5 ${
-              filterTab === 'caution'
-                ? 'bg-state-warning text-white shadow-xs'
-                : 'bg-state-warning-dim text-state-warning hover:bg-state-warning/20'
-            }`}
-          >
-            <AlertTriangle className="w-3.5 h-3.5" />
-            <span>Buy with Caution ({counts.caution})</span>
-          </button>
-          <button
-            onClick={() => setFilterTab('avoid')}
-            className={`px-3 py-1.5 rounded-xl font-medium transition-colors flex items-center gap-1.5 ${
-              filterTab === 'avoid'
-                ? 'bg-copy-muted text-white shadow-xs'
-                : 'bg-bg-subtle text-copy-muted hover:bg-surface-border'
-            }`}
-          >
-            <Lock className="w-3.5 h-3.5" />
-            <span>Locked / Pooled ({counts.avoid})</span>
-          </button>
+      {/* Filter Tabs & Purpose Filters */}
+      <div className="flex flex-col gap-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {/* Decision Tabs */}
+          <div className="flex rounded-xl bg-bg-subtle p-1 border border-surface-border text-xs font-medium">
+            <button
+              onClick={() => setFilterTab('all')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                filterTab === 'all'
+                  ? 'bg-surface text-copy-primary shadow-xs font-bold'
+                  : 'text-copy-secondary hover:text-copy-primary'
+              }`}
+            >
+              All Lots ({counts.all})
+            </button>
+            <button
+              onClick={() => setFilterTab('buy')}
+              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
+                filterTab === 'buy'
+                  ? 'bg-state-success text-white shadow-xs font-bold'
+                  : 'text-state-success hover:bg-state-success-dim'
+              }`}
+            >
+              <span>✓ Recommended</span>
+              <span className="text-[10px] opacity-90">({counts.buy})</span>
+            </button>
+            <button
+              onClick={() => setFilterTab('caution')}
+              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
+                filterTab === 'caution'
+                  ? 'bg-state-warning text-white shadow-xs font-bold'
+                  : 'text-state-warning hover:bg-state-warning-dim'
+              }`}
+            >
+              <span>⚠ Caution</span>
+              <span className="text-[10px] opacity-90">({counts.caution})</span>
+            </button>
+            <button
+              onClick={() => setFilterTab('avoid')}
+              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
+                filterTab === 'avoid'
+                  ? 'bg-copy-muted text-white shadow-xs font-bold'
+                  : 'text-copy-muted hover:bg-bg-subtle'
+              }`}
+            >
+              <span>✕ Avoid/Locked</span>
+              <span className="text-[10px] opacity-90">({counts.avoid})</span>
+            </button>
+          </div>
+
+          {/* Search & Sort Controls */}
+          <div className="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
+            <div className="relative flex-1 sm:w-48">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-copy-muted" />
+              <input
+                type="text"
+                placeholder="Search village, farmer, form..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-surface-border bg-surface text-copy-primary focus:ring-2 focus:ring-brand outline-none"
+              />
+            </div>
+
+            <div className="flex items-center gap-1 bg-surface border border-surface-border px-2.5 py-1.5 rounded-xl text-xs">
+              <ArrowUpDown className="w-3.5 h-3.5 text-copy-muted" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                className="bg-transparent text-xs text-copy-primary font-medium outline-none cursor-pointer"
+              >
+                <option value="recommended">Sort: Recommended</option>
+                <option value="price_low">Sort: Lowest Price</option>
+                <option value="tonnes_high">Sort: Highest Tonnes</option>
+                <option value="date">Sort: Earliest Harvest</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        {/* Search & Sort */}
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-48">
-            <Search className="w-3.5 h-3.5 text-copy-muted absolute left-2.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search farmer or village..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-8 pr-2.5 py-1 text-xs bg-bg-subtle border border-surface-border-subtle rounded-xl text-copy-primary focus:outline-none focus:ring-1 focus:ring-brand"
-            />
-          </div>
-
-          <div className="flex items-center gap-1 text-xs text-copy-secondary">
-            <ArrowUpDown className="w-3.5 h-3.5 text-copy-muted" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              className="bg-bg-subtle border border-surface-border-subtle rounded-xl px-2 py-1 text-xs text-copy-primary focus:outline-none focus:ring-1 focus:ring-brand"
-            >
-              <option value="recommended">Best Advice</option>
-              <option value="price_low">Lowest Price</option>
-              <option value="tonnes_high">Highest Volume</option>
-              <option value="date">Soonest Harvest</option>
-            </select>
-          </div>
+        {/* Industry / Purpose Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+          <span className="text-copy-muted text-[11px] font-semibold flex items-center gap-1 shrink-0">
+            <Filter className="w-3 h-3" /> Industry Match:
+          </span>
+          <button
+            onClick={() => setPurposeFilter('all')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium cursor-pointer transition-all ${
+              purposeFilter === 'all'
+                ? 'bg-copy-primary text-base font-bold'
+                : 'bg-bg-subtle border border-surface-border text-copy-secondary hover:bg-surface'
+            }`}
+          >
+            All Uses
+          </button>
+          <button
+            onClick={() => setPurposeFilter('cattle_feed')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium cursor-pointer transition-all flex items-center gap-1 ${
+              purposeFilter === 'cattle_feed'
+                ? 'bg-emerald-700 text-white font-bold'
+                : 'bg-bg-subtle border border-surface-border text-copy-secondary hover:bg-surface'
+            }`}
+          >
+            <span>🐄</span> Cattle Feed & Dairy (₹4,800–₹8,500/t)
+          </button>
+          <button
+            onClick={() => setPurposeFilter('paper_packaging')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium cursor-pointer transition-all flex items-center gap-1 ${
+              purposeFilter === 'paper_packaging'
+                ? 'bg-blue-700 text-white font-bold'
+                : 'bg-bg-subtle border border-surface-border text-copy-secondary hover:bg-surface'
+            }`}
+          >
+            <span>📦</span> Paper Mills & Delivered Bales (₹1,330–₹3,000/t)
+          </button>
+          <button
+            onClick={() => setPurposeFilter('thermal_power')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium cursor-pointer transition-all flex items-center gap-1 ${
+              purposeFilter === 'thermal_power'
+                ? 'bg-amber-700 text-white font-bold'
+                : 'bg-bg-subtle border border-surface-border text-copy-secondary hover:bg-surface'
+            }`}
+          >
+            <span>⚡</span> Power Plants & NTPC (₹4,320–₹5,500/t)
+          </button>
+          <button
+            onClick={() => setPurposeFilter('brick_kiln')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium cursor-pointer transition-all flex items-center gap-1 ${
+              purposeFilter === 'brick_kiln'
+                ? 'bg-orange-700 text-white font-bold'
+                : 'bg-bg-subtle border border-surface-border text-copy-secondary hover:bg-surface'
+            }`}
+          >
+            <span>🧱</span> Brick Kilns & Furnaces (₹600–₹1,400/t)
+          </button>
+          <button
+            onClick={() => setPurposeFilter('farm_gate_loose')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium cursor-pointer transition-all flex items-center gap-1 ${
+              purposeFilter === 'farm_gate_loose'
+                ? 'bg-stone-700 text-white font-bold'
+                : 'bg-bg-subtle border border-surface-border text-copy-secondary hover:bg-surface'
+            }`}
+          >
+            <span>🚜</span> Farm-Gate Loose (₹500–₹700/t)
+          </button>
         </div>
       </div>
 
-      {/* Listings Grid */}
+      {/* Listing Cards Grid */}
       {processedListings.length === 0 ? (
         <div className="bg-surface border border-surface-border rounded-2xl p-8 text-center space-y-2">
-          <p className="text-copy-primary font-medium text-sm">No stubble lots match this filter.</p>
-          <p className="text-copy-secondary text-xs">
-            Try switching filter tabs or clearing your search keywords.
+          <p className="text-sm font-semibold text-copy-primary">No straw listings match your current filters.</p>
+          <p className="text-xs text-copy-muted">
+            Try resetting your search query, village filter, or industry purpose selection.
           </p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {processedListings.map((listing) => {
-            const advice = listing.procurement_advice || {
-              decision: 'caution',
-              badge: 'Buy with Caution',
-              reasons: ['Standard crop residue listing.'],
-              quality_grade: 'Grade B (Standard Straw)',
-              benchmark_diff: 'At Regional Benchmark',
-            }
-
-            const isBuy = advice.decision === 'buy'
-            const isCaution = advice.decision === 'caution'
-            const isAvoid = advice.decision === 'avoid'
-
-            const tonnes = listing.est_tonnes || 25.0
-            const acres = listing.acres || listing.plots?.acres || round(tonnes / 2.5, 1)
-            const price = listing.price_per_tonne || 1500
-            const totalPrice = listing.total_price || Math.round(tonnes * price)
-            const village = listing.village_name || listing.plots?.villages?.name || 'Moga Region'
-            const district = listing.district || listing.plots?.villages?.district || 'Punjab'
-            const isPooledOrCompleted = listing.status === 'pooled' || listing.status === 'completed'
-            const isMatched = listing.status === 'matched'
+            const advice = listing.procurement_advice
+            const isBuy = advice?.decision === 'buy'
+            const isCaution = advice?.decision === 'caution'
+            const isAvoid = advice?.decision === 'avoid'
             const isOpen = listing.status === 'open'
+            const village = listing.village_name || listing.plots?.villages?.name || 'Local Village'
+            const tonnes = Number(listing.est_tonnes || 25).toFixed(1)
+            const price = listing.price_per_tonne || 1850
+            const total = (Number(tonnes) * price).toLocaleString()
+
+            // Visual Styling based on decision
+            const borderClass = isBuy
+              ? 'border-state-success/40 bg-surface shadow-xs hover:border-state-success'
+              : isCaution
+              ? 'border-state-warning/40 bg-surface shadow-xs hover:border-state-warning'
+              : 'border-surface-border bg-bg-subtle/30 opacity-75'
+
+            const badgeColor = isBuy
+              ? 'bg-state-success text-white'
+              : isCaution
+              ? 'bg-state-warning text-white'
+              : 'bg-copy-muted text-white'
 
             return (
               <div
                 key={listing.id}
-                className={`bg-surface border rounded-2xl p-4.5 space-y-3.5 transition-all shadow-xs relative overflow-hidden ${
-                  isBuy
-                    ? 'border-state-success/40 ring-1 ring-state-success/20'
-                    : isCaution
-                    ? 'border-state-warning/40'
-                    : 'border-surface-border opacity-85'
-                }`}
+                className={`rounded-2xl border p-5 space-y-3.5 transition-all flex flex-col justify-between ${borderClass}`}
               >
-                {/* Top Banner Stripe */}
-                <div
-                  className={`absolute top-0 left-0 right-0 h-1.5 ${
-                    isBuy ? 'bg-state-success' : isCaution ? 'bg-state-warning' : 'bg-copy-muted'
-                  }`}
-                />
+                {/* Card Top: Badges & Price */}
+                <div className="space-y-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold tracking-tight ${badgeColor}`}>
+                          {isBuy && '✓ '}
+                          {isCaution && '⚠ '}
+                          {isAvoid && '✕ '}
+                          {advice?.badge || 'Listing Review'}
+                        </span>
 
-                {/* Header: Village, Farmer, and Decision Badge */}
-                <div className="flex items-start justify-between gap-2 pt-1">
-                  <div>
-                    <div className="flex items-center gap-1.5 text-xs text-copy-muted">
-                      <MapPin className="w-3.5 h-3.5 text-copy-secondary" />
-                      <span className="font-semibold text-copy-primary">{village}</span>
-                      <span>•</span>
-                      <span>{district}</span>
+                        {listing.combine_sms_used && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                            Combine SMS Chopped
+                          </span>
+                        )}
+
+                        {listing.stubble_form_name && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-bg-subtle text-copy-primary border border-surface-border">
+                            {listing.stubble_form_name}
+                          </span>
+                        )}
+                      </div>
+
+                      <h4 className="font-display font-bold text-base text-copy-primary">
+                        {tonnes} Tonnes Paddy Straw • {listing.acres || '?'} Acres
+                      </h4>
+                      <p className="text-xs text-copy-secondary flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-copy-muted" />
+                        <span>
+                          {village}, {listing.district || 'Punjab'}
+                        </span>
+                        <span>•</span>
+                        <span>Farmer: {listing.farmer_name || 'Verified Farmer'}</span>
+                      </p>
                     </div>
-                    <h4 className="font-display text-base font-bold text-copy-primary mt-0.5">
-                      Farmer: {listing.farmer_name || 'Local Verified Farmer'}
-                    </h4>
+
+                    {/* Price Tag */}
+                    <div className="text-right shrink-0">
+                      <div className="text-lg font-bold font-display text-copy-primary">
+                        ₹{price.toLocaleString()}/t
+                      </div>
+                      <div className="text-[11px] text-copy-muted">Est. ₹{total} Total</div>
+                      {listing.market_price_range && (
+                        <div className="text-[10px] text-brand font-semibold">{listing.market_price_range}</div>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Recommendation Badge */}
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs whitespace-nowrap ${
-                      isBuy
-                        ? 'bg-state-success text-white'
-                        : isCaution
-                        ? 'bg-state-warning text-white'
-                        : 'bg-bg-subtle text-copy-muted border border-surface-border'
-                    }`}
-                  >
-                    {isBuy && <CheckCircle2 className="w-3.5 h-3.5" />}
-                    {isCaution && <AlertTriangle className="w-3.5 h-3.5" />}
-                    {isAvoid && <Lock className="w-3.5 h-3.5" />}
-                    <span>{advice.badge}</span>
-                  </span>
-                </div>
-
-                {/* Key Numbers Grid: Tonnes, Rate, Total Cost, Quality */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-bg-subtle border border-surface-border-subtle rounded-xl p-2.5 text-xs">
-                  <div>
-                    <span className="text-[10px] text-copy-muted uppercase font-semibold">Volume</span>
-                    <p className="font-bold text-copy-primary text-sm tabular-nums mt-0.5">
-                      {tonnes.toFixed(1)} <span className="text-xs font-normal">t</span>
-                    </p>
-                    <span className="text-[10px] text-copy-secondary">({acres} acres)</span>
+                  {/* Quality Grade & Moisture Bar */}
+                  <div className="p-2.5 rounded-xl bg-bg-subtle/60 border border-surface-border-subtle flex items-center justify-between text-xs">
+                    <div>
+                      <span className="text-[10px] text-copy-muted uppercase font-bold block">Quality Grade</span>
+                      <strong className="text-copy-primary text-xs">
+                        {advice?.quality_grade || 'Standard Agricultural Straw'}
+                      </strong>
+                    </div>
+                    {listing.moisture_level && (
+                      <div className="text-right">
+                        <span className="text-[10px] text-copy-muted uppercase font-bold block">Moisture Level</span>
+                        <strong className="text-brand text-xs font-mono">{listing.moisture_level}</strong>
+                      </div>
+                    )}
                   </div>
 
-                  <div>
-                    <span className="text-[10px] text-copy-muted uppercase font-semibold">Rate</span>
-                    <p className="font-bold text-copy-primary text-sm tabular-nums mt-0.5">
-                      ₹{price.toLocaleString()}
-                    </p>
-                    <span className="text-[10px] text-copy-secondary">/tonne</span>
-                  </div>
-
-                  <div>
-                    <span className="text-[10px] text-copy-muted uppercase font-semibold">Total Cost</span>
-                    <p className="font-bold text-brand text-sm tabular-nums mt-0.5">
-                      ₹{totalPrice.toLocaleString()}
-                    </p>
-                    <span className="text-[10px] text-copy-secondary">Estimated</span>
-                  </div>
-
-                  <div>
-                    <span className="text-[10px] text-copy-muted uppercase font-semibold">Straw Grade</span>
-                    <p
-                      className={`font-semibold text-xs mt-0.5 ${
-                        listing.combine_sms_used ? 'text-state-success' : 'text-state-warning'
-                      }`}
-                    >
-                      {listing.combine_sms_used ? 'Grade A (SMS)' : 'Grade B (No SMS)'}
-                    </p>
-                    <span className="text-[10px] text-copy-secondary">
-                      {listing.combine_sms_used ? 'Baler Ready' : 'Needs Rake'}
+                  {/* Reasons & Rationale List */}
+                  <div className="space-y-1.5 pt-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-copy-muted">
+                      Procurement Rationale & Analysis:
                     </span>
-                  </div>
-                </div>
-
-                {/* Decision Rationale: Why to Buy or Why Not */}
-                <div
-                  className={`rounded-xl p-3 text-xs space-y-1.5 border ${
-                    isBuy
-                      ? 'bg-state-success-dim/40 border-state-success/20'
-                      : isCaution
-                      ? 'bg-state-warning-dim/40 border-state-warning/20'
-                      : 'bg-bg-subtle/50 border-surface-border'
-                  }`}
-                >
-                  <div className="flex items-center justify-between font-semibold text-[11px]">
-                    <span
-                      className={
-                        isBuy ? 'text-state-success' : isCaution ? 'text-state-warning' : 'text-copy-secondary'
-                      }
-                    >
-                      {isBuy
-                        ? '✅ Why You Should Buy This Lot:'
-                        : isCaution
-                        ? '⚠️ Why to Proceed with Caution:'
-                        : 'ℹ️ Lot Status Analysis:'}
-                    </span>
-                    <span className="text-[10px] text-copy-muted font-normal flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      Harvest: {listing.harvest_date}
-                    </span>
+                    <ul className="space-y-1 text-xs text-copy-secondary">
+                      {advice?.reasons.map((r, i) => (
+                        <li key={i} className="flex items-start gap-1.5 leading-snug">
+                          {isBuy ? (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-state-success shrink-0 mt-0.5" />
+                          ) : isCaution ? (
+                            <AlertTriangle className="w-3.5 h-3.5 text-state-warning shrink-0 mt-0.5" />
+                          ) : (
+                            <Lock className="w-3.5 h-3.5 text-copy-muted shrink-0 mt-0.5" />
+                          )}
+                          <span>{r}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
-                  <ul className="space-y-1 text-copy-primary text-[11px] pl-1">
-                    {advice.reasons.map((r, i) => (
-                      <li key={i} className="flex items-start gap-1.5">
-                        <span className="text-copy-muted mt-0.5">•</span>
-                        <span>{r}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {/* Harvest Schedule */}
+                  <div className="flex items-center gap-2 text-xs text-copy-secondary pt-1">
+                    <Calendar className="w-3.5 h-3.5 text-copy-muted" />
+                    <span>Harvest: {new Date(listing.harvest_date).toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                    <span>•</span>
+                    <span>Baler Partner: {listing.baler_name || 'Regional Straw Baler'}</span>
+                  </div>
                 </div>
 
                 {/* Footer Actions */}
-                <div className="pt-1 flex flex-wrap items-center justify-between gap-2">
+                <div className="pt-2 border-t border-surface-border-subtle flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2 text-xs">
                     {listing.farmer_phone && (
                       <span className="text-copy-secondary flex items-center gap-1 text-[11px]">
@@ -475,7 +606,7 @@ export function BuyerProcurementAdvisor({
                       <button
                         onClick={() => handleProcure(listing)}
                         disabled={procuringId === listing.id}
-                        className={`px-3.5 py-1.5 rounded-xl font-semibold text-xs transition-all shadow-xs flex items-center gap-1.5 cursor-pointer ${
+                        className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all shadow-xs flex items-center gap-1.5 cursor-pointer ${
                           isBuy
                             ? 'bg-brand text-on-brand hover:bg-accent-secondary'
                             : 'bg-surface border border-brand text-brand hover:bg-brand/10'
@@ -486,23 +617,15 @@ export function BuyerProcurementAdvisor({
                         ) : (
                           <>
                             <Sparkles className="w-3 h-3" />
-                            <span>Procure (₹{price}/t)</span>
+                            <span>Procure Lot (₹{price}/t)</span>
                           </>
                         )}
                       </button>
                     )}
 
-                    {isMatched && (
-                      <span className="px-3 py-1.5 bg-brand/15 text-brand rounded-xl text-xs font-semibold flex items-center gap-1">
-                        <Check className="w-3 h-3" />
-                        <span>Offer Matched (₹{price}/t)</span>
-                      </span>
-                    )}
-
-                    {isPooledOrCompleted && (
-                      <span className="px-3 py-1.5 bg-bg-subtle text-copy-muted rounded-xl text-xs font-semibold flex items-center gap-1">
-                        <Lock className="w-3 h-3" />
-                        <span>Locked in Village Pool</span>
+                    {!isOpen && (
+                      <span className="px-3 py-1.5 bg-bg-subtle text-copy-muted rounded-xl text-xs font-semibold uppercase">
+                        {listing.status === 'pooled' ? 'Committed in Pool' : listing.status}
                       </span>
                     )}
                   </div>
@@ -514,9 +637,4 @@ export function BuyerProcurementAdvisor({
       )}
     </div>
   )
-}
-
-function round(val: number, precision: number): number {
-  const factor = Math.pow(10, precision)
-  return Math.round(val * factor) / factor
 }

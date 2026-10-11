@@ -7,12 +7,42 @@ from app.repositories.market_repository import MarketRepository
 from app.schemas.market import ListingCreate
 
 
+import json
+
 async def create_listing(user_id: str, listing_data: ListingCreate) -> str:
     repository = MarketRepository(get_supabase_client())
     if repository.get_farmer_status(user_id) != "verified":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Verified ID is required")
     if not repository.owns_plot(user_id, listing_data.plot_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plot not found")
+
+    purposes = listing_data.intended_purposes
+    if isinstance(purposes, str):
+        purposes = [p.strip() for p in purposes.split(",") if p.strip()]
+    elif not purposes:
+        purposes = ["paper_mill", "biomass_plant"] if listing_data.combine_sms_used else ["biomass_plant", "brick_kiln"]
+
+    quality_grade = listing_data.quality_grade or ("grade_a_sms" if listing_data.combine_sms_used else "grade_b")
+    stubble_form = listing_data.stubble_form or ("delivered_bales" if listing_data.combine_sms_used else "farm_gate_loose")
+
+    form_benchmarks = {
+        "farm_gate_loose": 600.0,
+        "brick_kiln": 1000.0,
+        "delivered_bales": 1850.0,
+        "processed_pellets": 4800.0,
+        "commercial_feed_grade": 5500.0,
+    }
+    benchmark_rate = form_benchmarks.get(stubble_form, 1850.0 if listing_data.combine_sms_used else 600.0)
+
+    meta_payload = json.dumps({
+        "channel": "web",
+        "quality_grade": quality_grade,
+        "stubble_form": stubble_form,
+        "intended_purposes": purposes,
+        "moisture_level": listing_data.moisture_level or ("12-15%" if listing_data.combine_sms_used else "15-20%"),
+        "expected_price_per_tonne": float(listing_data.expected_price_per_tonne or benchmark_rate),
+    })
+
     listing_id = repository.create_listing(
         user_id,
         {
@@ -20,6 +50,7 @@ async def create_listing(user_id: str, listing_data: ListingCreate) -> str:
             "harvest_date": listing_data.harvest_date.isoformat(),
             "combine_sms_used": listing_data.combine_sms_used,
             "est_tonnes": listing_data.est_tonnes,
+            "source": meta_payload,
         },
     )
     from app.services.matching_service import match_listing
@@ -42,6 +73,40 @@ async def get_all_listings(farmer_id: str | None = None, status_filter: str | No
     res = query.execute()
     listings = res.data or []
 
+    # Real-world Punjab stubble market benchmark tiers by source & form
+    form_benchmarks = {
+        "farm_gate_loose": {
+            "name": "Direct Farm-Gate Loose Straw",
+            "range": "₹500 to ₹700/t (₹170-₹300/qtl)",
+            "benchmark": 600.0,
+            "description": "Direct farm pickup for power companies & biomass plants.",
+        },
+        "brick_kiln": {
+            "name": "Brick Kilns & Industrial Use",
+            "range": "₹600 to ₹1,400/t",
+            "benchmark": 1000.0,
+            "description": "Fuel replacement for local kilns & industrial boilers.",
+        },
+        "delivered_bales": {
+            "name": "Delivered Bales (15–50 km)",
+            "range": "₹1,330 to ₹3,000/t",
+            "benchmark": 1850.0,
+            "description": "Baled with cutting, storage, and short haul transport to paper mills.",
+        },
+        "processed_pellets": {
+            "name": "Processed Pellets & Briquettes",
+            "range": "₹4,320 to ₹5,500+/t",
+            "benchmark": 4800.0,
+            "description": "NTPC co-firing power tender & industrial briquette standard.",
+        },
+        "commercial_feed_grade": {
+            "name": "Commercial / Cattle Feed Bales",
+            "range": "₹4,800 to ₹8,500/t (₹2-₹28/kg)",
+            "benchmark": 5500.0,
+            "description": "Premium dairy fodder & clean animal feed via industrial platforms.",
+        },
+    }
+
     # Enhance with farmer profile name and buyer procurement intelligence
     for listing_item in listings:
         f_id = listing_item.get("farmer_id")
@@ -53,9 +118,36 @@ async def get_all_listings(farmer_id: str | None = None, status_filter: str | No
             except Exception:
                 listing_item["farmer_name"] = "Local Farmer"
 
+        # Parse structured metadata from source column
+        raw_source = listing_item.get("source") or "web"
+        meta: dict[str, Any] = {}
+        if isinstance(raw_source, str) and raw_source.startswith("{"):
+            try:
+                meta = json.loads(raw_source)
+            except Exception:
+                pass
+
+        combine_sms = bool(listing_item.get("combine_sms_used"))
+        quality_grade = meta.get("quality_grade") or ("grade_a_sms" if combine_sms else "grade_b")
+        stubble_form = meta.get("stubble_form") or ("delivered_bales" if combine_sms else "farm_gate_loose")
+        intended_purposes = meta.get("intended_purposes") or (
+            ["paper_mill", "biomass_plant", "packaging"] if combine_sms else ["biomass_plant", "brick_kiln"]
+        )
+        moisture_level = meta.get("moisture_level") or ("12-15%" if combine_sms else "15-20%")
+
+        tier_info = form_benchmarks.get(stubble_form, form_benchmarks["delivered_bales" if combine_sms else "farm_gate_loose"])
+        benchmark_rate = float(tier_info["benchmark"])
+
+        listing_item["quality_grade"] = quality_grade
+        listing_item["stubble_form"] = stubble_form
+        listing_item["stubble_form_name"] = tier_info["name"]
+        listing_item["market_price_range"] = tier_info["range"]
+        listing_item["intended_purposes"] = intended_purposes
+        listing_item["moisture_level"] = moisture_level
+
         # Calculate pricing and baler details
         offers = listing_item.get("offers") or []
-        price_per_tonne = 1500.0
+        price_per_tonne = benchmark_rate
         baler_name = "Regional Straw Balers"
         buyer_org = None
         for o in offers:
@@ -80,8 +172,7 @@ async def get_all_listings(farmer_id: str | None = None, status_filter: str | No
         listing_item["district"] = village.get("district", "Punjab")
         listing_item["acres"] = float(plot.get("acres") or round(tonnes / 2.5, 1))
 
-        # Procurement evaluation
-        combine_sms = bool(listing_item.get("combine_sms_used"))
+        # Procurement evaluation matching market source & form
         current_status = listing_item.get("status", "open")
 
         if current_status in ("pooled", "completed"):
@@ -91,29 +182,55 @@ async def get_all_listings(farmer_id: str | None = None, status_filter: str | No
                 "This stubble lot is already committed in an active village pool or completed.",
                 "Not available for independent purchase."
             ]
-        elif combine_sms:
+        elif quality_grade in ("grade_a_plus", "commercial_feed") or "cattle_feed" in intended_purposes:
+            decision = "buy"
+            badge = "Prime Feed Grade (Top Recommendation)"
+            reasons = [
+                f"Commercial cattle feed grade: ultra-clean, dry ({moisture_level} moisture), zero mold.",
+                f"High value market tier: {tier_info['range']}.",
+                f"Offered at ₹{price_per_tonne:,.0f}/t vs benchmark ₹{benchmark_rate:,.0f}/t for {tier_info['name']}."
+            ]
+        elif combine_sms or stubble_form == "delivered_bales":
             decision = "buy"
             badge = "Recommended to Buy"
             reasons = [
-                "Harvester SMS equipped: finely chopped stubble, optimal combustion efficiency.",
-                f"Fair rate of ₹{price_per_tonne:,.0f}/tonne matches regional biomass market index.",
-                f"Clean straw with low moisture, baler ready by {baler_name}."
+                f"Form: {tier_info['name']} ({tier_info['range']}).",
+                f"Finely chopped combine SMS straw, optimal for baling and boiler combustion.",
+                f"Offered at ₹{price_per_tonne:,.0f}/t (Benchmark: ₹{benchmark_rate:,.0f}/t). Baler: {baler_name}."
+            ]
+        elif stubble_form == "brick_kiln" or "brick_kiln" in meta.get("intended_purposes", []):
+            decision = "caution"
+            badge = "Industrial / Brick Kiln Grade"
+            reasons = [
+                f"Suitable for brick kilns and local industrial furnaces ({tier_info['range']}).",
+                f"Offered at ₹{price_per_tonne:,.0f}/t.",
+                "Recommend testing ash content before high-pressure boiler usage."
             ]
         else:
             decision = "caution"
             badge = "Buy with Caution"
             reasons = [
-                "Combine SMS not used: uncut stubble clumps require additional rake pre-processing.",
-                "Potential moisture & dirt risk during baling. Recommend ₹100-₹150/t processing markdown.",
-                f"Offered at ₹{price_per_tonne:,.0f}/tonne."
+                f"Direct farm-gate loose straw ({tier_info['range']}): buyer provides in-field collection.",
+                "Uncut stubble clumps require additional rake pre-processing.",
+                f"Offered at ₹{price_per_tonne:,.0f}/t."
             ]
 
         listing_item["procurement_advice"] = {
             "decision": decision,
             "badge": badge,
             "reasons": reasons,
-            "quality_grade": "Grade A (SMS Chopped)" if combine_sms else "Grade B (Standard Straw)",
-            "benchmark_diff": "At Regional Benchmark" if price_per_tonne == 1500 else ("Below Benchmark" if price_per_tonne < 1500 else "Above Benchmark")
+            "quality_grade": (
+                "Grade A+ (Premium Golden Feed)" if quality_grade in ("grade_a_plus", "commercial_feed")
+                else ("Grade A (SMS Chopped Bales)" if combine_sms
+                else "Grade B (Standard Straw)")
+            ),
+            "stubble_form": tier_info["name"],
+            "market_range": tier_info["range"],
+            "benchmark_diff": (
+                "At Market Benchmark" if price_per_tonne == benchmark_rate
+                else ("Below Market Benchmark (Good Value)" if price_per_tonne < benchmark_rate
+                else "Above Market Benchmark")
+            )
         }
 
     return listings

@@ -32,7 +32,32 @@ export function FarmerDashboard({ userId }: { userId: string }) {
   const [view, setView] = useState<'listing' | 'dashboard' | 'assistance'>('dashboard')
   const [activeListing, setActiveListing] = useState<string | null>(null)
   const [listings, setListings] = useState<
-    { id: string; acres?: number; status: string; harvest_date: string; source: string; created_at?: string; plots?: { acres: number }; est_tonnes?: number; pool_id?: string | null }[]
+    {
+      id: string
+      acres?: number
+      status: string
+      harvest_date: string
+      source: string
+      created_at?: string
+      plots?: { acres: number }
+      est_tonnes?: number
+      pool_id?: string | null
+      quality_grade?: string
+      stubble_form?: string
+      stubble_form_name?: string
+      market_price_range?: string
+      intended_purposes?: string[]
+      moisture_level?: string
+      price_per_tonne?: number
+      total_price?: number
+      combine_sms_used?: boolean
+      procurement_advice?: {
+        decision: string
+        badge: string
+        quality_grade: string
+        stubble_form?: string
+      }
+    }[]
   >([])
   
   const { data: plots = [] } = useQuery({
@@ -356,6 +381,64 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                           </button>
                         </div>
                       </div>
+
+                      {/* Stubble Condition, Form, Quality & Fair Pricing */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-surface-border-subtle text-xs">
+                        <div className="bg-bg-subtle/50 p-2.5 rounded-xl border border-surface-border/40">
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-copy-muted block">
+                            Stubble Form & Delivery
+                          </span>
+                          <strong className="text-copy-primary text-xs mt-0.5 block truncate">
+                            {listing.stubble_form_name || (listing.combine_sms_used ? 'Delivered Bales' : 'Farm-Gate Loose')}
+                          </strong>
+                          <span className="text-[11px] text-brand font-medium">
+                            {listing.market_price_range || (listing.combine_sms_used ? '₹1,330 to ₹3,000/t' : '₹500 to ₹700/t')}
+                          </span>
+                        </div>
+
+                        <div className="bg-bg-subtle/50 p-2.5 rounded-xl border border-surface-border/40">
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-copy-muted block">
+                            Quality & Moisture
+                          </span>
+                          <strong className="text-copy-primary text-xs mt-0.5 block truncate">
+                            {listing.quality_grade === 'grade_a_plus'
+                              ? 'Grade A+ Premium Golden'
+                              : listing.quality_grade === 'grade_a_sms' || listing.combine_sms_used
+                              ? 'Grade A (SMS Chopped)'
+                              : 'Grade B Industrial'}
+                          </strong>
+                          <span className="text-[11px] text-copy-secondary">
+                            Moisture: {listing.moisture_level || (listing.combine_sms_used ? '12-15%' : '15-20%')}
+                          </span>
+                        </div>
+
+                        <div className="bg-bg-subtle/50 p-2.5 rounded-xl border border-surface-border/40">
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-copy-muted block">
+                            Market Benchmark / Offer
+                          </span>
+                          <strong className="text-state-success text-xs mt-0.5 block">
+                            ₹{(listing.price_per_tonne || (listing.combine_sms_used ? 1850 : 600)).toLocaleString()}/tonne
+                          </strong>
+                          <span className="text-[11px] text-copy-secondary">
+                            Est. Payout: ₹{Math.round(listing.total_price || (listing.est_tonnes || 0) * (listing.price_per_tonne || 600)).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Suitable Purposes */}
+                      {listing.intended_purposes && listing.intended_purposes.length > 0 && (
+                        <div className="flex items-center gap-1.5 flex-wrap text-[11px] pt-1">
+                          <span className="text-copy-muted font-medium">Target Buyer Industries:</span>
+                          {listing.intended_purposes.map((p) => {
+                            const label = p.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+                            return (
+                              <span key={p} className="px-2 py-0.5 rounded-md bg-brand/10 text-brand font-medium">
+                                {label}
+                              </span>
+                            )
+                          })}
+                        </div>
+                      )}
 
                       {/* If listing is pooled, display the live PoolProgress! */}
                       {isPooled && (

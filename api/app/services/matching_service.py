@@ -38,9 +38,35 @@ async def match_listing(user_id: str, listing_id: str) -> None:
     if not buyers_res.data or not balers_res.data:
         # Cannot match
         return
+
+    # Parse stubble form, quality and intended purpose metadata
+    raw_source = listing_res.data.get("source") or "web"
+    meta: dict[str, Any] = {}
+    import json
+    if isinstance(raw_source, str) and raw_source.startswith("{"):
+        try:
+            meta = json.loads(raw_source)
+        except Exception:
+            pass
+
+    combine_sms = bool(listing_res.data.get("combine_sms_used"))
+    stubble_form = meta.get("stubble_form") or ("delivered_bales" if combine_sms else "farm_gate_loose")
+    intended_purposes = meta.get("intended_purposes") or (
+        ["paper_mill", "biomass_plant"] if combine_sms else ["biomass_plant", "brick_kiln"]
+    )
+    quality_grade = meta.get("quality_grade") or ("grade_a_sms" if combine_sms else "grade_b")
+
+    form_benchmarks = {
+        "farm_gate_loose": 600.0,
+        "brick_kiln": 1000.0,
+        "delivered_bales": 1850.0,
+        "processed_pellets": 4800.0,
+        "commercial_feed_grade": 5500.0,
+    }
+    benchmark_price = form_benchmarks.get(stubble_form, 1850.0 if combine_sms else 600.0)
         
-    # 2. Weighted scoring for buyers
-    # Score = w_price * norm(price) + w_dist * (1 - norm(dist)) + w_cap * norm(cap)
+    # 2. Purpose-Driven Weighted scoring for buyers
+    # Score = w_price * norm(price) + w_dist * (1 - norm(dist)) + w_cap * norm(cap) + w_purpose * affinity
     best_buyer = None
     best_buyer_score = -float("inf")
 
@@ -51,13 +77,29 @@ async def match_listing(user_id: str, listing_id: str) -> None:
     for b in buyers_res.data:
         b_lat = float(b.get("lat") or 30.8)
         b_lng = float(b.get("lng") or 75.2)
+        b_type = str(b.get("type") or "biomass")
         dist = _calculate_distance_km(plot_lat, plot_lon, b_lat, b_lng)
-        # Normalize: distance (assume max 100km), price (assume range 1000-3000), capacity (50-500)
+
+        # Check industry purpose affinity
+        affinity = 0.2
+        if b_type == "mill" and (stubble_form == "delivered_bales" or "paper_mill" in intended_purposes or "packaging" in intended_purposes):
+            affinity = 1.0
+        elif b_type == "biomass" and ("biomass_plant" in intended_purposes or "ntpc_tender" in intended_purposes or stubble_form in ("processed_pellets", "farm_gate_loose")):
+            affinity = 1.0
+        elif b_type == "kiln" and ("brick_kiln" in intended_purposes or stubble_form == "brick_kiln"):
+            affinity = 1.0
+        elif b_type == "cbg" and ("cbg_plant" in intended_purposes or stubble_form == "farm_gate_loose"):
+            affinity = 1.0
+        elif "cattle_feed" in intended_purposes and quality_grade in ("grade_a_plus", "commercial_feed"):
+            affinity = 0.9
+
+        # Normalize metrics
         norm_dist = min(dist / 100.0, 1.0)
-        norm_price = min(max((float(b.get("price_per_tonne") or 1500) - 1000) / 2000.0, 0.0), 1.0)
+        buyer_price = float(b.get("price_per_tonne") or benchmark_price)
+        norm_price = min(max((buyer_price - 500.0) / 4500.0, 0.0), 1.0)
         norm_cap = min(float(b.get("capacity") or 100) / 500.0, 1.0)
 
-        score = (w_price * norm_price) + (w_dist * (1.0 - norm_dist)) + (w_cap * norm_cap)
+        score = (w_price * norm_price) + (w_dist * (1.0 - norm_dist)) + (w_cap * norm_cap) + (0.35 * affinity)
         if score > best_buyer_score:
             best_buyer_score = score
             best_buyer = b
@@ -74,13 +116,16 @@ async def match_listing(user_id: str, listing_id: str) -> None:
     pickup_start = (h_date + datetime.timedelta(days=2)).isoformat()
     pickup_end = (h_date + datetime.timedelta(days=5)).isoformat()
 
+    # Fair offer price calibrated by stubble form
+    offer_price = benchmark_price if float(buyer.get("price_per_tonne") or 0) <= 0 else float(buyer.get("price_per_tonne") or benchmark_price)
+
     # 4. Insert into `offers`
     client.table("offers").insert({
         "listing_id": listing_id,
         "buyer_id": buyer["profile_id"],
         "baler_id": baler["id"],
         "status": "pending",
-        "price_per_tonne": buyer["price_per_tonne"],
+        "price_per_tonne": offer_price,
         "pickup_start": pickup_start,
         "pickup_end": pickup_end
     }).execute()

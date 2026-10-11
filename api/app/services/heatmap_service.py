@@ -107,7 +107,7 @@ def get_village_heatmap() -> list[dict[str, Any]]:
             dem, sup = demo_pairs[idx % len(demo_pairs)]
             v["demand_tonnes"] = dem
             v["supply_tonnes"] = sup
-            v["prices"].append(1500.0)
+            v["prices"].append(1850.0)
 
     zones = []
     for v_id, v in villages.items():
@@ -116,7 +116,7 @@ def get_village_heatmap() -> list[dict[str, Any]]:
         unfilled = max(0.0, round(demand_t - supply_t, 1))
         surplus = max(0.0, round(supply_t - demand_t, 1))
         prices_list = v.get("prices") or []
-        avg_price = round(sum(prices_list) / len(prices_list), 0) if prices_list else 1500.0
+        avg_price = round(sum(prices_list) / len(prices_list), 0) if prices_list else 1850.0
 
         status = "balanced"
         if unfilled > 0 and demand_t > 0:

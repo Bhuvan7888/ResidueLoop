@@ -1,11 +1,16 @@
 import { supabase } from '@/lib/supabase'
 import { apiRequest } from '@/lib/api-client'
 
-interface ListingPayload {
+export interface ListingPayload {
   plotId: string
   harvestDate: string
   combineSmsUsed: boolean
   estTonnes: number
+  qualityGrade?: string
+  stubbleForm?: string
+  intendedPurposes?: string[]
+  expectedPricePerTonne?: number
+  moistureLevel?: string
 }
 
 export async function createListing(data: ListingPayload) {
@@ -15,6 +20,11 @@ export async function createListing(data: ListingPayload) {
       harvest_date: data.harvestDate,
       combine_sms_used: data.combineSmsUsed,
       est_tonnes: data.estTonnes,
+      quality_grade: data.qualityGrade,
+      stubble_form: data.stubbleForm,
+      intended_purposes: data.intendedPurposes,
+      expected_price_per_tonne: data.expectedPricePerTonne,
+      moisture_level: data.moistureLevel,
     },
     method: 'POST',
   })

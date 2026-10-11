@@ -128,4 +128,4 @@ async def test_get_all_listings_enriches_procurement_advice(mock_client_factory:
     no_sms_item = next(item for item in results if item["id"] == "l-no-sms")
     assert no_sms_item["procurement_advice"]["decision"] == "caution"
     assert no_sms_item["procurement_advice"]["badge"] == "Buy with Caution"
-    assert no_sms_item["price_per_tonne"] == 1500.0
+    assert no_sms_item["price_per_tonne"] == 600.0
