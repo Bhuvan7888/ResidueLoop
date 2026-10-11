@@ -84,7 +84,7 @@ export function VerificationCard({
                 : 'text-copy-muted hover:text-copy-primary'
             }`}
           >
-            🛰️ Sentinel-2 Multispectral
+            {t('verification.tab_sentinel', '🛰️ Sentinel-2 Multispectral')}
           </button>
           <button
             type="button"
@@ -95,7 +95,7 @@ export function VerificationCard({
                 : 'text-copy-muted hover:text-copy-primary'
             }`}
           >
-            🎯 NASA FIRMS Radar
+            {t('verification.tab_radar', '🎯 NASA FIRMS Radar')}
           </button>
         </div>
 
@@ -120,17 +120,17 @@ export function VerificationCard({
         {/* Evidence Status */}
         <div className="rounded-xl bg-bg-subtle/80 border border-surface-border-subtle p-3 text-xs text-copy-secondary">
           <p className="font-medium text-copy-primary">
-            📡 Optical & Thermal Sensors Ready
+            {t('verification.sensors_ready', '📡 Optical & Thermal Sensors Ready')}
           </p>
           <p className="text-[11px] text-copy-muted mt-0.5">
-            Automated orbital pass scans field perimeter for fire activity and burn scar changes post-pickup.
+            {t('verification.sensors_desc', 'Automated orbital pass scans field perimeter for fire activity and burn scar changes post-pickup.')}
           </p>
         </div>
 
         {/* Trigger Button if onTriggerCheck passed */}
         {onTriggerCheck && (
           <div className="pt-1 flex flex-wrap items-center justify-between gap-2">
-            <span className="text-[11px] text-copy-muted">Run Verification Now:</span>
+            <span className="text-[11px] text-copy-muted">{t('verification.run_check', 'Run Verification Now:')}</span>
             <div className="flex gap-1.5">
               <button
                 type="button"
@@ -138,7 +138,7 @@ export function VerificationCard({
                 onClick={() => onTriggerCheck('verified')}
                 className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-state-success-dim border border-state-success/30 text-state-success hover:bg-state-success hover:text-white transition-all disabled:opacity-50"
               >
-                ✓ Clean Pass
+                ✓ {t('verification.scenario_clean', 'Clean Pass')}
               </button>
               <button
                 type="button"
@@ -146,7 +146,7 @@ export function VerificationCard({
                 onClick={() => onTriggerCheck('fire_detected')}
                 className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-state-error-dim border border-state-error/30 text-state-error hover:bg-state-error hover:text-white transition-all disabled:opacity-50"
               >
-                🔥 Fire Alert
+                🔥 {t('verification.scenario_fire', 'Fire Alert')}
               </button>
               <button
                 type="button"
@@ -154,7 +154,7 @@ export function VerificationCard({
                 onClick={() => onTriggerCheck('inconclusive')}
                 className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-bg-subtle border border-surface-border text-copy-secondary hover:bg-surface transition-all disabled:opacity-50"
               >
-                ☁️ Cloudy
+                ☁️ {t('verification.scenario_inconclusive', 'Cloudy')}
               </button>
             </div>
           </div>
@@ -199,7 +199,7 @@ export function VerificationCard({
               : 'text-copy-muted hover:text-copy-primary'
           }`}
         >
-          🛰️ Sentinel-2 Multispectral
+          {t('verification.tab_sentinel', '🛰️ Sentinel-2 Multispectral')}
         </button>
         <button
           type="button"
@@ -210,7 +210,7 @@ export function VerificationCard({
               : 'text-copy-muted hover:text-copy-primary'
           }`}
         >
-          🎯 NASA FIRMS Radar ({verification.firms_hits} hits)
+          {t('verification.tab_radar', '🎯 NASA FIRMS Radar')} ({verification.firms_hits} {t('verification.firms_hits_short', 'hits')})
         </button>
       </div>
 
@@ -247,15 +247,18 @@ export function VerificationCard({
           <span>{isFire ? '⚠️' : isInconclusive ? '☁️' : '✅'}</span>
           <span>
             {isFire
-              ? 'Satellite Alert: Thermal Fire Anomaly Detected'
+              ? t('verification.fire_detected_title', 'Satellite Alert: Thermal Fire Anomaly Detected')
               : isInconclusive
-              ? 'Satellite Check Inconclusive: Optical Overpass Obscured'
-              : 'Satellite Verified: Clean Clearance Confirmed'}
+              ? t('verification.inconclusive_title', 'Satellite Check Inconclusive: Optical Overpass Obscured')
+              : t('verification.clean_title', 'Satellite Verified: Clean Clearance Confirmed')}
           </span>
         </div>
         <p className="text-[11px] leading-relaxed opacity-95">
           {isFire &&
-            `NASA FIRMS registered ${verification.firms_hits} thermal hotspot(s) with an NBR burn-scar shift of ${Number(verification.nbr_delta).toFixed(2)}. Plot flagged for field review.`}
+            t('verification.fire_evidence', 'NASA FIRMS registered {{hits}} thermal hotspot(s) with an NBR burn-scar shift of {{delta}}. Plot flagged for field review.', {
+              hits: verification.firms_hits,
+              delta: Number(verification.nbr_delta).toFixed(2),
+            })}
           {isInconclusive &&
             t(
               'verification.inconclusive_reason',
@@ -263,14 +266,17 @@ export function VerificationCard({
             )}
           {!isFire &&
             !isInconclusive &&
-            `No fire detected and no burn scar found. Checked on ${dateFormatted || 'recent pass'}. Confidence: ${verification.confidence}.`}
+            t('verification.clean_evidence', 'No fire detected and no burn scar found. Checked on {{date}}. Confidence: {{confidence}}.', {
+              date: dateFormatted || 'recent pass',
+              confidence: verification.confidence,
+            })}
         </p>
       </div>
 
       {/* Simulator Actions if onTriggerCheck provided */}
       {onTriggerCheck && (
         <div className="pt-1 flex flex-wrap items-center justify-between gap-2 border-t border-surface-border-subtle pt-3">
-          <span className="text-[10px] text-copy-muted uppercase font-semibold">Simulate / Re-test:</span>
+          <span className="text-[10px] text-copy-muted uppercase font-semibold">{t('verification.simulate_label', 'Simulate / Re-test:')}</span>
           <div className="flex gap-1.5">
             <button
               type="button"
@@ -279,7 +285,7 @@ export function VerificationCard({
               className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-state-success-dim border border-state-success/30 text-state-success hover:bg-state-success hover:text-white transition-all disabled:opacity-50"
               title="Simulate clear Sentinel-2 NBR pass with 0 FIRMS fire hits"
             >
-              ✓ Clean Pass
+              ✓ {t('verification.scenario_clean', 'Clean Pass')}
             </button>
             <button
               type="button"
@@ -288,7 +294,7 @@ export function VerificationCard({
               className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-state-error-dim border border-state-error/30 text-state-error hover:bg-state-error hover:text-white transition-all disabled:opacity-50"
               title="Simulate FIRMS thermal fire alert"
             >
-              🔥 Fire Alert
+              🔥 {t('verification.scenario_fire', 'Fire Alert')}
             </button>
             <button
               type="button"
@@ -297,7 +303,7 @@ export function VerificationCard({
               className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-bg-subtle border border-surface-border text-copy-secondary hover:bg-surface transition-all disabled:opacity-50"
               title="Simulate optical cloud cover"
             >
-              ☁️ Cloudy
+              ☁️ {t('verification.scenario_inconclusive', 'Cloudy')}
             </button>
           </div>
         </div>

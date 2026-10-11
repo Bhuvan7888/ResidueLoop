@@ -34,7 +34,7 @@ interface NewListingFormProps {
 }
 
 export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [error, setError] = useState<string | null>(null)
 
   const form = useForm<z.infer<typeof listingSchema>>({
@@ -132,7 +132,7 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
       {/* Basic Setup: Plot & Date */}
       <div className="bg-surface border border-surface-border rounded-2xl p-5 space-y-4 shadow-xs">
         <h3 className="text-base font-bold text-copy-primary flex items-center gap-2">
-          <span>📍</span> 1. Select Plot & Harvest Schedule
+          <span>📍</span> {i18n.language === 'hi' ? '1. खेत और कटाई अनुसूची चुनें' : '1. Select Plot & Harvest Schedule'}
         </h3>
 
         <div className="grid sm:grid-cols-2 gap-4">
@@ -158,7 +158,7 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
 
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-copy-secondary mb-1">
-              Expected Harvest Date
+              {t('farmer.expected_harvest', 'Expected Harvest Date')}
             </label>
             <input
               type="date"
@@ -174,10 +174,10 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
         {selectedPlot && (
           <div className="flex items-center justify-between bg-bg-subtle/80 p-3 rounded-xl text-xs border border-surface-border-subtle">
             <span className="text-copy-secondary font-medium">
-              Acreage: <strong>{selectedPlot.acres} acres</strong>
+              {i18n.language === 'hi' ? 'रकबा:' : 'Acreage:'} <strong>{selectedPlot.acres} {t('listing.acres', 'acres')}</strong>
             </span>
             <span className="text-copy-primary font-bold">
-              Estimated Biomass: {estMin.toFixed(1)} – {estMax.toFixed(1)} tonnes (~{estTonnes.toFixed(1)}t)
+              {i18n.language === 'hi' ? 'अनुमानित बायोमास:' : 'Estimated Biomass:'} {estMin.toFixed(1)} – {estMax.toFixed(1)} {t('listing.tonnes', 'tonnes')} (~{estTonnes.toFixed(1)}{t('common.tonne', 't')})
             </span>
           </div>
         )}
@@ -187,10 +187,12 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
       <div className="bg-surface border border-surface-border rounded-2xl p-5 space-y-4 shadow-xs">
         <div>
           <h3 className="text-base font-bold text-copy-primary flex items-center gap-2">
-            <span>🌾</span> 2. Stubble Quality & Condition Assessment
+            <span>🌾</span> {i18n.language === 'hi' ? '2. पराली गुणवत्ता एवं स्थिति मूल्यांकन' : '2. Stubble Quality & Condition Assessment'}
           </h3>
           <p className="text-xs text-copy-secondary mt-0.5">
-            How good is your stubble? Accurate moisture and grading matches you with premium industrial and dairy buyers.
+            {i18n.language === 'hi'
+              ? 'आपकी पराली की गुणवत्ता कैसी है? सटीक नमी और ग्रेडिंग आपको प्रीमियम खरीदारों से जोड़ती है।'
+              : 'How good is your stubble? Accurate moisture and grading matches you with premium industrial and dairy buyers.'}
           </p>
         </div>
 
@@ -228,10 +230,10 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
         <div className="pt-2 border-t border-surface-border-subtle flex items-center justify-between">
           <div>
             <label htmlFor="combineSmsUsed" className="text-xs font-semibold text-copy-primary block cursor-pointer">
-              Combine equipped with Straw Management System (SMS)?
+              {i18n.language === 'hi' ? 'कंबाइन में स्ट्रॉ मैनेजमेंट सिस्टम (SMS) लगा है?' : 'Combine equipped with Straw Management System (SMS)?'}
             </label>
             <span className="text-[11px] text-copy-muted">
-              Finely chopped stubble earns higher rates from paper mills and NTPC briquetting tenders.
+              {i18n.language === 'hi' ? 'बारीक कटी पराली पेपर मिलों और एनटीपीसी से अधिक दर दिलाती है।' : 'Finely chopped stubble earns higher rates from paper mills and NTPC briquetting tenders.'}
             </span>
           </div>
           <input
@@ -247,10 +249,12 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
       <div className="bg-surface border border-surface-border rounded-2xl p-5 space-y-4 shadow-xs">
         <div>
           <h3 className="text-base font-bold text-copy-primary flex items-center gap-2">
-            <span>📦</span> 3. Stubble Form & Delivery Method
+            <span>📦</span> {i18n.language === 'hi' ? '3. पराली रूप एवं वितरण विधि' : '3. Stubble Form & Delivery Method'}
           </h3>
           <p className="text-xs text-copy-secondary mt-0.5">
-            Cost breakdown varies by source and form. Select how your stubble will be cleared and delivered.
+            {i18n.language === 'hi'
+              ? 'लागत वितरण स्रोत और रूप के अनुसार भिन्न होती है। चुनें कि आपकी पराली कैसे हटाई जाएगी।'
+              : 'Cost breakdown varies by source and form. Select how your stubble will be cleared and delivered.'}
           </p>
         </div>
 
@@ -285,10 +289,12 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
       <div className="bg-surface border border-surface-border rounded-2xl p-5 space-y-4 shadow-xs">
         <div>
           <h3 className="text-base font-bold text-copy-primary flex items-center gap-2">
-            <span>🎯</span> 4. Suitable Uses & Target Industries
+            <span>🎯</span> {i18n.language === 'hi' ? '4. उपयुक्त उपयोग एवं लक्षित उद्योग' : '4. Suitable Uses & Target Industries'}
           </h3>
           <p className="text-xs text-copy-secondary mt-0.5">
-            For what purposes can your stubble be used? We match you directly with buyers in these industries.
+            {i18n.language === 'hi'
+              ? 'आपकी पराली किन उद्देश्यों के लिए उपयोग हो सकती है? हम आपको सीधे इन उद्योगों से जोड़ते हैं।'
+              : 'For what purposes can your stubble be used? We match you directly with buyers in these industries.'}
           </p>
         </div>
 
@@ -321,16 +327,16 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-brand-text">
-              Fair Market Price Index ({activeMarketTier.name})
+              {i18n.language === 'hi' ? 'उचित बाज़ार मूल्य सूचकांक' : 'Fair Market Price Index'} ({activeMarketTier.name})
             </span>
             <h4 className="text-xl font-bold font-display text-copy-primary mt-0.5">
-              ₹{benchmarkPrice.toLocaleString()} / tonne benchmark rate
+              ₹{benchmarkPrice.toLocaleString()} / {t('common.tonne', 'tonne')} {i18n.language === 'hi' ? 'बेंचमार्क दर' : 'benchmark rate'}
             </h4>
           </div>
 
           <div className="text-right">
             <span className="text-[10px] uppercase font-bold tracking-wider text-copy-muted block">
-              Estimated Total Farmer Payout
+              {t('farmer.est_payout', 'Estimated Total Farmer Payout')}
             </span>
             <span className="text-2xl font-bold font-display text-state-success">
               ₹{Math.round(estimatedTotalPayout).toLocaleString()}
@@ -341,7 +347,7 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
         <div className="grid sm:grid-cols-2 gap-3 pt-2 border-t border-brand/20">
           <div>
             <label className="block text-xs font-semibold text-copy-primary mb-1">
-              Your Desired Listing Rate (₹/tonne):
+              {i18n.language === 'hi' ? 'आपकी इच्छित दर (₹/टन):' : 'Your Desired Listing Rate (₹/tonne):'}
             </label>
             <div className="flex items-center gap-2">
               <input
@@ -354,7 +360,7 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
                 onClick={() => form.setValue('expectedPricePerTonne', benchmarkPrice)}
                 className="text-xs px-2.5 py-2 rounded-xl bg-surface border border-surface-border text-copy-secondary hover:text-copy-primary whitespace-nowrap"
               >
-                Use Index
+                {i18n.language === 'hi' ? 'इंडेक्स दर चुनें' : 'Use Index'}
               </button>
             </div>
             {form.formState.errors.expectedPricePerTonne && (
@@ -364,10 +370,10 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
 
           <div className="text-[11px] text-copy-secondary flex flex-col justify-center space-y-1 bg-surface/60 p-2.5 rounded-xl border border-surface-border-subtle">
             <p>
-              📊 <strong>Prevailing Market Range:</strong> {activeMarketTier.priceUnit}
+              📊 <strong>{i18n.language === 'hi' ? 'प्रचलित बाज़ार दायरा:' : 'Prevailing Market Range:'}</strong> {activeMarketTier.priceUnit}
             </p>
             <p>
-              ⚡ <strong>Source Data:</strong> BiofuelCircle, CEEW, NTPC tenders & IndiaMART commercial straw indices.
+              ⚡ <strong>{i18n.language === 'hi' ? 'डेटा स्रोत:' : 'Source Data:'}</strong> BiofuelCircle, CEEW, NTPC & IndiaMART indices.
             </p>
           </div>
         </div>
@@ -387,7 +393,13 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
           disabled={form.formState.isSubmitting || !selectedPlot}
           className="flex-1 bg-brand text-on-brand rounded-xl py-2.5 font-bold hover:bg-accent-secondary disabled:opacity-50 cursor-pointer shadow-sm text-sm"
         >
-          {form.formState.isSubmitting ? t('listing.confirming', 'Confirming Listing...') : 'Publish Straw Listing & Match Buyers'}
+          {form.formState.isSubmitting
+            ? t('listing.confirming', 'Confirming Listing...')
+            : i18n.language === 'hi'
+            ? 'पराली लिस्टिंग प्रकाशित करें और खरीदार खोजें'
+            : i18n.language === 'pa'
+            ? 'ਪਰਾਲੀ ਲਿਸਟਿੰਗ ਪ੍ਰਕਾਸ਼ਿਤ ਕਰੋ ਅਤੇ ਖਰੀਦਦਾਰ ਲੱਭੋ'
+            : 'Publish Straw Listing & Match Buyers'}
         </button>
       </div>
     </form>

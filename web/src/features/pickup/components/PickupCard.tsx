@@ -51,11 +51,11 @@ export function PickupCard({ pickup, mode, onUpdateWeight, onUpdatePayment }: Pi
         <div className="mb-4 rounded-xl bg-state-error-dim border border-state-error/40 p-3 text-xs text-state-error flex items-start gap-2">
           <span className="text-base leading-none">⚠️</span>
           <div>
-            <p className="font-bold">PAYMENT FLAGGED: NOT RECEIVED</p>
+            <p className="font-bold">{t('pickup.flagged_title', 'PAYMENT FLAGGED: NOT RECEIVED')}</p>
             <p className="text-[11px] opacity-90 mt-0.5">
               {mode === 'buyer'
                 ? 'The farmer reported this payment as not received! Please disburse cash or bank transfer immediately.'
-                : 'You flagged this payment as not received. The buyer has been alerted to disburse immediately.'}
+                : t('pickup.flagged_desc_farmer', 'You flagged this payment as not received. The buyer has been alerted to disburse immediately.')}
             </p>
           </div>
         </div>
@@ -64,7 +64,7 @@ export function PickupCard({ pickup, mode, onUpdateWeight, onUpdatePayment }: Pi
       {pickup.payment_status === 'received' && (
         <div className="mb-4 rounded-xl bg-state-success-dim border border-state-success/30 p-2.5 text-xs text-state-success flex items-center gap-2">
           <span>✓</span>
-          <span className="font-semibold">Payment settled and verified hand-to-hand.</span>
+          <span className="font-semibold">{t('pickup.settled_desc', 'Payment settled and verified hand-to-hand.')}</span>
         </div>
       )}
 
@@ -89,11 +89,11 @@ export function PickupCard({ pickup, mode, onUpdateWeight, onUpdatePayment }: Pi
             <div className="bg-bg-subtle p-3 rounded-xl space-y-1.5">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-copy-secondary">{t('pickup.actual_weight', 'Actual Weight')}</span>
-                <span className="text-base font-semibold text-copy-primary">{pickup.actual_tonnes} t</span>
+                <span className="text-base font-semibold text-copy-primary">{pickup.actual_tonnes} {t('common.tonne', 't')}</span>
               </div>
               {pickup.quality_notes && (
                 <p className="text-xs text-copy-secondary pt-1 border-t border-surface-border/40">
-                  <span className="font-medium text-copy-muted">Notes:</span> {pickup.quality_notes}
+                  <span className="font-medium text-copy-muted">{t('pickup.quality_notes', 'Notes')}:</span> {pickup.quality_notes}
                 </p>
               )}
             </div>
@@ -103,7 +103,7 @@ export function PickupCard({ pickup, mode, onUpdateWeight, onUpdatePayment }: Pi
 
       {mode === 'farmer' && (
         <div className="space-y-2">
-          <p className="text-xs text-copy-secondary font-medium">Record Hand-to-Hand Payment Status:</p>
+          <p className="text-xs text-copy-secondary font-medium">{t('pickup.record_status', 'Record Hand-to-Hand Payment Status:')}</p>
           <div className="flex gap-2">
             <button
               type="button"
@@ -115,7 +115,7 @@ export function PickupCard({ pickup, mode, onUpdateWeight, onUpdatePayment }: Pi
               }`}
             >
               <span>✓</span>
-              <span>Received</span>
+              <span>{t('status.received', 'Received')}</span>
             </button>
             <button
               type="button"
@@ -127,7 +127,7 @@ export function PickupCard({ pickup, mode, onUpdateWeight, onUpdatePayment }: Pi
               }`}
             >
               <span>✕</span>
-              <span>Not Received</span>
+              <span>{t('status.not_received', 'Not Received')}</span>
             </button>
           </div>
           {isEditing ? (

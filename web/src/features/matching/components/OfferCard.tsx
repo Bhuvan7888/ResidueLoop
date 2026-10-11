@@ -20,18 +20,18 @@ import { useTranslation } from 'react-i18next'
 
 export function OfferCard({ offer, onAccept, onDecline }: OfferCardProps) {
   const { t } = useTranslation()
-  const buyerName = offer.buyers?.org_name || offer.buyer_name || 'Industrial Biomass Buyer'
-  const balerName = offer.balers?.name || offer.baler_name || 'Assigned Local Baler'
+  const buyerName = offer.buyers?.org_name || offer.buyer_name || t('matching.default_buyer', 'Industrial Biomass Buyer')
+  const balerName = offer.balers?.name || offer.baler_name || t('matching.default_baler', 'Assigned Local Baler')
   const windowStr = offer.pickup_start && offer.pickup_end
     ? `${offer.pickup_start} — ${offer.pickup_end}`
-    : 'Within 3-5 days of harvest'
+    : t('matching.window_harvest', 'Within 3-5 days of harvest')
 
   return (
     <div className="bg-surface border border-surface-border rounded-2xl p-5 shadow-xs space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-surface-border/60 pb-3">
         <div>
           <span className="text-xs uppercase tracking-wider font-semibold text-brand bg-brand/10 px-2.5 py-0.5 rounded-full">
-            Verified Offer
+            {t('matching.verified_offer', 'Verified Offer')}
           </span>
           <h4 className="text-lg font-bold text-copy-primary mt-1">
             {t('matching.offer_price', { price: offer.price_per_tonne })}
@@ -75,7 +75,7 @@ export function OfferCard({ offer, onAccept, onDecline }: OfferCardProps) {
             onClick={() => onAccept(offer.id)}
             className="px-5 py-2 rounded-xl bg-brand text-on-brand hover:bg-accent-secondary text-xs font-semibold shadow-xs transition-colors"
           >
-            {t('common.accept', 'Accept & Join Pool')}
+            {t('matching.accept_pool', 'Accept & Join Pool')}
           </button>
         </div>
       )}

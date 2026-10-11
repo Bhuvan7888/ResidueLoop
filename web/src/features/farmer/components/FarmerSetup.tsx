@@ -289,6 +289,67 @@ export const DISTRICT_TO_STATE: Record<string, string> = {
   Jammu: 'Jammu and Kashmir',
 }
 
+export const STATE_NAMES_HI: Record<string, string> = {
+  'Andhra Pradesh': 'आंध्र प्रदेश',
+  'Arunachal Pradesh': 'अरुणाचल प्रदेश',
+  'Assam': 'असम',
+  'Bihar': 'बिहार',
+  'Chhattisgarh': 'छत्तीसगढ़',
+  'Goa': 'गोवा',
+  'Gujarat': 'गुजरात',
+  'Haryana': 'हरियाणा',
+  'Himachal Pradesh': 'हिमाचल प्रदेश',
+  'Jharkhand': 'झारखंड',
+  'Karnataka': 'कर्नाटक',
+  'Kerala': 'केरल',
+  'Madhya Pradesh': 'मध्य प्रदेश',
+  'Maharashtra': 'महाराष्ट्र',
+  'Manipur': 'मणिपुर',
+  'Meghalaya': 'मेघालय',
+  'Mizoram': 'मिजोरम',
+  'Nagaland': 'नागालैंड',
+  'Odisha': 'ओडिशा',
+  'Punjab': 'पंजाब',
+  'Rajasthan': 'राजस्थान',
+  'Sikkim': 'सिक्किम',
+  'Tamil Nadu': 'तमिलनाडु',
+  'Telangana': 'तेलंगाना',
+  'Tripura': 'त्रिपुरा',
+  'Uttar Pradesh': 'उत्तर प्रदेश',
+  'Uttarakhand': 'उत्तराखंड',
+  'West Bengal': 'पश्चिम बंगाल',
+  'Andaman and Nicobar Islands': 'अंडमान और निकोबार द्वीप समूह',
+  'Chandigarh': 'चंडीगढ़',
+  'Dadra and Nagar Haveli and Daman and Diu': 'दादरा और नगर हवेली एवं दमन और दीव',
+  'Delhi': 'दिल्ली',
+  'Jammu and Kashmir': 'जम्मू और कश्मीर',
+  'Ladakh': 'लद्दाख',
+  'Lakshadweep': 'लक्षद्वीप',
+  'Puducherry': 'पुदुचेरी',
+}
+
+export const STATE_NAMES_PA: Record<string, string> = {
+  Punjab: 'ਪੰਜਾਬ',
+  Haryana: 'ਹਰਿਆਣਾ',
+  'Uttar Pradesh': 'ਉੱਤਰ ਪ੍ਰਦੇਸ਼',
+  Rajasthan: 'ਰਾਜਸਥਾਨ',
+  'Madhya Pradesh': 'ਮੱਧ ਪ੍ਰਦੇਸ਼',
+  Maharashtra: 'ਮਹਾਰਾਸ਼ਟਰ',
+  Bihar: 'ਬਿਹਾਰ',
+  Gujarat: 'ਗੁਜਰਾਤ',
+  Delhi: 'ਦਿੱਲੀ',
+  Chandigarh: 'ਚੰਡੀਗੜ੍ਹ',
+  'Himachal Pradesh': 'ਹਿਮਾਚਲ ਪ੍ਰਦੇਸ਼',
+  'Jammu and Kashmir': 'ਜੰਮੂ ਅਤੇ ਕਸ਼ਮੀਰ',
+  Uttarakhand: 'ਉੱਤਰਾਖੰਡ',
+}
+
+export function getStateDisplay(st: string, lang: string): string {
+  if (lang === 'hi' && STATE_NAMES_HI[st]) return `${STATE_NAMES_HI[st]} (${st})`
+  if (lang === 'pa' && STATE_NAMES_PA[st]) return `${STATE_NAMES_PA[st]} (${st})`
+  return st
+}
+
 export function getVillageState(v: Village): string {
   if (v.district.includes(',')) {
     const parts = v.district.split(',')
@@ -296,6 +357,7 @@ export function getVillageState(v: Village): string {
   }
   return DISTRICT_TO_STATE[v.district] || 'Other'
 }
+
 
 const profileSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(120),
@@ -582,19 +644,19 @@ export function FarmerSetup() {
           {idStatus === 'verified' && (
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-state-success-dim text-state-success border border-state-success/30 shadow-xs">
               <span className="w-2 h-2 rounded-full bg-state-success animate-pulse"></span>
-              ID Verified Farmer
+              {t('farmer.id_verified_badge') || 'ID Verified Farmer'}
             </span>
           )}
           {idStatus === 'pending' && (
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
               <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-              ID Verification Pending
+              {t('farmer.id_pending_badge') || 'ID Verification Pending'}
             </span>
           )}
           {idStatus === 'rejected' && (
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-state-error-dim text-state-error border border-state-error/30">
               <span className="w-2 h-2 rounded-full bg-state-error"></span>
-              ID Rejected
+              {t('farmer.id_rejected_badge') || 'ID Rejected'}
             </span>
           )}
         </div>
@@ -626,7 +688,7 @@ export function FarmerSetup() {
       {/* Card 1: Farmer Profile */}
       <SetupCard
         title={t('farmer.profile_title')}
-        subtitle="Set your name, state, and home village for stubble matching"
+        subtitle={t('farmer.profile_subtitle') || 'Set your name, state, and home village for stubble matching'}
       >
         <form onSubmit={profileForm.handleSubmit(submitProfile)} className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-3">
@@ -635,7 +697,7 @@ export function FarmerSetup() {
               {t('farmer.name')} <span className="text-state-error">*</span>
               <input
                 className="mt-1 w-full rounded-xl border border-surface-border p-2.5 focus:ring-2 focus:ring-accent-primary outline-none bg-surface"
-                placeholder="e.g. Gurpreet Singh"
+                placeholder={i18n.language === 'hi' ? 'उदा. गुरप्रीत सिंह' : i18n.language === 'pa' ? 'ਉਦਾ. ਗੁਰਪ੍ਰੀਤ ਸਿੰਘ' : 'e.g. Gurpreet Singh'}
                 {...profileForm.register('name')}
               />
               {profileForm.formState.errors.name && (
@@ -651,13 +713,13 @@ export function FarmerSetup() {
                 value={profileState}
                 onChange={(e) => onProfileStateChange(e.target.value)}
               >
-                <option value="">Select State...</option>
+                <option value="">{i18n.language === 'hi' ? 'राज्य चुनें...' : i18n.language === 'pa' ? 'ਸੂਬਾ ਚੁਣੋ...' : 'Select State...'}</option>
                 {INDIAN_STATES.map((st) => (
                   <option key={st} value={st}>
-                    {st}
+                    {getStateDisplay(st, i18n.language)}
                   </option>
                 ))}
-                <option value="Other">Other</option>
+                <option value="Other">{i18n.language === 'hi' ? 'अन्य (Other)' : i18n.language === 'pa' ? 'ਹੋਰ (Other)' : 'Other'}</option>
               </select>
             </label>
 
@@ -680,9 +742,9 @@ export function FarmerSetup() {
                 <option value="">
                   {profileState
                     ? (filteredProfileVillages.length > 0
-                        ? 'Select your village...'
-                        : 'No pre-seeded villages in this state')
-                    : 'Select state first...'}
+                        ? (i18n.language === 'hi' ? 'अपना गाँव / कस्बा चुनें...' : i18n.language === 'pa' ? 'ਆਪਣਾ ਪਿੰਡ ਚੁਣੋ...' : 'Select your village...')
+                        : (i18n.language === 'hi' ? 'इस राज्य में कोई पूर्व-निर्धारित गाँव नहीं है' : 'No pre-seeded villages in this state'))
+                    : (i18n.language === 'hi' ? 'पहले राज्य चुनें...' : i18n.language === 'pa' ? 'ਪਹਿਲਾਂ ਸੂਬਾ ਚੁਣੋ...' : 'Select state first...')}
                 </option>
                 {filteredProfileVillages.map((v) => (
                   <option key={v.id} value={v.id}>
@@ -690,7 +752,13 @@ export function FarmerSetup() {
                   </option>
                 ))}
                 {profileState && (
-                  <option value="__add_custom__">+ Add other village in {profileState}...</option>
+                  <option value="__add_custom__">
+                    {i18n.language === 'hi'
+                      ? `+ ${getStateDisplay(profileState, 'hi')} में अन्य गाँव जोड़ें...`
+                      : i18n.language === 'pa'
+                      ? `+ ${getStateDisplay(profileState, 'pa')} ਵਿੱਚ ਹੋਰ ਪਿੰਡ ਜੋੜੋ...`
+                      : `+ Add other village in ${profileState}...`}
+                  </option>
                 )}
               </select>
               {profileForm.formState.errors.villageId && (
@@ -704,13 +772,13 @@ export function FarmerSetup() {
             <div className="p-3.5 bg-bg-subtle rounded-xl border border-surface-border flex flex-col sm:flex-row items-center gap-3">
               <input
                 className="w-full sm:w-1/3 rounded-lg border border-surface-border p-2 text-sm bg-surface"
-                placeholder="Village/Town Name (e.g. Rampur)"
+                placeholder={t('farmer.custom_village_placeholder') || 'Village/Town Name (e.g. Rampur)'}
                 value={customVillageName}
                 onChange={(e) => setCustomVillageName(e.target.value)}
               />
               <input
                 className="w-full sm:w-1/3 rounded-lg border border-surface-border p-2 text-sm bg-surface"
-                placeholder="District/Tehsil (e.g. Ludhiana)"
+                placeholder={t('farmer.custom_district_placeholder') || 'District/Tehsil (e.g. Ludhiana)'}
                 value={customVillageDistrict}
                 onChange={(e) => setCustomVillageDistrict(e.target.value)}
               />
@@ -721,14 +789,14 @@ export function FarmerSetup() {
                   disabled={isAddingVillage}
                   className="rounded-lg bg-brand px-3.5 py-2 text-xs font-semibold text-on-brand disabled:opacity-50"
                 >
-                  {isAddingVillage ? 'Adding...' : 'Save & Select Village'}
+                  {isAddingVillage ? t('common.loading') : (t('farmer.custom_village_save') || 'Save & Select Village')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowCustomProfile(false)}
                   className="rounded-lg border border-surface-border px-3 py-2 text-xs font-medium hover:bg-surface"
                 >
-                  Cancel
+                  {t('common.cancel') || 'Cancel'}
                 </button>
               </div>
             </div>
@@ -749,7 +817,7 @@ export function FarmerSetup() {
       {/* Card 2: Register Plot */}
       <SetupCard
         title={t('farmer.plot_title')}
-        subtitle="Add your field plots to list stubble for local biomass buyers"
+        subtitle={t('farmer.plot_subtitle') || 'Add your field plots to list stubble for local biomass buyers'}
       >
         <form className="space-y-4" onSubmit={plotForm.handleSubmit(submitPlot)}>
           <div className="grid gap-3 sm:grid-cols-4">
@@ -761,13 +829,13 @@ export function FarmerSetup() {
                 value={plotState}
                 onChange={(e) => onPlotStateChange(e.target.value)}
               >
-                <option value="">Select State...</option>
+                <option value="">{i18n.language === 'hi' ? 'राज्य चुनें...' : i18n.language === 'pa' ? 'ਸੂਬਾ ਚੁਣੋ...' : 'Select State...'}</option>
                 {INDIAN_STATES.map((st) => (
                   <option key={st} value={st}>
-                    {st}
+                    {getStateDisplay(st, i18n.language)}
                   </option>
                 ))}
-                <option value="Other">Other</option>
+                <option value="Other">{i18n.language === 'hi' ? 'अन्य (Other)' : i18n.language === 'pa' ? 'ਹੋਰ (Other)' : 'Other'}</option>
               </select>
             </label>
 
@@ -790,9 +858,9 @@ export function FarmerSetup() {
                 <option value="">
                   {plotState
                     ? (filteredPlotVillages.length > 0
-                        ? 'Select plot village...'
-                        : 'No pre-seeded villages in this state')
-                    : 'Select state first...'}
+                        ? (i18n.language === 'hi' ? 'खेत का गाँव चुनें...' : i18n.language === 'pa' ? 'ਖੇਤ ਦਾ ਪਿੰਡ ਚੁਣੋ...' : 'Select plot village...')
+                        : (i18n.language === 'hi' ? 'इस राज्य में कोई पूर्व-निर्धारित गाँव नहीं है' : 'No pre-seeded villages in this state'))
+                    : (i18n.language === 'hi' ? 'पहले राज्य चुनें...' : i18n.language === 'pa' ? 'ਪਹਿਲਾਂ ਸੂਬਾ ਚੁਣੋ...' : 'Select state first...')}
                 </option>
                 {filteredPlotVillages.map((v) => (
                   <option key={v.id} value={v.id}>
@@ -800,7 +868,13 @@ export function FarmerSetup() {
                   </option>
                 ))}
                 {plotState && (
-                  <option value="__add_custom__">+ Add other village in {plotState}...</option>
+                  <option value="__add_custom__">
+                    {i18n.language === 'hi'
+                      ? `+ ${getStateDisplay(plotState, 'hi')} में अन्य गाँव जोड़ें...`
+                      : i18n.language === 'pa'
+                      ? `+ ${getStateDisplay(plotState, 'pa')} ਵਿੱਚ ਹੋਰ ਪਿੰਡ ਜੋੜੋ...`
+                      : `+ Add other village in ${plotState}...`}
+                  </option>
                 )}
               </select>
               {plotForm.formState.errors.villageId && (
@@ -815,7 +889,7 @@ export function FarmerSetup() {
                 className="mt-1 w-full rounded-xl border border-surface-border p-2.5 focus:ring-2 focus:ring-accent-primary outline-none bg-surface"
                 step="0.1"
                 type="number"
-                placeholder="e.g. 10.5"
+                placeholder={i18n.language === 'hi' ? 'उदा. 10.5' : i18n.language === 'pa' ? 'ਉਦਾ. 10.5' : 'e.g. 10.5'}
                 {...plotForm.register('acres')}
               />
               {plotForm.formState.errors.acres && (
@@ -840,13 +914,13 @@ export function FarmerSetup() {
             <div className="p-3.5 bg-bg-subtle rounded-xl border border-surface-border flex flex-col sm:flex-row items-center gap-3">
               <input
                 className="w-full sm:w-1/3 rounded-lg border border-surface-border p-2 text-sm bg-surface"
-                placeholder="Village/Town Name (e.g. Rampur)"
+                placeholder={t('farmer.custom_village_placeholder') || 'Village/Town Name (e.g. Rampur)'}
                 value={customVillageName}
                 onChange={(e) => setCustomVillageName(e.target.value)}
               />
               <input
                 className="w-full sm:w-1/3 rounded-lg border border-surface-border p-2 text-sm bg-surface"
-                placeholder="District/Tehsil (e.g. Ludhiana)"
+                placeholder={t('farmer.custom_district_placeholder') || 'District/Tehsil (e.g. Ludhiana)'}
                 value={customVillageDistrict}
                 onChange={(e) => setCustomVillageDistrict(e.target.value)}
               />
@@ -857,14 +931,14 @@ export function FarmerSetup() {
                   disabled={isAddingVillage}
                   className="rounded-lg bg-brand px-3.5 py-2 text-xs font-semibold text-on-brand disabled:opacity-50"
                 >
-                  {isAddingVillage ? 'Adding...' : 'Save & Select Village'}
+                  {isAddingVillage ? t('common.loading') : (t('farmer.custom_village_save') || 'Save & Select Village')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowCustomPlot(false)}
                   className="rounded-lg border border-surface-border px-3 py-2 text-xs font-medium hover:bg-surface"
                 >
-                  Cancel
+                  {t('common.cancel') || 'Cancel'}
                 </button>
               </div>
             </div>
@@ -872,11 +946,11 @@ export function FarmerSetup() {
 
           <details className="text-xs text-copy-secondary pt-1">
             <summary className="cursor-pointer hover:text-copy-primary font-medium select-none">
-              GPS Coordinates (Auto-derived from village)
+              {t('farmer.gps_coords') || 'GPS Coordinates (Auto-derived from village)'}
             </summary>
             <div className="grid grid-cols-2 gap-3 mt-2 p-3 bg-bg-subtle rounded-xl border border-surface-border">
               <label className="block">
-                <span>Latitude</span>
+                <span>{t('farmer.latitude_label') || 'Latitude'}</span>
                 <input
                   className="mt-1 w-full rounded-lg border border-surface-border p-2 bg-surface"
                   step="0.0001"
@@ -885,7 +959,7 @@ export function FarmerSetup() {
                 />
               </label>
               <label className="block">
-                <span>Longitude</span>
+                <span>{t('farmer.longitude_label') || 'Longitude'}</span>
                 <input
                   className="mt-1 w-full rounded-lg border border-surface-border p-2 bg-surface"
                   step="0.0001"
@@ -902,14 +976,14 @@ export function FarmerSetup() {
       {idStatus !== 'verified' && (
         <SetupCard
           title={t('farmer.id_title')}
-          subtitle="Verify your identity to enable automatic listing creation and instant payouts"
+          subtitle={t('farmer.id_subtitle') || 'Verify your identity to enable automatic listing creation and instant payouts'}
         >
           <form className="grid gap-3 sm:grid-cols-3" onSubmit={documentForm.handleSubmit(submitDocument)}>
             <label className="text-sm text-copy-primary block">
               {t('farmer.id_type')}
               <input
                 className="mt-1 w-full rounded-xl border border-surface-border p-2.5 focus:ring-2 focus:ring-accent-primary outline-none"
-                placeholder="Aadhaar / Voter ID"
+                placeholder={i18n.language === 'hi' ? 'आधार / वोटर आईडी' : 'Aadhaar / Voter ID'}
                 {...documentForm.register('idType')}
               />
               {documentForm.formState.errors.idType && (

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { simulateWhatsappMessage } from '../api'
 
 interface WhatsappSimulatorProps {
@@ -6,22 +7,49 @@ interface WhatsappSimulatorProps {
   onMessageSent: () => void
 }
 
-const QUICK_PROMPTS = [
+const PROMPTS_HI = [
+  { label: '🌾 1. "Hi" (प्रश्नावली शुरू करें)', text: 'Hi' },
+  { label: '📍 2. "5" (5 एकड़)', text: '5' },
+  { label: '🗓️ 3. "2" (1 सप्ताह में कटाई)', text: '2' },
+  { label: '⭐ 4. "1" (ग्रेड ए+ चारा)', text: '1' },
+  { label: '🐄 5. "1" (पशु आहार / डेयरी)', text: '1' },
+  { label: '📦 6. "2" (गांठें पहुँचाई गईं)', text: '2' },
+  { label: '🤝 "हाँ" (प्रस्ताव स्वीकार करें)', text: 'हाँ' },
+  { label: '🗓️ पिकअप तिथि (स्थिति पूछें)', text: 'मेरी पिकअप तिथि कब है?' },
+  { label: '💵 "मिल गए" (भुगतान प्राप्त)', text: 'भुगतान मिल गया है' },
+]
+
+const PROMPTS_PA = [
+  { label: '🌾 1. "Hi" (ਪ੍ਰਸ਼ਨਾਵਲੀ ਸ਼ੁਰੂ ਕਰੋ)', text: 'Hi' },
+  { label: '📍 2. "5" (5 ਏਕੜ)', text: '5' },
+  { label: '🗓️ 3. "2" (1 ਹਫ਼ਤੇ ਵਿੱਚ ਵਾਢੀ)', text: '2' },
+  { label: '⭐ 4. "1" (ਗ੍ਰੇਡ ਏ+ ਚਾਰਾ)', text: '1' },
+  { label: '🐄 5. "1" (ਪਸ਼ੂ ਚਾਰਾ / ਡੇਅਰੀ)', text: '1' },
+  { label: '📦 6. "2" (ਗੰਢਾਂ ਪਹੁੰਚਾਈਆਂ)', text: '2' },
+  { label: '🤝 "ਹਾਂ" (ਪੇਸ਼ਕਸ਼ ਸਵੀਕਾਰ ਕਰੋ)', text: 'ਹਾਂ' },
+  { label: '🗓️ ਪਿਕਅੱਪ ਮਿਤੀ (ਸਥਿਤੀ ਪੁੱਛੋ)', text: 'ਮੇਰੀ ਪਿਕਅੱਪ ਮਿਤੀ ਕਦੋਂ ਹੈ?' },
+  { label: '💵 "ਮਿਲ ਗਏ" (ਭੁਗਤਾਨ ਪ੍ਰਾਪਤ)', text: 'ਭੁਗਤਾਨ ਮਿਲ ਗਿਆ ਹੈ' },
+]
+
+const PROMPTS_EN = [
   { label: '🌾 1. "Hi" (Start Questionnaire)', text: 'Hi' },
   { label: '📍 2. "5" (5 Acres)', text: '5' },
   { label: '🗓️ 3. "2" (1 Week Harvest)', text: '2' },
   { label: '⭐ 4. "1" (Grade A+ Fodder)', text: '1' },
   { label: '🐄 5. "1" (Cattle Feed / Dairy)', text: '1' },
   { label: '📦 6. "2" (Delivered Bales)', text: '2' },
-  { label: '🤝 "ਹਾਂ" (Accept Matched Offer)', text: 'ਹਾਂ' },
-  { label: '🗓️ ਪਿਕਅੱਪ ਮਿਤੀ (Pickup Status)', text: 'ਮੇਰੀ ਪਿਕਅੱਪ ਮਿਤੀ ਕਦੋਂ ਹੈ?' },
-  { label: '💵 "ਮਿਲ ਗਏ" (Payment Received)', text: 'ਭੁਗਤਾਨ ਮਿਲ ਗਿਆ ਹੈ' },
+  { label: '🤝 "Yes" (Accept Matched Offer)', text: 'Yes' },
+  { label: '🗓️ Pickup Status', text: 'When is my pickup scheduled?' },
+  { label: '💵 "Received" (Payment Received)', text: 'Payment received' },
 ]
 
 export function WhatsappSimulator({ userPhone, onMessageSent }: WhatsappSimulatorProps) {
+  const { i18n } = useTranslation()
   const [inputText, setInputText] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [feedback, setFeedback] = useState<string | null>(null)
+
+  const prompts = i18n.language === 'hi' ? PROMPTS_HI : i18n.language === 'pa' ? PROMPTS_PA : PROMPTS_EN
 
   const handleSend = async (textToSend: string) => {
     if (!textToSend.trim() || isSending) return
@@ -30,7 +58,7 @@ export function WhatsappSimulator({ userPhone, onMessageSent }: WhatsappSimulato
     try {
       await simulateWhatsappMessage(userPhone, textToSend)
       setInputText('')
-      setFeedback('Message synced via WhatsApp channel!')
+      setFeedback(i18n.language === 'hi' ? 'व्हाट्सएप चैनल के माध्यम से संदेश सिंक हुआ!' : i18n.language === 'pa' ? 'ਵਟਸਐਪ ਰਾਹੀਂ ਸੁਨੇਹਾ ਸਿੰਕ ਹੋ ਗਿਆ!' : 'Message synced via WhatsApp channel!')
       setTimeout(() => setFeedback(null), 3000)
       onMessageSent()
     } catch (err: unknown) {
@@ -46,14 +74,21 @@ export function WhatsappSimulator({ userPhone, onMessageSent }: WhatsappSimulato
         <div className="flex items-center gap-2">
           <span className="text-xl">💬</span>
           <div>
-            <h4 className="text-sm font-bold text-copy-primary">WhatsApp Two-Way Interactive Simulator</h4>
+            <h4 className="text-sm font-bold text-copy-primary">
+              {i18n.language === 'hi' ? 'व्हाट्सएप दो-तरफ़ा इंटरैक्टिव सिम्युलेटर' : i18n.language === 'pa' ? 'ਵਟਸਐਪ ਇੰਟਰਐਕਟਿਵ ਸਿਮੂਲੇਟਰ' : 'WhatsApp Two-Way Interactive Simulator'}
+            </h4>
             <p className="text-xs text-copy-secondary">
-              Simulates sending and receiving WhatsApp messages for phone: <span className="font-mono font-medium text-copy-primary">{userPhone}</span>
+              {i18n.language === 'hi'
+                ? 'इस फोन नंबर के लिए व्हाट्सएप संदेश भेजने और प्राप्त करने का अनुकरण करता है: '
+                : i18n.language === 'pa'
+                ? 'ਇਸ ਫੋਨ ਲਈ ਵਟਸਐਪ ਸੁਨੇਹੇ ਭੇਜਣ ਅਤੇ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਨਕਲ ਕਰਦਾ ਹੈ: '
+                : 'Simulates sending and receiving WhatsApp messages for phone: '}
+              <span className="font-mono font-medium text-copy-primary">{userPhone}</span>
             </p>
           </div>
         </div>
         <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-state-success-dim text-state-success border border-state-success/30">
-          Connected
+          {i18n.language === 'hi' ? 'कनेक्टेड' : i18n.language === 'pa' ? 'ਕਨੈਕਟਡ' : 'Connected'}
         </span>
       </div>
 
@@ -66,10 +101,10 @@ export function WhatsappSimulator({ userPhone, onMessageSent }: WhatsappSimulato
       {/* Quick Action Chips */}
       <div className="space-y-1.5">
         <p className="text-[11px] font-semibold text-copy-secondary uppercase tracking-wider">
-          Quick Punjabi Actions:
+          {i18n.language === 'hi' ? 'त्वरित कार्रवाइयाँ (क्लिक करें):' : i18n.language === 'pa' ? 'ਤੁਰੰਤ ਕਾਰਵਾਈਆਂ:' : 'Quick Actions:'}
         </p>
         <div className="flex flex-wrap gap-1.5">
-          {QUICK_PROMPTS.map((p, idx) => (
+          {prompts.map((p, idx) => (
             <button
               key={idx}
               type="button"
@@ -95,7 +130,13 @@ export function WhatsappSimulator({ userPhone, onMessageSent }: WhatsappSimulato
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          placeholder="ਸੁਨੇਹਾ ਲਿਖੋ (e.g. ਮੇਰੀ ਪਿਕਅੱਪ ਕਦੋਂ ਹੈ? or When is my pickup?)..."
+          placeholder={
+            i18n.language === 'hi'
+              ? 'संदेश लिखें (उदा. मेरी पिकअप कब है? या हाँ)...'
+              : i18n.language === 'pa'
+              ? 'ਸੁਨੇਹਾ ਲਿਖੋ (ਜਿਵੇਂ ਕਿ ਮੇਰੀ ਪਿਕਅੱਪ ਕਦੋਂ ਹੈ?)...'
+              : 'Type a message (e.g. When is my pickup? or Yes)...'
+          }
           disabled={isSending}
           className="flex-1 rounded-xl border border-surface-border bg-surface px-3 py-2 text-sm text-copy-primary placeholder:text-copy-muted focus:ring-2 focus:ring-accent-primary outline-none"
         />
@@ -104,7 +145,9 @@ export function WhatsappSimulator({ userPhone, onMessageSent }: WhatsappSimulato
           disabled={isSending || !inputText.trim()}
           className="px-4 py-2 bg-brand text-on-brand rounded-xl text-xs font-semibold hover:bg-accent-secondary disabled:opacity-50 shadow-xs transition-colors"
         >
-          {isSending ? 'Sending...' : 'Send'}
+          {isSending
+            ? (i18n.language === 'hi' ? 'भेजा जा रहा है...' : 'Sending...')
+            : (i18n.language === 'hi' ? 'भेजें' : i18n.language === 'pa' ? 'ਭੇਜੋ' : 'Send')}
         </button>
       </form>
     </div>

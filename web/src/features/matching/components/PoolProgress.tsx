@@ -35,9 +35,9 @@ export function PoolProgress({ pool }: { pool?: Pool }) {
         <div>
           <h4 className="text-sm font-bold text-copy-primary">{t('matching.pool_progress', 'Village Straw Pool Progress')}</h4>
           <p className="text-xs text-copy-secondary mt-0.5">
-            {pool.current_tonnes.toFixed(1)} of {pool.target_tonnes.toFixed(1)} tonnes
+            {pool.current_tonnes.toFixed(1)} / {pool.target_tonnes.toFixed(1)} {t('common.tonne', 'tonnes')}
             {!isReady && farmersNeeded > 0 && (
-              <span className="text-brand font-medium"> • ~{farmersNeeded} more farmer(s) needed</span>
+              <span className="text-brand font-medium"> • ~{t('matching.more_farmers_needed', { count: farmersNeeded })}</span>
             )}
           </p>
         </div>
@@ -56,8 +56,8 @@ export function PoolProgress({ pool }: { pool?: Pool }) {
       </div>
       
       <div className="flex justify-between text-xs text-copy-secondary">
-        <span>{pool.current_tonnes.toFixed(1)}t {t('matching.collected', 'collected')}</span>
-        <span>{pool.target_tonnes.toFixed(1)}t {t('matching.goal', 'target load')} ({percentage.toFixed(0)}%)</span>
+        <span>{pool.current_tonnes.toFixed(1)} {t('common.tonne', 't')} {t('matching.collected', 'collected')}</span>
+        <span>{pool.target_tonnes.toFixed(1)} {t('common.tonne', 't')} {t('matching.goal', 'target load')} ({percentage.toFixed(0)}%)</span>
       </div>
       
       {pool.pickup_date && (
