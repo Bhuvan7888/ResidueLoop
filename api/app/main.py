@@ -1,3 +1,4 @@
+import os
 import logging
 import uuid
 from typing import Awaitable, Callable
@@ -24,9 +25,21 @@ app = FastAPI(
 )
 
 # Baseline Security Middleware
+env_allowed = os.getenv("ALLOWED_HOSTS")
+allowed_hosts = [h.strip() for h in env_allowed.split(",") if h.strip()] if env_allowed else [
+    "residueloop.in",
+    "www.residueloop.in",
+    "localhost",
+    "127.0.0.1",
+    "*.compute.amazonaws.com",
+    "*.amazonaws.com",
+    "*.compute-1.amazonaws.com",
+    "*.compute.internal",
+]
+
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["residueloop.in", "www.residueloop.in"],
+    allowed_hosts=allowed_hosts,
 )
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -86,7 +99,7 @@ app.add_middleware(
         "http://localhost:3000",
     ],
     # Supports free Vercel production and preview deployments without opening CORS to every origin.
-    allow_origin_regex=r"^https://[a-z0-9-]+\.vercel\.app$",
+    allow_origin_regex=r"^https://.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
