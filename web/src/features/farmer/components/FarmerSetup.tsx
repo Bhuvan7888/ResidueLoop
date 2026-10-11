@@ -5,10 +5,16 @@ import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase'
-import { createFarmerPlot, createFarmerProfile, getFarmerProfile, submitIdVerification } from '@/features/farmer/api'
+import {
+  createFarmerPlot,
+  createFarmerProfile,
+  getFarmerProfile,
+  submitIdVerification,
+  createCustomVillage,
+} from '@/features/farmer/api'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 
-interface Village {
+export interface Village {
   district: string
   id: string
   name: string
@@ -16,6 +22,279 @@ interface Village {
     type: string
     coordinates: [number, number]
   }
+}
+
+export const INDIAN_STATES = [
+  'Andhra Pradesh',
+  'Arunachal Pradesh',
+  'Assam',
+  'Bihar',
+  'Chhattisgarh',
+  'Goa',
+  'Gujarat',
+  'Haryana',
+  'Himachal Pradesh',
+  'Jharkhand',
+  'Karnataka',
+  'Kerala',
+  'Madhya Pradesh',
+  'Maharashtra',
+  'Manipur',
+  'Meghalaya',
+  'Mizoram',
+  'Nagaland',
+  'Odisha',
+  'Punjab',
+  'Rajasthan',
+  'Sikkim',
+  'Tamil Nadu',
+  'Telangana',
+  'Tripura',
+  'Uttar Pradesh',
+  'Uttarakhand',
+  'West Bengal',
+  // Union Territories
+  'Andaman and Nicobar Islands',
+  'Chandigarh',
+  'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi',
+  'Jammu and Kashmir',
+  'Ladakh',
+  'Lakshadweep',
+  'Puducherry',
+] as const
+
+export const DISTRICT_TO_STATE: Record<string, string> = {
+  // Punjab
+  Moga: 'Punjab',
+  Ludhiana: 'Punjab',
+  Sangrur: 'Punjab',
+  Bathinda: 'Punjab',
+  Patiala: 'Punjab',
+  Amritsar: 'Punjab',
+  Firozpur: 'Punjab',
+  Fazilka: 'Punjab',
+  Jalandhar: 'Punjab',
+  Kapurthala: 'Punjab',
+  Mansa: 'Punjab',
+  Barnala: 'Punjab',
+  'Tarn Taran': 'Punjab',
+  Faridkot: 'Punjab',
+  Fatehgarh: 'Punjab',
+  Gurdaspur: 'Punjab',
+  Hoshiarpur: 'Punjab',
+  Muktsar: 'Punjab',
+  Rupnagar: 'Punjab',
+  Pathankot: 'Punjab',
+  'Shahid Bhagat Singh Nagar': 'Punjab',
+
+  // Haryana
+  Karnal: 'Haryana',
+  Ambala: 'Haryana',
+  Kurukshetra: 'Haryana',
+  Kaithal: 'Haryana',
+  Fatehabad: 'Haryana',
+  Sirsa: 'Haryana',
+  Jind: 'Haryana',
+  Panipat: 'Haryana',
+  Sonipat: 'Haryana',
+  Yamunanagar: 'Haryana',
+  Hisar: 'Haryana',
+  Rohtak: 'Haryana',
+  Bhiwani: 'Haryana',
+  Jhajjar: 'Haryana',
+  Rewari: 'Haryana',
+  Gurugram: 'Haryana',
+  Palwal: 'Haryana',
+
+  // Uttar Pradesh
+  Meerut: 'Uttar Pradesh',
+  Muzaffarnagar: 'Uttar Pradesh',
+  Saharanpur: 'Uttar Pradesh',
+  Bareilly: 'Uttar Pradesh',
+  Aligarh: 'Uttar Pradesh',
+  Mathura: 'Uttar Pradesh',
+  Bulandshahr: 'Uttar Pradesh',
+  Moradabad: 'Uttar Pradesh',
+  Pilibhit: 'Uttar Pradesh',
+  'Lakhimpur Kheri': 'Uttar Pradesh',
+  Sitapur: 'Uttar Pradesh',
+  Lucknow: 'Uttar Pradesh',
+  Kanpur: 'Uttar Pradesh',
+  Prayagraj: 'Uttar Pradesh',
+  Varanasi: 'Uttar Pradesh',
+  Gorakhpur: 'Uttar Pradesh',
+  Ayodhya: 'Uttar Pradesh',
+  Agra: 'Uttar Pradesh',
+  Budaun: 'Uttar Pradesh',
+  Shahjahanpur: 'Uttar Pradesh',
+  Hardoi: 'Uttar Pradesh',
+  Barabanki: 'Uttar Pradesh',
+  Sultanpur: 'Uttar Pradesh',
+
+  // Rajasthan
+  'Sri Ganganagar': 'Rajasthan',
+  Hanumangarh: 'Rajasthan',
+  Kota: 'Rajasthan',
+  Baran: 'Rajasthan',
+  Alwar: 'Rajasthan',
+  Bharatpur: 'Rajasthan',
+  Jaipur: 'Rajasthan',
+  Jodhpur: 'Rajasthan',
+  Bikaner: 'Rajasthan',
+  Bundi: 'Rajasthan',
+  Nagaur: 'Rajasthan',
+
+  // Madhya Pradesh
+  Hoshangabad: 'Madhya Pradesh',
+  Narmadapuram: 'Madhya Pradesh',
+  Sehore: 'Madhya Pradesh',
+  Ujjain: 'Madhya Pradesh',
+  Indore: 'Madhya Pradesh',
+  Dewas: 'Madhya Pradesh',
+  Jabalpur: 'Madhya Pradesh',
+  Gwalior: 'Madhya Pradesh',
+  Vidisha: 'Madhya Pradesh',
+  Raisen: 'Madhya Pradesh',
+  Harda: 'Madhya Pradesh',
+
+  // Maharashtra
+  Pune: 'Maharashtra',
+  Nashik: 'Maharashtra',
+  Kolhapur: 'Maharashtra',
+  Solapur: 'Maharashtra',
+  Ahmednagar: 'Maharashtra',
+  Nagpur: 'Maharashtra',
+  Amravati: 'Maharashtra',
+  Aurangabad: 'Maharashtra',
+  'Chhatrapati Sambhaji Nagar': 'Maharashtra',
+  Satara: 'Maharashtra',
+  Sangli: 'Maharashtra',
+  Jalgaon: 'Maharashtra',
+
+  // Gujarat
+  Anand: 'Gujarat',
+  Mehsana: 'Gujarat',
+  Rajkot: 'Gujarat',
+  Surat: 'Gujarat',
+  Vadodara: 'Gujarat',
+  Bhavnagar: 'Gujarat',
+  Junagadh: 'Gujarat',
+  Ahmedabad: 'Gujarat',
+  Kheda: 'Gujarat',
+
+  // Bihar
+  Rohtas: 'Bihar',
+  Buxar: 'Bihar',
+  Bhojpur: 'Bihar',
+  Patna: 'Bihar',
+  Muzaffarpur: 'Bihar',
+  Nalanda: 'Bihar',
+  Samastipur: 'Bihar',
+  'West Champaran': 'Bihar',
+  'East Champaran': 'Bihar',
+  Gaya: 'Bihar',
+  Bhagalpur: 'Bihar',
+
+  // West Bengal
+  'Purba Bardhaman': 'West Bengal',
+  'Paschim Bardhaman': 'West Bengal',
+  Hooghly: 'West Bengal',
+  Murshidabad: 'West Bengal',
+  Nadia: 'West Bengal',
+  Midnapore: 'West Bengal',
+  Bankura: 'West Bengal',
+  Birbhum: 'West Bengal',
+
+  // Karnataka
+  Bengaluru: 'Karnataka',
+  Mandya: 'Karnataka',
+  Mysuru: 'Karnataka',
+  Raichur: 'Karnataka',
+  Bellary: 'Karnataka',
+  Belagavi: 'Karnataka',
+  Shivamogga: 'Karnataka',
+  Davangere: 'Karnataka',
+
+  // Andhra Pradesh
+  Krishna: 'Andhra Pradesh',
+  Guntur: 'Andhra Pradesh',
+  'East Godavari': 'Andhra Pradesh',
+  'West Godavari': 'Andhra Pradesh',
+  Kurnool: 'Andhra Pradesh',
+  Nellore: 'Andhra Pradesh',
+
+  // Telangana
+  Karimnagar: 'Telangana',
+  Nizamabad: 'Telangana',
+  Warangal: 'Telangana',
+  Nalgonda: 'Telangana',
+  Khammam: 'Telangana',
+
+  // Tamil Nadu
+  Thanjavur: 'Tamil Nadu',
+  Tiruvarur: 'Tamil Nadu',
+  Nagapattinam: 'Tamil Nadu',
+  Madurai: 'Tamil Nadu',
+  Tiruchirappalli: 'Tamil Nadu',
+  Erode: 'Tamil Nadu',
+
+  // Odisha
+  Bargarh: 'Odisha',
+  Sambalpur: 'Odisha',
+  Balasore: 'Odisha',
+  Cuttack: 'Odisha',
+
+  // Chhattisgarh
+  Raipur: 'Chhattisgarh',
+  Durg: 'Chhattisgarh',
+  Dhamtari: 'Chhattisgarh',
+  Bilaspur: 'Chhattisgarh',
+
+  // Jharkhand
+  Ranchi: 'Jharkhand',
+  Hazaribagh: 'Jharkhand',
+  Deoghar: 'Jharkhand',
+
+  // Uttarakhand
+  'Udham Singh Nagar': 'Uttarakhand',
+  Haridwar: 'Uttarakhand',
+  Dehradun: 'Uttarakhand',
+
+  // Himachal Pradesh
+  Kangra: 'Himachal Pradesh',
+  Mandi: 'Himachal Pradesh',
+  Una: 'Himachal Pradesh',
+  Kullu: 'Himachal Pradesh',
+
+  // Assam
+  Nagaon: 'Assam',
+  Barpeta: 'Assam',
+  Cachar: 'Assam',
+  Dibrugarh: 'Assam',
+
+  // Kerala
+  Palakkad: 'Kerala',
+  Alappuzha: 'Kerala',
+  Thrissur: 'Kerala',
+
+  // Delhi
+  'North Delhi': 'Delhi',
+  'South West Delhi': 'Delhi',
+  'North West Delhi': 'Delhi',
+
+  // UTs
+  Chandigarh: 'Chandigarh',
+  Puducherry: 'Puducherry',
+  Jammu: 'Jammu and Kashmir',
+}
+
+export function getVillageState(v: Village): string {
+  if (v.district.includes(',')) {
+    const parts = v.district.split(',')
+    return parts[parts.length - 1].trim()
+  }
+  return DISTRICT_TO_STATE[v.district] || 'Other'
 }
 
 const profileSchema = z.object({
@@ -74,6 +353,17 @@ export function FarmerSetup() {
   const villages = useQuery({ queryFn: getVillages, queryKey: ['villages'] })
   const villageOptions = useMemo(() => villages.data ?? [], [villages.data])
 
+  // Cascading state selection
+  const [profileState, setProfileState] = useState<string>('')
+  const [plotState, setPlotState] = useState<string>('')
+
+  // Custom village creation modal/form states
+  const [showCustomProfile, setShowCustomProfile] = useState<boolean>(false)
+  const [showCustomPlot, setShowCustomPlot] = useState<boolean>(false)
+  const [customVillageName, setCustomVillageName] = useState<string>('')
+  const [customVillageDistrict, setCustomVillageDistrict] = useState<string>('')
+  const [isAddingVillage, setIsAddingVillage] = useState<boolean>(false)
+
   const profileForm = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     defaultValues: { name: '', villageId: '' },
@@ -94,6 +384,23 @@ export function FarmerSetup() {
   const { reset: resetProfile, formState: { isDirty: isProfileDirty } } = profileForm
   const { setValue: setPlotValue, getValues: getPlotValues } = plotForm
 
+  // Filter villages by selected state
+  const filteredProfileVillages = useMemo(() => {
+    if (!profileState) return []
+    return villageOptions.filter((v) => {
+      const st = getVillageState(v)
+      return st === profileState || (profileState === 'Other' && st === 'Other')
+    })
+  }, [profileState, villageOptions])
+
+  const filteredPlotVillages = useMemo(() => {
+    if (!plotState) return []
+    return villageOptions.filter((v) => {
+      const st = getVillageState(v)
+      return st === plotState || (plotState === 'Other' && st === 'Other')
+    })
+  }, [plotState, villageOptions])
+
   // Populate profile form only on initial profile load, without resetting while dirty
   useEffect(() => {
     if (farmerProfile?.name || farmerProfile?.villageId) {
@@ -103,8 +410,17 @@ export function FarmerSetup() {
           villageId: farmerProfile.villageId || '',
         })
       }
+      // Auto-detect and set state from saved village if state not set yet
+      if (farmerProfile.villageId && villageOptions.length > 0) {
+        const matched = villageOptions.find((v) => v.id === farmerProfile.villageId)
+        if (matched) {
+          const st = getVillageState(matched)
+          setProfileState((prev) => prev || st)
+          setPlotState((prev) => prev || st)
+        }
+      }
     }
-  }, [farmerProfile?.name, farmerProfile?.villageId, isProfileDirty, resetProfile])
+  }, [farmerProfile?.name, farmerProfile?.villageId, isProfileDirty, resetProfile, villageOptions])
 
   // Sync village to plot form if plot village not selected yet
   useEffect(() => {
@@ -117,6 +433,31 @@ export function FarmerSetup() {
       }
     }
   }, [farmerProfile?.villageId, getPlotValues, setPlotValue, villageOptions])
+
+  const onProfileStateChange = (state: string) => {
+    setProfileState(state)
+    setShowCustomProfile(false)
+    // Check if currently selected village belongs to newly chosen state
+    const currentVillageId = profileForm.getValues('villageId')
+    const currentVillage = villageOptions.find((v) => v.id === currentVillageId)
+    if (currentVillage && getVillageState(currentVillage) !== state) {
+      profileForm.setValue('villageId', '', { shouldValidate: true })
+    }
+    // Also default plotState if not set yet
+    if (!plotState) {
+      setPlotState(state)
+    }
+  }
+
+  const onPlotStateChange = (state: string) => {
+    setPlotState(state)
+    setShowCustomPlot(false)
+    const currentVillageId = plotForm.getValues('villageId')
+    const currentVillage = villageOptions.find((v) => v.id === currentVillageId)
+    if (currentVillage && getVillageState(currentVillage) !== state) {
+      plotForm.setValue('villageId', '', { shouldValidate: true })
+    }
+  }
 
   const onProfileVillageSelect = (villageId: string) => {
     profileForm.setValue('villageId', villageId, { shouldValidate: true })
@@ -136,6 +477,39 @@ export function FarmerSetup() {
     if (v?.geometry?.coordinates) {
       plotForm.setValue('lng', String(v.geometry.coordinates[0]))
       plotForm.setValue('lat', String(v.geometry.coordinates[1]))
+    }
+  }
+
+  const handleCreateCustomVillage = async (target: 'profile' | 'plot') => {
+    if (!customVillageName.trim() || !customVillageDistrict.trim()) {
+      setFeedback({ type: 'error', text: 'Please enter village name and district' })
+      return
+    }
+    const state = target === 'profile' ? profileState : plotState
+    setIsAddingVillage(true)
+    try {
+      const res = await createCustomVillage({
+        name: customVillageName.trim(),
+        district: `${customVillageDistrict.trim()}, ${state}`,
+      })
+      await queryClient.invalidateQueries({ queryKey: ['villages'] })
+      const newId = res.data?.id
+      if (newId) {
+        if (target === 'profile') {
+          profileForm.setValue('villageId', newId, { shouldValidate: true })
+          setShowCustomProfile(false)
+        } else {
+          plotForm.setValue('villageId', newId, { shouldValidate: true })
+          setShowCustomPlot(false)
+        }
+      }
+      setCustomVillageName('')
+      setCustomVillageDistrict('')
+      setFeedback({ type: 'success', text: `Village ${customVillageName.trim()} registered successfully!` })
+    } catch (err: unknown) {
+      setFeedback({ type: 'error', text: err instanceof Error ? err.message : 'Failed to create village' })
+    } finally {
+      setIsAddingVillage(false)
     }
   }
 
@@ -251,45 +625,123 @@ export function FarmerSetup() {
       {/* Card 1: Farmer Profile */}
       <SetupCard
         title={t('farmer.profile_title')}
-        subtitle="Set your name and home village for stubble matching"
+        subtitle="Set your name, state, and home village for stubble matching"
       >
-        <form className="grid gap-3 sm:grid-cols-3" onSubmit={profileForm.handleSubmit(submitProfile)}>
-          <label className="text-sm text-copy-primary block">
-            {t('farmer.name')} <span className="text-state-error">*</span>
-            <input
-              className="mt-1 w-full rounded-xl border border-surface-border p-2.5 focus:ring-2 focus:ring-accent-primary outline-none bg-surface"
-              placeholder="e.g. Gurpreet Singh"
-              {...profileForm.register('name')}
-            />
-            {profileForm.formState.errors.name && (
-              <p className="text-state-error text-xs mt-1">{profileForm.formState.errors.name.message}</p>
-            )}
-          </label>
-          <label className="text-sm text-copy-primary block">
-            {t('farmer.village')} <span className="text-state-error">*</span>
-            <select
-              className="mt-1 w-full rounded-xl border border-surface-border bg-surface p-2.5 focus:ring-2 focus:ring-accent-primary outline-none"
-              value={profileForm.watch('villageId') || ''}
-              onChange={(e) => onProfileVillageSelect(e.target.value)}
-            >
-              <option value="">Select your village...</option>
-              {villageOptions.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.name}, {v.district}
+        <form onSubmit={profileForm.handleSubmit(submitProfile)} className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-3">
+            {/* 1. Name */}
+            <label className="text-sm text-copy-primary block">
+              {t('farmer.name')} <span className="text-state-error">*</span>
+              <input
+                className="mt-1 w-full rounded-xl border border-surface-border p-2.5 focus:ring-2 focus:ring-accent-primary outline-none bg-surface"
+                placeholder="e.g. Gurpreet Singh"
+                {...profileForm.register('name')}
+              />
+              {profileForm.formState.errors.name && (
+                <p className="text-state-error text-xs mt-1">{profileForm.formState.errors.name.message}</p>
+              )}
+            </label>
+
+            {/* 2. State */}
+            <label className="text-sm text-copy-primary block">
+              {t('farmer.state') || 'State'} <span className="text-state-error">*</span>
+              <select
+                className="mt-1 w-full rounded-xl border border-surface-border bg-surface p-2.5 focus:ring-2 focus:ring-accent-primary outline-none"
+                value={profileState}
+                onChange={(e) => onProfileStateChange(e.target.value)}
+              >
+                <option value="">Select State...</option>
+                {INDIAN_STATES.map((st) => (
+                  <option key={st} value={st}>
+                    {st}
+                  </option>
+                ))}
+                <option value="Other">Other</option>
+              </select>
+            </label>
+
+            {/* 3. Village */}
+            <label className="text-sm text-copy-primary block">
+              {t('farmer.village')} <span className="text-state-error">*</span>
+              <select
+                className="mt-1 w-full rounded-xl border border-surface-border bg-surface p-2.5 focus:ring-2 focus:ring-accent-primary outline-none disabled:opacity-50"
+                disabled={!profileState}
+                value={profileForm.watch('villageId') || ''}
+                onChange={(e) => {
+                  if (e.target.value === '__add_custom__') {
+                    setShowCustomProfile(true)
+                  } else {
+                    setShowCustomProfile(false)
+                    onProfileVillageSelect(e.target.value)
+                  }
+                }}
+              >
+                <option value="">
+                  {profileState
+                    ? (filteredProfileVillages.length > 0
+                        ? 'Select your village...'
+                        : 'No pre-seeded villages in this state')
+                    : 'Select state first...'}
                 </option>
-              ))}
-            </select>
-            {profileForm.formState.errors.villageId && (
-              <p className="text-state-error text-xs mt-1">{profileForm.formState.errors.villageId.message}</p>
-            )}
-          </label>
-          <button
-            type="submit"
-            className="self-end rounded-xl bg-brand px-5 py-2.5 font-medium text-on-brand disabled:opacity-50 hover:bg-accent-secondary active:scale-[0.99] transition-all cursor-pointer shadow-xs"
-            disabled={profileForm.formState.isSubmitting}
-          >
-            {profileForm.formState.isSubmitting ? t('common.loading') : t('farmer.save_profile')}
-          </button>
+                {filteredProfileVillages.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.name} ({v.district})
+                  </option>
+                ))}
+                {profileState && (
+                  <option value="__add_custom__">+ Add other village in {profileState}...</option>
+                )}
+              </select>
+              {profileForm.formState.errors.villageId && (
+                <p className="text-state-error text-xs mt-1">{profileForm.formState.errors.villageId.message}</p>
+              )}
+            </label>
+          </div>
+
+          {/* Inline Add Village for Profile */}
+          {showCustomProfile && (
+            <div className="p-3.5 bg-bg-subtle rounded-xl border border-surface-border flex flex-col sm:flex-row items-center gap-3">
+              <input
+                className="w-full sm:w-1/3 rounded-lg border border-surface-border p-2 text-sm bg-surface"
+                placeholder="Village/Town Name (e.g. Rampur)"
+                value={customVillageName}
+                onChange={(e) => setCustomVillageName(e.target.value)}
+              />
+              <input
+                className="w-full sm:w-1/3 rounded-lg border border-surface-border p-2 text-sm bg-surface"
+                placeholder="District/Tehsil (e.g. Ludhiana)"
+                value={customVillageDistrict}
+                onChange={(e) => setCustomVillageDistrict(e.target.value)}
+              />
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => handleCreateCustomVillage('profile')}
+                  disabled={isAddingVillage}
+                  className="rounded-lg bg-brand px-3.5 py-2 text-xs font-semibold text-on-brand disabled:opacity-50"
+                >
+                  {isAddingVillage ? 'Adding...' : 'Save & Select Village'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCustomProfile(false)}
+                  className="rounded-lg border border-surface-border px-3 py-2 text-xs font-medium hover:bg-surface"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end pt-1">
+            <button
+              type="submit"
+              className="rounded-xl bg-brand px-6 py-2.5 font-medium text-on-brand disabled:opacity-50 hover:bg-accent-secondary active:scale-[0.99] transition-all cursor-pointer shadow-xs"
+              disabled={profileForm.formState.isSubmitting}
+            >
+              {profileForm.formState.isSubmitting ? t('common.loading') : t('farmer.save_profile')}
+            </button>
+          </div>
         </form>
       </SetupCard>
 
@@ -298,26 +750,64 @@ export function FarmerSetup() {
         title={t('farmer.plot_title')}
         subtitle="Add your field plots to list stubble for local biomass buyers"
       >
-        <form className="space-y-3" onSubmit={plotForm.handleSubmit(submitPlot)}>
-          <div className="grid gap-3 sm:grid-cols-3">
+        <form className="space-y-4" onSubmit={plotForm.handleSubmit(submitPlot)}>
+          <div className="grid gap-3 sm:grid-cols-4">
+            {/* 1. Plot State */}
+            <label className="text-sm text-copy-primary block">
+              {t('farmer.state') || 'State'} <span className="text-state-error">*</span>
+              <select
+                className="mt-1 w-full rounded-xl border border-surface-border bg-surface p-2.5 focus:ring-2 focus:ring-accent-primary outline-none"
+                value={plotState}
+                onChange={(e) => onPlotStateChange(e.target.value)}
+              >
+                <option value="">Select State...</option>
+                {INDIAN_STATES.map((st) => (
+                  <option key={st} value={st}>
+                    {st}
+                  </option>
+                ))}
+                <option value="Other">Other</option>
+              </select>
+            </label>
+
+            {/* 2. Plot Village */}
             <label className="text-sm text-copy-primary block">
               {t('farmer.village')} <span className="text-state-error">*</span>
               <select
-                className="mt-1 w-full rounded-xl border border-surface-border bg-surface p-2.5 focus:ring-2 focus:ring-accent-primary outline-none"
+                className="mt-1 w-full rounded-xl border border-surface-border bg-surface p-2.5 focus:ring-2 focus:ring-accent-primary outline-none disabled:opacity-50"
+                disabled={!plotState}
                 value={plotForm.watch('villageId') || ''}
-                onChange={(e) => onPlotVillageSelect(e.target.value)}
+                onChange={(e) => {
+                  if (e.target.value === '__add_custom__') {
+                    setShowCustomPlot(true)
+                  } else {
+                    setShowCustomPlot(false)
+                    onPlotVillageSelect(e.target.value)
+                  }
+                }}
               >
-                <option value="">Select plot village...</option>
-                {villageOptions.map((v) => (
+                <option value="">
+                  {plotState
+                    ? (filteredPlotVillages.length > 0
+                        ? 'Select plot village...'
+                        : 'No pre-seeded villages in this state')
+                    : 'Select state first...'}
+                </option>
+                {filteredPlotVillages.map((v) => (
                   <option key={v.id} value={v.id}>
-                    {v.name}, {v.district}
+                    {v.name} ({v.district})
                   </option>
                 ))}
+                {plotState && (
+                  <option value="__add_custom__">+ Add other village in {plotState}...</option>
+                )}
               </select>
               {plotForm.formState.errors.villageId && (
                 <p className="text-state-error text-xs mt-1">{plotForm.formState.errors.villageId.message}</p>
               )}
             </label>
+
+            {/* 3. Acres */}
             <label className="text-sm text-copy-primary block">
               {t('farmer.acres')} <span className="text-state-error">*</span>
               <input
@@ -331,14 +821,53 @@ export function FarmerSetup() {
                 <p className="text-state-error text-xs mt-1">{plotForm.formState.errors.acres.message}</p>
               )}
             </label>
-            <button
-              type="submit"
-              className="self-end rounded-xl bg-brand px-5 py-2.5 font-medium text-on-brand disabled:opacity-50 hover:bg-accent-secondary active:scale-[0.99] transition-all cursor-pointer shadow-xs"
-              disabled={plotForm.formState.isSubmitting}
-            >
-              {plotForm.formState.isSubmitting ? t('common.loading') : t('farmer.add_plot')}
-            </button>
+
+            {/* 4. Add Plot Button */}
+            <div className="flex flex-col justify-end">
+              <button
+                type="submit"
+                className="w-full rounded-xl bg-brand px-5 py-2.5 font-medium text-on-brand disabled:opacity-50 hover:bg-accent-secondary active:scale-[0.99] transition-all cursor-pointer shadow-xs"
+                disabled={plotForm.formState.isSubmitting}
+              >
+                {plotForm.formState.isSubmitting ? t('common.loading') : t('farmer.add_plot')}
+              </button>
+            </div>
           </div>
+
+          {/* Inline Add Village for Plot */}
+          {showCustomPlot && (
+            <div className="p-3.5 bg-bg-subtle rounded-xl border border-surface-border flex flex-col sm:flex-row items-center gap-3">
+              <input
+                className="w-full sm:w-1/3 rounded-lg border border-surface-border p-2 text-sm bg-surface"
+                placeholder="Village/Town Name (e.g. Rampur)"
+                value={customVillageName}
+                onChange={(e) => setCustomVillageName(e.target.value)}
+              />
+              <input
+                className="w-full sm:w-1/3 rounded-lg border border-surface-border p-2 text-sm bg-surface"
+                placeholder="District/Tehsil (e.g. Ludhiana)"
+                value={customVillageDistrict}
+                onChange={(e) => setCustomVillageDistrict(e.target.value)}
+              />
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => handleCreateCustomVillage('plot')}
+                  disabled={isAddingVillage}
+                  className="rounded-lg bg-brand px-3.5 py-2 text-xs font-semibold text-on-brand disabled:opacity-50"
+                >
+                  {isAddingVillage ? 'Adding...' : 'Save & Select Village'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCustomPlot(false)}
+                  className="rounded-lg border border-surface-border px-3 py-2 text-xs font-medium hover:bg-surface"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
 
           <details className="text-xs text-copy-secondary pt-1">
             <summary className="cursor-pointer hover:text-copy-primary font-medium select-none">

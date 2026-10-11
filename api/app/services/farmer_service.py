@@ -2,6 +2,7 @@ import base64
 import binascii
 import os
 from pathlib import PurePosixPath
+from typing import Any
 from uuid import uuid4
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -10,7 +11,7 @@ from fastapi import HTTPException, UploadFile, status
 from app.core.config import get_settings
 from app.core.security import get_supabase_client
 from app.repositories.farmer_repository import FarmerRepository
-from app.schemas.farmer import FarmerProfileCreate, PlotCreate
+from app.schemas.farmer import FarmerProfileCreate, PlotCreate, VillageCreate
 
 
 def point_wkt(lng: float, lat: float) -> str:
@@ -77,3 +78,31 @@ async def upload_id_document(user_id: str, id_type: str, id_last4: str, file: Up
     )
     repository.update_farmer_status(user_id, verification_status)
     return verification_status
+
+
+async def create_village(village_data: VillageCreate) -> dict[str, Any]:
+    client = get_supabase_client()
+    lat = village_data.lat if village_data.lat is not None else 30.82
+    lng = village_data.lng if village_data.lng is not None else 75.171
+    new_id = str(uuid4())
+
+    existing = (
+        client.table("villages")
+        .select("id, name, district, geometry")
+        .ilike("name", village_data.name.strip())
+        .ilike("district", village_data.district.strip())
+        .limit(1)
+        .execute()
+    )
+    if existing.data:
+        return existing.data[0]
+
+    payload = {
+        "id": new_id,
+        "name": village_data.name.strip(),
+        "district": village_data.district.strip(),
+        "geometry": {"type": "Point", "coordinates": [lng, lat]},
+        "paddy_area_est": 1000,
+    }
+    client.table("villages").insert(payload).execute()
+    return payload

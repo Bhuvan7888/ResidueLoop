@@ -1,8 +1,9 @@
 from typing import Any
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from app.core.security import require_role
-from app.schemas.farmer import FarmerProfileCreate, PlotCreate
-from app.services.farmer_service import create_farmer_profile, create_plot, upload_id_document
+from app.schemas.farmer import FarmerProfileCreate, PlotCreate, VillageCreate
+from app.services.farmer_service import create_farmer_profile, create_plot, upload_id_document, create_village
+
 
 router = APIRouter(prefix="/farmers", tags=["farmers"])
 
@@ -39,3 +40,13 @@ async def upload_id(
         
     verification_status = await upload_id_document(user_id, id_type, id_last4, file)
     return {"data": {"status": verification_status}}
+
+
+@router.post("/villages")
+async def add_custom_village(
+    village: VillageCreate,
+    user_id: str = Depends(require_role(["farmer"]))
+) -> dict[str, Any]:
+    created = await create_village(village)
+    return {"data": created}
+

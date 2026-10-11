@@ -63,3 +63,17 @@ export async function getFarmerProfile(userId: string) {
   }
 }
 
+export interface CustomVillagePayload {
+  name: string
+  district: string
+  lat?: number
+  lng?: number
+}
+
+export function createCustomVillage(payload: CustomVillagePayload): Promise<{ data: { id: string; name: string; district: string } }> {
+  return apiRequest('/farmers/villages', {
+    body: payload,
+    method: 'POST',
+  })
+}
+
