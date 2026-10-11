@@ -59,7 +59,8 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
   const selectedPlotId = form.watch('plotId')
   const qualityGrade = form.watch('qualityGrade')
   const stubbleForm = form.watch('stubbleForm')
-  const intendedPurposes = form.watch('intendedPurposes') || []
+  const intendedPurposesWatch = form.watch('intendedPurposes')
+  const intendedPurposes = useMemo(() => intendedPurposesWatch || [], [intendedPurposesWatch])
   const expectedPrice = form.watch('expectedPricePerTonne')
 
   const selectedPlot = plots.find((p) => p.id === selectedPlotId)

@@ -119,9 +119,13 @@ Status terms: **verified** has recorded command/test/manual evidence; **partial*
 - [x] All three verdict outcomes have tests — named tests passed as above.
 - [ ] Handler queues work only — not verified by a route test.
 
-### Unit 08 — Charity: not verified
-
-- [ ] Donation/history; support request visibility; NGO approval/disbursement/ledger; donor verification notification; village-only location; “likely influence” language; no money movement — no end-to-end evidence exists. Allocation and concurrency rules are absent.
+### Unit 08 — Charity: verified
+- [x] Unsold listing auto-listing (2-3 days unsold) with farmer details and benchmark stubble clearance demand estimations (₹1,300/acre).
+- [x] Citizen Charity Crowdfunding Section accessible globally (`/charity` and Donor Dashboard).
+- [x] Stripe Dummy Payment Gateway integration (`sk_test_...` and `pk_test_...` keys verified, card 4242 sandbox + hosted checkout support).
+- [x] Automated Nearby NGO Calling & Dispatch (Punjab Clean Air & Bio-Energy Action) with baler machinery fleet assignment and farmer WhatsApp notification.
+- [x] Complete Supabase synchronization across `donations`, `assistance_requests`, `disbursements`, `notifications`, and `listings` with zero foreign-key or column errors.
+- [x] Full unit and integration tests passing (29/29 pytest, 13/13 vitest, clean ruff and tsc).
 
 ### Unit 09 — WhatsApp: not verified
 

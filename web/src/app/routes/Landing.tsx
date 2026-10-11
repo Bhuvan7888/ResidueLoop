@@ -28,6 +28,9 @@ export function Landing() {
         <nav className="hidden items-center gap-7 text-sm md:flex" aria-label={t('landing.primary_navigation')}>
           <a href="#how-it-works">{t('landing.nav_how')}</a>
           <a href="#for-everyone">{t('landing.nav_roles')}</a>
+          <Link to="/charity" className="font-semibold text-brand hover:underline">
+            🌾 Citizen Charity
+          </Link>
           <a href="#impact">{t('landing.nav_impact')}</a>
         </nav>
         <div className="flex items-center gap-2">
@@ -75,7 +78,9 @@ export function Landing() {
             {roles.map(({ key, icon: Icon }) => (
               <article className="landing-role landing-reveal" key={key}>
                 <Icon className="h-8 w-8" aria-hidden="true" /><h3>{t(`landing.roles.${key}.title`)}</h3><p>{t(`landing.roles.${key}.body`)}</p>
-                <Link to="/login" className="landing-text-link">{t('landing.roles.cta')} <ArrowUpRight className="h-4 w-4" aria-hidden="true" /></Link>
+                <Link to={key === 'donor' ? '/charity' : '/login'} className="landing-text-link">
+                  {key === 'donor' ? 'Explore Citizen Crowdfunding' : t('landing.roles.cta')} <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
               </article>
             ))}
           </div>

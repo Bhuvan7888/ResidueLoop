@@ -4,12 +4,14 @@ import { Landing } from './app/routes/Landing'
 import { Login } from './app/routes/Login'
 import { RolePickerRoute } from './app/routes/RolePickerRoute'
 import { Dashboard } from './app/routes/Dashboard'
+import { PublicCharity } from './app/routes/PublicCharity'
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/charity" element={<PublicCharity />} />
         <Route path="/login" element={<Login />} />
         <Route path="/role-picker" element={<RolePickerRoute />} />
         

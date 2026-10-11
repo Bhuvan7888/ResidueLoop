@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     whatsapp_verify_token: str = "residueloop-0cb6fc51a8d5"
     meta_app_secret: str | None = None
     graph_api_version: str = "v20.0"
+    stripe_secret_key: str = ""
+    stripe_publishable_key: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

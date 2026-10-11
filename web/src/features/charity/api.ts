@@ -60,7 +60,11 @@ export async function getDonorHistory(donorId: string) {
 }
 
 export async function getNgoRequests(ngoId: string) {
-  const { data, error } = await supabase.from('assistance_requests').select('*, farmers(profiles(name)), listings(acres, price_per_tonne)').eq('ngo_id', ngoId).order('created_at', { ascending: false })
+  const { data, error } = await supabase
+    .from('assistance_requests')
+    .select('*, farmers(profiles(name, phone)), listings(id, est_tonnes, status, plots(acres, villages(name)))')
+    .eq('ngo_id', ngoId)
+    .order('created_at', { ascending: false })
   if (error) throw error
   return data
 }
@@ -70,7 +74,7 @@ export async function getNgoDisbursements(ngoId: string) {
     .from('disbursements')
     .select('*, assistance_requests(purpose, farmers(profiles(name)))')
     .eq('ngo_id', ngoId)
-    .order('created_at', { ascending: false })
+    .order('disbursed_at', { ascending: false })
   if (error) throw error
   return data || []
 }
@@ -118,3 +122,80 @@ export async function getCrowdfundingCampaigns() {
     return data || []
   }
 }
+
+export async function createStripeCheckoutSession(data: {
+  campaign_id: string
+  amount: number
+  currency?: string
+  return_url?: string
+}) {
+  return apiRequest<{
+    session_id: string
+    checkout_url: string
+    publishable_key: string
+  }>('/charity/stripe/create-checkout-session', {
+    body: data,
+    method: 'POST',
+  })
+}
+
+export async function confirmStripePayment(data: {
+  campaign_id: string
+  amount: number
+  session_id?: string
+  donor_id?: string
+  is_test_dummy?: boolean
+}) {
+  return apiRequest<{
+    status: string
+    donation: Record<string, unknown>
+    amount_donated: number
+    total_funded: number
+    amount_requested: number
+    percent_funded: number
+    is_fully_funded: boolean
+    ngo_dispatch?: {
+      ngo_name: string
+      ngo_phone: string
+      mission_status: string
+      machinery_assigned: string
+      estimated_arrival: string
+      co2_saved_tonnes: number
+      pm25_saved_kg: number
+      action: string
+    }
+  }>('/charity/stripe/confirm-payment', {
+    body: data,
+    method: 'POST',
+  })
+}
+
+export async function syncUnsoldListings(options?: { days_threshold?: number; force_demo?: boolean }) {
+  return apiRequest<{ data: Record<string, unknown>[]; count: number }>('/charity/sync-unsold-listings', {
+    body: {
+      days_threshold: options?.days_threshold ?? 2,
+      force_demo: options?.force_demo ?? false,
+    },
+    method: 'POST',
+  })
+}
+
+export async function callNgoForCampaign(campaignId: string) {
+  return apiRequest<{
+    data: {
+      status: string
+      mission_status: string
+      ngo_name: string
+      ngo_phone: string
+      machinery_assigned: string
+      estimated_arrival: string
+      co2_saved_tonnes: number
+      pm25_saved_kg: number
+      action: string
+    }
+  }>(`/charity/campaigns/${campaignId}/call-ngo`, {
+    method: 'POST',
+  })
+}
+
+

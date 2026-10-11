@@ -3,7 +3,7 @@ import logging
 import re
 import datetime
 import httpx
-from typing import Any, Dict
+from typing import Any, Dict, cast
 from app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ async def parse_message_intent(message_text: str) -> Dict[str, Any]:
             text_content = data["candidates"][0]["content"]["parts"][0]["text"]
             res = json.loads(text_content)
             if res.get("intent") and res.get("intent") != "unknown":
-                return res
+                return cast(dict[str, Any], res)
             return _rule_based_fallback(message_text)
         except Exception as e:
             logger.info(f"Using rule-based parser fallback: {e}")
