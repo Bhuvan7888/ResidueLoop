@@ -140,7 +140,7 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
   }
 
   return (
-    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 max-w-3xl mx-auto">
+    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 w-full max-w-4xl mx-auto">
       {error && (
         <div className="p-4 rounded-2xl bg-state-error-dim border border-state-error/30 text-state-error text-sm font-semibold flex items-center justify-between">
           <span>⚠️ {error}</span>
@@ -180,14 +180,14 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
                     key={plot.id}
                     type="button"
                     onClick={() => form.setValue('plotId', plot.id)}
-                    className={`p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer ${
+                    className={`p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer h-full min-h-[72px] flex flex-col justify-between ${
                       isSelected
                         ? 'border-brand bg-brand/10 ring-2 ring-brand/30 shadow-xs'
                         : 'border-surface-border bg-bg-subtle/50 hover:border-brand/40'
                     }`}
                   >
                     <div className="font-bold text-sm text-copy-primary">{plot.name}</div>
-                    <div className="text-xs text-brand font-semibold mt-0.5">{plot.acres} {t('listing.acres', 'acres')}</div>
+                    <div className="text-xs text-brand font-semibold mt-1">{plot.acres} {t('listing.acres', 'acres')}</div>
                   </button>
                 )
               })}
@@ -238,16 +238,16 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
             <button
               type="button"
               onClick={() => handleTimingSelect('now')}
-              className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
+              className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer h-full min-h-[110px] flex flex-col justify-between ${
                 selectedTiming === 'now'
                   ? 'border-state-success bg-state-success-dim ring-2 ring-state-success/40 shadow-xs'
                   : 'border-surface-border bg-bg-subtle/50 hover:border-state-success/40'
               }`}
             >
-              <div className="flex items-center justify-between mb-2">
+              <div className="h-7 flex items-center justify-between mb-2">
                 <span className="text-2xl">🟢</span>
                 {selectedTiming === 'now' && (
-                  <span className="text-xs font-bold text-state-success">
+                  <span className="text-xs font-bold text-state-success bg-state-success/15 px-2 py-0.5 rounded-full">
                     ✓ {t('farmer.selected_badge', 'Selected')}
                   </span>
                 )}
@@ -266,16 +266,16 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
             <button
               type="button"
               onClick={() => handleTimingSelect('1wk')}
-              className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
+              className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer h-full min-h-[110px] flex flex-col justify-between ${
                 selectedTiming === '1wk'
                   ? 'border-brand bg-brand/10 ring-2 ring-brand/40 shadow-xs'
                   : 'border-surface-border bg-bg-subtle/50 hover:border-brand/40'
               }`}
             >
-              <div className="flex items-center justify-between mb-2">
+              <div className="h-7 flex items-center justify-between mb-2">
                 <span className="text-2xl">🟡</span>
                 {selectedTiming === '1wk' && (
-                  <span className="text-xs font-bold text-brand">
+                  <span className="text-xs font-bold text-brand bg-brand/15 px-2 py-0.5 rounded-full">
                     ✓ {t('farmer.selected_badge', 'Selected')}
                   </span>
                 )}
@@ -294,16 +294,16 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
             <button
               type="button"
               onClick={() => handleTimingSelect('2wk')}
-              className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
+              className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer h-full min-h-[110px] flex flex-col justify-between ${
                 selectedTiming === '2wk'
                   ? 'border-accent-primary bg-accent-primary/10 ring-2 ring-accent-primary/40 shadow-xs'
                   : 'border-surface-border bg-bg-subtle/50 hover:border-accent-primary/40'
               }`}
             >
-              <div className="flex items-center justify-between mb-2">
+              <div className="h-7 flex items-center justify-between mb-2">
                 <span className="text-2xl">🔵</span>
                 {selectedTiming === '2wk' && (
-                  <span className="text-xs font-bold text-accent-primary">
+                  <span className="text-xs font-bold text-accent-primary bg-accent-primary/15 px-2 py-0.5 rounded-full">
                     ✓ {t('farmer.selected_badge', 'Selected')}
                   </span>
                 )}
@@ -487,7 +487,7 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-2xl py-3 px-6 font-semibold border-2 border-surface-border text-copy-secondary hover:bg-bg-subtle cursor-pointer text-sm order-2 sm:order-1"
+          className="h-14 px-8 rounded-2xl font-bold border-2 border-surface-border text-copy-secondary hover:bg-bg-subtle cursor-pointer text-sm order-2 sm:order-1 transition-all flex items-center justify-center"
         >
           {t('common.cancel', 'Cancel')}
         </button>
@@ -495,11 +495,16 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
         <button
           type="submit"
           disabled={form.formState.isSubmitting || !selectedPlot}
-          className="flex-1 bg-brand text-on-brand rounded-2xl py-4 px-6 text-base font-extrabold hover:bg-accent-secondary disabled:opacity-50 cursor-pointer shadow-md transition-transform hover:scale-[1.01] order-1 sm:order-2 text-center"
+          className="flex-1 h-14 bg-brand text-on-brand rounded-2xl px-6 text-base font-extrabold hover:bg-accent-secondary disabled:opacity-50 cursor-pointer shadow-md transition-all hover:scale-[1.005] order-1 sm:order-2 flex items-center justify-center text-center"
         >
-          {form.formState.isSubmitting
-            ? t('listing.confirming', 'Confirming Listing...')
-            : `🌾 ${t('farmer.publish_listing_btn', 'Publish Straw Listing & Match Buyers')}`}
+          {form.formState.isSubmitting ? (
+            <span>{t('listing.confirming', 'Confirming Listing...')}</span>
+          ) : (
+            <span className="inline-flex items-center justify-center gap-2">
+              <span className="text-xl">🌾</span>
+              <span>{t('farmer.publish_listing_btn', 'Publish Straw Listing & Match Buyers')}</span>
+            </span>
+          )}
         </button>
       </div>
     </form>

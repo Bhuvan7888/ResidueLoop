@@ -198,6 +198,8 @@
     "farmer_via_whatsapp": "Farmer via WhatsApp",
     "bot_name": "ResidueLoop Bot",
     "plots_title": "Your Registered Plots",
+    "edit_settings": "Edit Profile & Add Plots ▼",
+    "hide_settings": "Close Settings ▲",
     "plots_desc": "Your registered agricultural land plots and acreage for paddy straw listing.",
     "plot_ready_to_list": "Ready to list paddy straw",
     "list_straw_btn": "+ List Straw",

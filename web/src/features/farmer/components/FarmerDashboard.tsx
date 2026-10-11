@@ -15,6 +15,7 @@ import { getMessages } from '@/features/whatsapp/api'
 import { WhatsappSimulator } from '@/features/whatsapp/components/WhatsappSimulator'
 import { AssistanceRequestForm } from '@/features/charity/components/AssistanceRequestForm'
 import { getFarmerProfile } from '@/features/farmer/api'
+import { FarmerSetup } from './FarmerSetup'
 
 interface PoolData {
   id: string
@@ -273,86 +274,80 @@ export function FarmerDashboard({ userId }: { userId: string }) {
         </div>
       )}
 
-      {/* ID Verification Status Banner */}
-      <div className="space-y-3">
-        {idStatus === 'verified' && (
-          <div className="rounded-2xl bg-state-success-dim border border-state-success/30 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">🛡️</span>
-              <div>
-                <h4 className="text-sm font-bold text-state-success">{t('farmer.id_verified_title')}</h4>
-                <p className="text-xs text-copy-secondary">
-                  {t('farmer.id_verified_desc')}
-                </p>
-              </div>
+      {view === 'listing' && (
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Aligned Listing Header Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface border border-surface-border p-4 rounded-2xl shadow-xs">
+            <button
+              type="button"
+              onClick={() => setView('dashboard')}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-bg-subtle hover:bg-surface-border text-copy-primary rounded-xl font-semibold text-sm transition-all self-start sm:self-auto cursor-pointer"
+            >
+              ← {t('common.back', 'Back to Dashboard')}
+            </button>
+            <div className="text-center">
+              <h3 className="font-bold text-copy-primary text-base">🌾 {t('farmer.new_listing', 'Sell Stubble (New Listing)')}</h3>
+              <p className="text-xs text-copy-secondary">{t('farmer.three_simple_steps', '2 Simple Steps • Fair Market Price')}</p>
             </div>
-            <span className="text-xs px-3 py-1 rounded-full font-semibold bg-state-success text-white self-start sm:self-auto">
-              {t('farmer.id_verified_badge')}
-            </span>
-          </div>
-        )}
-
-        {idStatus === 'pending' && (
-          <div className="rounded-2xl bg-amber-50 border border-amber-300 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">⏳</span>
-              <div>
-                <h4 className="text-sm font-bold text-amber-900">{t('farmer.id_pending_title')}</h4>
-                <p className="text-xs text-amber-800">
-                  {t('farmer.id_pending_desc')}
-                </p>
-              </div>
+            <div className="flex items-center gap-2 text-xs text-copy-secondary bg-bg-subtle border border-surface-border px-3 py-1.5 rounded-full self-start sm:self-auto">
+              <span className="w-2 h-2 rounded-full bg-state-success animate-pulse"></span>
+              <span className="font-medium text-copy-primary">{t('farmer.live_sync')}</span>
+              <span>•</span>
+              <span className="font-mono text-state-success">🔒 {t('farmer.e2e_encrypted')}</span>
             </div>
-            <span className="text-xs px-3 py-1 rounded-full font-semibold bg-amber-200 text-amber-900 self-start sm:self-auto">
-              {t('farmer.id_pending_badge')}
-            </span>
           </div>
-        )}
 
-        {idStatus === 'rejected' && (
-          <div className="rounded-2xl bg-state-error-dim border border-state-error/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">⚠️</span>
-              <div>
-                <h4 className="text-sm font-bold text-state-error">{t('farmer.id_rejected_title')}</h4>
-                <p className="text-xs text-state-error opacity-90">
-                  {i18n.language === 'hi'
-                    ? `कारण: ${farmerProfile?.rejectionReason || 'दस्तावेज़ फोटो अस्पष्ट या बेमेल है।'} कृपया ऊपर सेटअप अनुभाग में पुनः जमा करें।`
-                    : i18n.language === 'pa'
-                    ? `ਕਾਰਨ: ${farmerProfile?.rejectionReason || 'ਦਸਤਾਵੇਜ਼ ਫੋਟੋ ਅਸਪਸ਼ਟ ਹੈ।'} ਕਿਰਪਾ ਕਰਕੇ ਉੱਪਰ ਸੈੱਟਅੱਪ ਸੈਕਸ਼ਨ ਵਿੱਚ ਦੁਬਾਰਾ ਜਮ੍ਹਾਂ ਕਰੋ।`
-                    : `Reason: ${farmerProfile?.rejectionReason || 'Document photo unreadable or mismatched.'} Please resubmit in the setup section above.`}
-                </p>
-              </div>
+          {plots.length === 0 ? (
+            <div className="bg-surface border border-surface-border rounded-2xl p-6 text-center space-y-3">
+              <h4 className="text-lg font-medium text-copy-primary">
+                {i18n.language === 'hi' ? 'कोई खेत पंजीकृत नहीं है' : i18n.language === 'pa' ? 'ਕੋਈ ਖੇਤ ਰਜਿਸਟਰਡ ਨਹੀਂ ਹੈ' : 'No plots registered'}
+              </h4>
+              <p className="text-copy-secondary text-sm">
+                {i18n.language === 'hi' ? 'लिस्टिंग बनाने से पहले कृपया अपने खेत का विवरण जोड़ें।' : i18n.language === 'pa' ? 'ਲਿਸਟਿੰਗ ਬਣਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੇ ਖੇਤ ਦਾ ਵੇਰਵਾ ਸ਼ਾਮਲ ਕਰੋ।' : 'Please register at least one plot before creating a listing.'}
+              </p>
+              <button onClick={() => setView('dashboard')} className="px-5 py-2.5 bg-brand text-on-brand rounded-xl text-sm font-bold">
+                {i18n.language === 'hi' ? 'डैशबोर्ड पर वापस' : i18n.language === 'pa' ? 'ਡੈਸ਼ਬੋਰਡ ਵੱਲ ਵਾਪਸ' : 'Back to Dashboard'}
+              </button>
             </div>
-            <span className="text-xs px-3 py-1 rounded-full font-semibold bg-state-error text-white self-start sm:self-auto">
-              {t('farmer.id_rejected_badge')}
-            </span>
-          </div>
-        )}
+          ) : (
+            <NewListingForm 
+              plots={plots.map((p, idx) => ({ id: p.id, name: `${t('farmer.plot_num')}${idx + 1}`, acres: p.acres }))}
+              onSubmit={async (data) => {
+                await createListing(data)
+                await queryClient.invalidateQueries({ queryKey: ['heatmap'] })
+                reloadData()
+                setView('dashboard')
+              }} 
+              onCancel={() => setView('dashboard')} 
+            />
+          )}
+        </div>
+      )}
 
-        {idStatus === 'not_submitted' && (
-          <div className="rounded-2xl bg-bg-subtle border border-surface-border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+      {view === 'assistance' && activeListing && (
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="flex items-center justify-between bg-surface border border-surface-border p-4 rounded-2xl shadow-xs">
+            <button
+              onClick={() => setView('dashboard')}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-bg-subtle hover:bg-surface-border text-copy-primary rounded-xl font-semibold text-sm transition-all"
+            >
+              ← {t('common.back', 'Back to Dashboard')}
+            </button>
+            <h3 className="font-bold text-copy-primary">🌾 {t('charity.assistance_title', 'Citizen Crowdfunding Assistance')}</h3>
+          </div>
+          <AssistanceRequestForm 
+            listingId={activeListing}
+            onSubmit={() => { reloadData(); setView('dashboard') }}
+            onCancel={() => setView('dashboard')}
+          />
+        </div>
+      )}
+
+      {view === 'dashboard' && (
+        <div className="space-y-8">
+          {/* Header Sync Status Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">📄</span>
-              <div>
-                <h4 className="text-sm font-bold text-copy-primary">{t('farmer.id_not_submitted_title')}</h4>
-                <p className="text-xs text-copy-secondary">
-                  {t('farmer.id_not_submitted_desc')}
-                </p>
-              </div>
-            </div>
-            <span className="text-xs px-3 py-1 rounded-full font-semibold bg-surface border border-surface-border text-copy-secondary self-start sm:self-auto">
-              {t('farmer.id_required_badge')}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Sync Status & Navigation Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          {view === 'dashboard' && (
-            <div className="relative group">
               <button
                 onClick={() => {
                   if (!isVerified) {
@@ -361,98 +356,126 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                   }
                   setView('listing')
                 }}
-                className={`px-4 py-2 rounded-xl font-medium shadow-xs transition-all ${
+                className={`px-4 py-2 rounded-xl font-bold text-sm shadow-xs transition-all ${
                   isVerified
                     ? 'bg-brand text-on-brand hover:bg-accent-secondary'
                     : 'bg-bg-subtle text-copy-muted border border-surface-border cursor-not-allowed opacity-80'
                 }`}
               >
-                {t('farmer.new_listing')}
+                + {t('farmer.new_listing', 'Sell Stubble')}
               </button>
-              {!isVerified && (
-                <span className="absolute bottom-full left-0 mb-1.5 hidden group-hover:block w-56 p-2 bg-surface text-copy-primary text-xs rounded-xl shadow-lg border border-surface-border z-20">
-                  {i18n.language === 'hi' ? 'लिस्टिंग बनाने के लिए सत्यापित पहचान आवश्यक है।' : i18n.language === 'pa' ? 'ਲਿਸਟਿੰਗ ਬਣਾਉਣ ਲਈ ਤਸਦੀਕਸ਼ੁਦਾ ਪਛਾਣ ਲੋੜੀਂਦੀ ਹੈ।' : 'Verified ID required to create listings.'}
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-copy-secondary bg-surface border border-surface-border px-3 py-1.5 rounded-full shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-state-success animate-pulse"></span>
+              <span className="font-medium text-copy-primary">{t('farmer.live_sync')}</span>
+              <span>•</span>
+              <span className="font-mono font-medium text-state-success">🔒 {t('farmer.e2e_encrypted')}</span>
+            </div>
+          </div>
+
+          {/* ID Verification Status Banner */}
+          <div className="space-y-3">
+            {idStatus === 'verified' && (
+              <div className="rounded-2xl bg-state-success-dim border border-state-success/30 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🛡️</span>
+                  <div>
+                    <h4 className="text-sm font-bold text-state-success">{t('farmer.id_verified_title')}</h4>
+                    <p className="text-xs text-copy-secondary">
+                      {t('farmer.id_verified_desc')}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs px-3 py-1 rounded-full font-semibold bg-state-success text-white self-start sm:self-auto">
+                  {t('farmer.id_verified_badge')}
                 </span>
-              )}
+              </div>
+            )}
+
+            {idStatus === 'pending' && (
+              <div className="rounded-2xl bg-amber-50 border border-amber-300 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">⏳</span>
+                  <div>
+                    <h4 className="text-sm font-bold text-amber-900">{t('farmer.id_pending_title')}</h4>
+                    <p className="text-xs text-amber-800">
+                      {t('farmer.id_pending_desc')}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs px-3 py-1 rounded-full font-semibold bg-amber-200 text-amber-900 self-start sm:self-auto">
+                  {t('farmer.id_pending_badge')}
+                </span>
+              </div>
+            )}
+
+            {idStatus === 'rejected' && (
+              <div className="rounded-2xl bg-state-error-dim border border-state-error/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">⚠️</span>
+                  <div>
+                    <h4 className="text-sm font-bold text-state-error">{t('farmer.id_rejected_title')}</h4>
+                    <p className="text-xs text-state-error opacity-90">
+                      {i18n.language === 'hi'
+                        ? `कारण: ${farmerProfile?.rejectionReason || 'दस्तावेज़ फोटो अस्पष्ट या बेमेल है।'} कृपया ऊपर सेटअप अनुभाग में पुनः जमा करें।`
+                        : i18n.language === 'pa'
+                        ? `ਕਾਰਨ: ${farmerProfile?.rejectionReason || 'ਦਸਤਾਵੇਜ਼ ਫੋਟੋ ਅਸਪਸ਼ਟ ਹੈ।'} ਕਿਰਪਾ ਕਰਕੇ ਉੱਪਰ ਸੈੱਟਅੱਪ ਸੈਕਸ਼ਨ ਵਿੱਚ ਦੁਬਾਰਾ ਜਮ੍ਹਾਂ ਕਰੋ।`
+                        : `Reason: ${farmerProfile?.rejectionReason || 'Document photo unreadable or mismatched.'} Please resubmit in the setup section above.`}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs px-3 py-1 rounded-full font-semibold bg-state-error text-white self-start sm:self-auto">
+                  {t('farmer.id_rejected_badge')}
+                </span>
+              </div>
+            )}
+
+            {idStatus === 'not_submitted' && (
+              <div className="rounded-2xl bg-bg-subtle border border-surface-border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">📄</span>
+                  <div>
+                    <h4 className="text-sm font-bold text-copy-primary">{t('farmer.id_not_submitted_title')}</h4>
+                    <p className="text-xs text-copy-secondary">
+                      {t('farmer.id_not_submitted_desc')}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs px-3 py-1 rounded-full font-semibold bg-surface border border-surface-border text-copy-secondary self-start sm:self-auto">
+                  {t('farmer.id_required_badge')}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Real-time Notifications: Payments & Matches */}
+          {notifications.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-copy-primary flex items-center gap-1.5">
+                  <span>🔔</span> {t('farmer.notifications_title')}
+                </h4>
+                <span className="text-xs bg-brand/10 text-brand px-2 py-0.5 rounded-full font-medium">
+                  {notifications.length} {t('farmer.notifications_updates')}
+                </span>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {notifications.slice(0, 4).map((n) => (
+                  <div
+                    key={n.id}
+                    className="bg-surface border border-brand/30 rounded-xl p-3 shadow-xs text-xs relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 left-0 w-1 h-full bg-brand"></div>
+                    <p className="font-medium text-copy-primary pl-1">{translateNotification(n.message, i18n.language)}</p>
+                    <p className="text-copy-secondary mt-1 pl-1 opacity-70">
+                      {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
-          {view !== 'dashboard' && (
-            <button
-              onClick={() => setView('dashboard')}
-              className="px-4 py-2 bg-surface border border-surface-border rounded-xl font-medium text-copy-primary hover:bg-bg-subtle"
-            >
-              {t('common.back')}
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 text-xs text-copy-secondary bg-surface border border-surface-border px-3 py-1.5 rounded-full shadow-xs">
-          <span className="w-2 h-2 rounded-full bg-state-success animate-pulse"></span>
-          <span className="font-medium text-copy-primary">{t('farmer.live_sync')}</span>
-          <span>•</span>
-          <span className="font-mono font-medium text-state-success">🔒 {t('farmer.e2e_encrypted')}</span>
-        </div>
-      </div>
-
-      {/* Real-time Notifications: Payments & Matches */}
-      {notifications.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-semibold text-copy-primary flex items-center gap-1.5">
-              <span>🔔</span> {t('farmer.notifications_title')}
-            </h4>
-            <span className="text-xs bg-brand/10 text-brand px-2 py-0.5 rounded-full font-medium">
-              {notifications.length} {t('farmer.notifications_updates')}
-            </span>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {notifications.slice(0, 4).map((n) => (
-              <div
-                key={n.id}
-                className="bg-surface border border-brand/30 rounded-xl p-3 shadow-xs text-xs relative overflow-hidden"
-              >
-                <div className="absolute top-0 left-0 w-1 h-full bg-brand"></div>
-                <p className="font-medium text-copy-primary pl-1">{translateNotification(n.message, i18n.language)}</p>
-                <p className="text-copy-secondary mt-1 pl-1 opacity-70">
-                  {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {view === 'listing' && (
-        plots.length === 0 ? (
-          <div className="bg-surface border border-surface-border rounded-2xl p-6 text-center space-y-3">
-            <h4 className="text-lg font-medium text-copy-primary">{i18n.language === 'hi' ? 'कोई खेत पंजीकृत नहीं है' : i18n.language === 'pa' ? 'ਕੋਈ ਖੇਤ ਰਜਿਸਟਰਡ ਨਹੀਂ ਹੈ' : 'No plots registered'}</h4>
-            <p className="text-copy-secondary text-sm">{i18n.language === 'hi' ? 'लिस्टिंग बनाने से पहले कृपया ऊपर "आपके खेत" अनुभाग में कम से कम एक खेत जोड़ें।' : i18n.language === 'pa' ? 'ਲਿਸਟਿੰਗ ਬਣਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਕਿਰਪਾ ਕਰਕੇ ਉੱਪਰ "ਤੁਹਾਡੇ ਖੇਤ" ਸੈਕਸ਼ਨ ਵਿੱਚ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਖੇਤ ਸ਼ਾਮਲ ਕਰੋ।' : 'Please register at least one plot in the "Your Plots" section before creating a listing.'}</p>
-            <button onClick={() => setView('dashboard')} className="px-4 py-2 bg-brand text-on-brand rounded-xl text-sm font-medium">{i18n.language === 'hi' ? 'डैशबोर्ड पर वापस' : i18n.language === 'pa' ? 'ਡੈਸ਼ਬੋਰਡ ਵੱਲ ਵਾਪਸ' : 'Back to Dashboard'}</button>
-          </div>
-        ) : (
-          <NewListingForm 
-            plots={plots.map((p, idx) => ({ id: p.id, name: `${t('farmer.plot_num')}${idx + 1}`, acres: p.acres }))}
-            onSubmit={async (data) => {
-              await createListing(data)
-              await queryClient.invalidateQueries({ queryKey: ['heatmap'] })
-              reloadData()
-              setView('dashboard')
-            }} 
-            onCancel={() => setView('dashboard')} 
-          />
-        )
-      )}
-
-      {view === 'assistance' && activeListing && (
-        <AssistanceRequestForm 
-          listingId={activeListing}
-          onSubmit={() => { reloadData(); setView('dashboard') }}
-          onCancel={() => setView('dashboard')}
-        />
-      )}
-
-      {view === 'dashboard' && (
-        <div className="space-y-8">
           {/* ================= THE BIG 3 ACTIONS HOME SCREEN ================= */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -1084,6 +1107,11 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Section 6: Profile & Land Plot Settings (Collapsible) */}
+          <div className="pt-2">
+            <FarmerSetup />
           </div>
         </div>
       )}

@@ -92,6 +92,19 @@ This tracker records verified evidence only. Earlier completion claims were inde
     5. 📋 `Plant Demand Tenders`: Factory demand capacity manager, tender creator, and active procurement specifications.
   - Maintained 100% key and semantic parity across `en.json`, `hi.json`, and `pa.json` (769 keys each, 0 diffs).
   - Verified static quality: `npm run typecheck` (0 errors), `npm test` (17 tests passed), `npm run lint` (0 errors), `npm run build` (clean production bundle), `poetry run pytest` (32 tests passed).
+- [x] Refactored Farmer Layout, Alignment, and Listing View Isolation (2026-10-11):
+  - Fixed Card 2 ("2. Your plot") 4-column form grid alignment in `FarmerSetup.tsx`: gave the "+ Add Plot" button an invisible header spacer (`hidden sm:block h-5`), identical `mt-1` margin, and exact `h-[42px]` matching the state, village, and acres inputs.
+  - Added collapsible settings state to `FarmerSetup.tsx`: established farmers with existing profiles now see a sleek 1-row summary card (`🌾 Name • Village • Plots • Verified`) with an "Edit Profile & Add Plots" dropdown toggle instead of 800px of open forms on every load.
+  - Isolated New Listing wizard (`view === 'listing'`) in `FarmerDashboard.tsx`:
+    - Hid notifications, ID banners, and plot setup forms from the listing screen.
+    - Added balanced Listing Header bar with `← Back to Dashboard`, `🌾 Sell Stubble (New Listing)`, and `Live Sync Active • 🔒 E2E Encrypted`.
+    - Aligned container boundaries to `max-w-4xl mx-auto space-y-6`.
+  - Stabilized card and button dimensions in `NewListingForm.tsx`:
+    - Step 1: Fixed plot button min-height (`min-h-[72px]`) and harvest time card min-height (`min-h-[110px]`) with fixed `h-7` top badge row to eliminate vertical text jumping.
+    - Step 2: Balanced Straw Condition cards with consistent spacing.
+    - Bottom Action Buttons: Aligned Cancel and Publish buttons to matching `h-14` (56px) height, flex centering, and flex-aligned `🌾` emoji with listing text.
+  - Attained 100% key parity across `en.json`, `hi.json`, and `pa.json` (771 keys each, 0 diffs).
+  - Verified static quality: `npm run typecheck` (0 errors), `npm test` (17 tests passed), `npm run lint` (0 errors), `npm run build` (clean production bundle), `poetry run pytest` (32 tests passed).
 
 ## Recovery Decisions
 

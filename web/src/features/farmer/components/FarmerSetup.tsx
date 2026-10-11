@@ -535,7 +535,13 @@ function SetupCard({ children, title, subtitle }: { children: ReactNode; title: 
   )
 }
 
-export function FarmerSetup() {
+export function FarmerSetup({
+  isCollapsible = true,
+  defaultExpanded,
+}: {
+  isCollapsible?: boolean
+  defaultExpanded?: boolean
+} = {}) {
   const queryClient = useQueryClient()
   const { session } = useAuth()
   const { i18n, t } = useTranslation()
@@ -547,6 +553,9 @@ export function FarmerSetup() {
     queryKey: ['farmerProfile', userId],
     enabled: !!userId,
   })
+
+  const isProfileConfigured = Boolean(farmerProfile?.name)
+  const [isExpanded, setIsExpanded] = useState<boolean>(defaultExpanded ?? !isProfileConfigured)
 
   const villages = useQuery({ queryFn: getVillages, queryKey: ['villages'] })
   const villageOptions = useMemo(() => villages.data ?? [], [villages.data])
@@ -768,6 +777,40 @@ export function FarmerSetup() {
 
   const idStatus = farmerProfile?.idStatus || 'not_submitted'
 
+  // If already configured and collapsed, show sleek summary card with edit toggle
+  if (isCollapsible && isProfileConfigured && !isExpanded) {
+    return (
+      <div className="rounded-2xl border border-surface-border bg-surface p-4 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-brand/10 text-brand flex items-center justify-center text-xl shrink-0">
+            🌾
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-bold text-copy-primary text-sm sm:text-base">{farmerProfile?.name}</h3>
+              {idStatus === 'verified' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-state-success-dim text-state-success border border-state-success/30">
+                  ✓ {t('farmer.id_verified_badge', 'Verified Farmer')}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-copy-secondary mt-0.5">
+              {profileState || 'Punjab'} • {t('farmer.plots_title', 'Your Registered Plots')}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsExpanded(true)}
+          className="px-4 py-2 rounded-xl border border-surface-border bg-bg-subtle text-xs font-semibold text-copy-primary hover:bg-surface transition-all flex items-center gap-2 self-start sm:self-auto cursor-pointer"
+        >
+          <span>⚙️</span>
+          <span>{t('farmer.edit_settings', 'Edit Profile & Add Plots ▼')}</span>
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -776,7 +819,7 @@ export function FarmerSetup() {
           <h3 className="text-2xl font-display text-copy-primary">{t('farmer.setup_title')}</h3>
           <p className="mt-1 text-copy-secondary">{t('farmer.setup_body')}</p>
         </div>
-        <div className="self-start sm:self-auto">
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
           {idStatus === 'verified' && (
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-state-success-dim text-state-success border border-state-success/30 shadow-xs">
               <span className="w-2 h-2 rounded-full bg-state-success animate-pulse"></span>
@@ -794,6 +837,15 @@ export function FarmerSetup() {
               <span className="w-2 h-2 rounded-full bg-state-error"></span>
               {t('farmer.id_rejected_badge') || 'ID Rejected'}
             </span>
+          )}
+          {isCollapsible && isProfileConfigured && (
+            <button
+              type="button"
+              onClick={() => setIsExpanded(false)}
+              className="px-3.5 py-1.5 rounded-xl border border-surface-border bg-bg-subtle text-xs font-semibold text-copy-primary hover:bg-surface transition-all cursor-pointer"
+            >
+              {t('farmer.hide_settings', 'Close Settings ▲')}
+            </button>
           )}
         </div>
       </div>
@@ -830,9 +882,9 @@ export function FarmerSetup() {
           <div className="grid gap-3 sm:grid-cols-3">
             {/* 1. Name */}
             <label className="text-sm text-copy-primary block">
-              {t('farmer.name')} <span className="text-state-error">*</span>
+              <span className="font-medium">{t('farmer.name')}</span> <span className="text-state-error">*</span>
               <input
-                className="mt-1 w-full rounded-xl border border-surface-border p-2.5 focus:ring-2 focus:ring-accent-primary outline-none bg-surface"
+                className="mt-1 w-full h-[42px] rounded-xl border border-surface-border px-3 text-sm focus:ring-2 focus:ring-accent-primary outline-none bg-surface"
                 placeholder={i18n.language === 'hi' ? 'उदा. गुरप्रीत सिंह' : i18n.language === 'pa' ? 'ਉਦਾ. ਗੁਰਪ੍ਰੀਤ ਸਿੰਘ' : 'e.g. Gurpreet Singh'}
                 {...profileForm.register('name')}
               />
@@ -843,9 +895,9 @@ export function FarmerSetup() {
 
             {/* 2. State */}
             <label className="text-sm text-copy-primary block">
-              {t('farmer.state') || 'State'} <span className="text-state-error">*</span>
+              <span className="font-medium">{t('farmer.state') || 'State'}</span> <span className="text-state-error">*</span>
               <select
-                className="mt-1 w-full rounded-xl border border-surface-border bg-surface p-2.5 focus:ring-2 focus:ring-accent-primary outline-none"
+                className="mt-1 w-full h-[42px] rounded-xl border border-surface-border bg-surface px-3 text-sm focus:ring-2 focus:ring-accent-primary outline-none"
                 value={profileState}
                 onChange={(e) => onProfileStateChange(e.target.value)}
               >
@@ -861,9 +913,9 @@ export function FarmerSetup() {
 
             {/* 3. Village */}
             <label className="text-sm text-copy-primary block">
-              {t('farmer.village')} <span className="text-state-error">*</span>
+              <span className="font-medium">{t('farmer.village')}</span> <span className="text-state-error">*</span>
               <select
-                className="mt-1 w-full rounded-xl border border-surface-border bg-surface p-2.5 focus:ring-2 focus:ring-accent-primary outline-none disabled:opacity-50"
+                className="mt-1 w-full h-[42px] rounded-xl border border-surface-border bg-surface px-3 text-sm focus:ring-2 focus:ring-accent-primary outline-none disabled:opacity-50"
                 disabled={!profileState}
                 value={profileForm.watch('villageId') || ''}
                 onChange={(e) => {
@@ -941,7 +993,7 @@ export function FarmerSetup() {
           <div className="flex justify-end pt-1">
             <button
               type="submit"
-              className="rounded-xl bg-brand px-6 py-2.5 font-medium text-on-brand disabled:opacity-50 hover:bg-accent-secondary active:scale-[0.99] transition-all cursor-pointer shadow-xs"
+              className="h-[42px] rounded-xl bg-brand px-6 font-bold text-on-brand disabled:opacity-50 hover:bg-accent-secondary active:scale-[0.99] transition-all cursor-pointer shadow-xs flex items-center justify-center text-sm"
               disabled={profileForm.formState.isSubmitting}
             >
               {profileForm.formState.isSubmitting ? t('common.loading') : t('farmer.save_profile')}
@@ -959,9 +1011,9 @@ export function FarmerSetup() {
           <div className="grid gap-3 sm:grid-cols-4">
             {/* 1. Plot State */}
             <label className="text-sm text-copy-primary block">
-              {t('farmer.state') || 'State'} <span className="text-state-error">*</span>
+              <span className="font-medium">{t('farmer.state') || 'State'}</span> <span className="text-state-error">*</span>
               <select
-                className="mt-1 w-full rounded-xl border border-surface-border bg-surface p-2.5 focus:ring-2 focus:ring-accent-primary outline-none"
+                className="mt-1 w-full h-[42px] rounded-xl border border-surface-border bg-surface px-3 text-sm focus:ring-2 focus:ring-accent-primary outline-none"
                 value={plotState}
                 onChange={(e) => onPlotStateChange(e.target.value)}
               >
@@ -977,9 +1029,9 @@ export function FarmerSetup() {
 
             {/* 2. Plot Village */}
             <label className="text-sm text-copy-primary block">
-              {t('farmer.village')} <span className="text-state-error">*</span>
+              <span className="font-medium">{t('farmer.village')}</span> <span className="text-state-error">*</span>
               <select
-                className="mt-1 w-full rounded-xl border border-surface-border bg-surface p-2.5 focus:ring-2 focus:ring-accent-primary outline-none disabled:opacity-50"
+                className="mt-1 w-full h-[42px] rounded-xl border border-surface-border bg-surface px-3 text-sm focus:ring-2 focus:ring-accent-primary outline-none disabled:opacity-50"
                 disabled={!plotState}
                 value={plotForm.watch('villageId') || ''}
                 onChange={(e) => {
@@ -1020,9 +1072,9 @@ export function FarmerSetup() {
 
             {/* 3. Acres */}
             <label className="text-sm text-copy-primary block">
-              {t('farmer.acres')} <span className="text-state-error">*</span>
+              <span className="font-medium">{t('farmer.acres')}</span> <span className="text-state-error">*</span>
               <input
-                className="mt-1 w-full rounded-xl border border-surface-border p-2.5 focus:ring-2 focus:ring-accent-primary outline-none bg-surface"
+                className="mt-1 w-full h-[42px] rounded-xl border border-surface-border px-3 text-sm focus:ring-2 focus:ring-accent-primary outline-none bg-surface"
                 step="0.1"
                 type="number"
                 placeholder={i18n.language === 'hi' ? 'उदा. 10.5' : i18n.language === 'pa' ? 'ਉਦਾ. 10.5' : 'e.g. 10.5'}
@@ -1033,14 +1085,15 @@ export function FarmerSetup() {
               )}
             </label>
 
-            {/* 4. Add Plot Button */}
-            <div className="flex flex-col justify-end">
+            {/* 4. Add Plot Button - Pixel-perfect aligned with inputs */}
+            <div className="block">
+              <span className="text-sm block invisible select-none hidden sm:block h-5">&nbsp;</span>
               <button
                 type="submit"
-                className="w-full rounded-xl bg-brand px-5 py-2.5 font-medium text-on-brand disabled:opacity-50 hover:bg-accent-secondary active:scale-[0.99] transition-all cursor-pointer shadow-xs"
+                className="mt-1 w-full h-[42px] rounded-xl bg-brand px-5 font-bold text-on-brand disabled:opacity-50 hover:bg-accent-secondary active:scale-[0.99] transition-all cursor-pointer shadow-xs flex items-center justify-center text-sm"
                 disabled={plotForm.formState.isSubmitting}
               >
-                {plotForm.formState.isSubmitting ? t('common.loading') : t('farmer.add_plot')}
+                + {plotForm.formState.isSubmitting ? t('common.loading') : t('farmer.add_plot')}
               </button>
             </div>
           </div>
