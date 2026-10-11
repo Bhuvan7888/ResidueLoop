@@ -1,5 +1,6 @@
 from datetime import timedelta, date
 import logging
+from typing import Any
 from app.core.security import get_supabase_client
 from app.core.config import get_settings
 from app.integrations.firms import FirmsClient
@@ -25,7 +26,7 @@ async def _evaluate_verdict(lat: float, lon: float, radius_km: float, window_sta
         
     return verdict, confidence, nbr_change if nbr_change is not None else 0.0, firms_hits
 
-def _notify_stakeholders(client, listing_id: str, verdict: str) -> None:
+def _notify_stakeholders(client: Any, listing_id: str, verdict: str) -> None:
     req_res = client.table("assistance_requests").select("ngo_id").eq("listing_id", listing_id).execute()
     ngo_ids = set([r["ngo_id"] for r in req_res.data])
     donor_ids = set()

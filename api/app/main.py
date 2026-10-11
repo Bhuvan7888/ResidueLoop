@@ -11,7 +11,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core.config import get_settings
 from app.core.errors import setup_exception_handlers
-from app.routers.v1 import buyer, farmer, health, listing, offer, pickup, webhooks, heatmap
+from app.routers.v1 import buyer, farmer, health, listing, offer, pickup, webhooks, heatmap, charity, verification
 
 # Validate settings at startup
 get_settings()
@@ -100,3 +100,5 @@ app.include_router(offer.router, prefix="/api/v1")
 app.include_router(pickup.router, prefix="/api/v1")
 app.include_router(webhooks.router, prefix="/api/v1")
 app.include_router(heatmap.router, prefix="/api/v1")
+app.include_router(charity.router, prefix="/api/v1")
+app.include_router(verification.router, prefix="/api/v1")

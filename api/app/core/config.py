@@ -9,6 +9,14 @@ class Settings(BaseSettings):
     supabase_jwt_secret: str
     database_url: str
 
+    # Satellite verification (Unit 07). "mock" makes the integrations return fixture results.
+    nasa_firms_map_key: str = "mock"
+    cdse_client_id: str = "mock"
+    cdse_client_secret: str = "mock"
+    nbr_drop_threshold: float = 0.1
+    verification_window_days: int = 30
+    plot_buffer_radius_m: float = 100.0
+
     # Matching weights. They sum to 1 and are tunable without code changes.
     match_weight_distance: float = 0.4
     match_weight_price: float = 0.3
