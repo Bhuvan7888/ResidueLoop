@@ -1,16 +1,30 @@
 from app.core.security import get_supabase_client
 from fastapi import HTTPException
 
+def _extract_single(item: object) -> dict:
+    if isinstance(item, list):
+        return item[0] if item else {}
+    if isinstance(item, dict):
+        return item
+    return {}
+
 async def update_pickup_weight(user_id: str, pickup_id: str, actual_tonnes: float, quality_notes: str | None = None) -> str:
     client = get_supabase_client()
     
     # 1. Check ownership (buyer of the pool)
     pickup_res = client.table("pickups").select("*, pools(buyer_id), listings(farmer_id, offers(price_per_tonne))").eq("id", pickup_id).single().execute()
-    if not pickup_res.data or pickup_res.data["pools"]["buyer_id"] != user_id:
+    if not pickup_res.data:
+        raise HTTPException(status_code=404, detail="Pickup not found")
+        
+    pools = _extract_single(pickup_res.data.get("pools"))
+    if str(pools.get("buyer_id") or "") != user_id:
         raise HTTPException(status_code=403, detail="Forbidden")
         
-    offers = pickup_res.data.get("listings", {}).get("offers", [])
-    price = offers[0]["price_per_tonne"] if offers else 1500.0
+    listings = _extract_single(pickup_res.data.get("listings"))
+    offers_raw = listings.get("offers")
+    offers = offers_raw if isinstance(offers_raw, list) else ([offers_raw] if offers_raw else [])
+    first_offer = _extract_single(offers[0] if offers else {})
+    price = float(first_offer.get("price_per_tonne") or 1500.0)
     amount_due = actual_tonnes * price
     
     update_data = {
@@ -24,7 +38,7 @@ async def update_pickup_weight(user_id: str, pickup_id: str, actual_tonnes: floa
 
     client.table("pickups").update(update_data).eq("id", pickup_id).execute()
 
-    farmer_id = pickup_res.data.get("listings", {}).get("farmer_id")
+    farmer_id = listings.get("farmer_id")
     if farmer_id:
         try:
             client.table("notifications").insert({
@@ -54,7 +68,11 @@ async def update_pickup_payment(user_id: str, pickup_id: str, payment_status: st
     
     # 1. Check ownership (farmer of the listing)
     pickup_res = client.table("pickups").select("*, listings(farmer_id)").eq("id", pickup_id).single().execute()
-    if not pickup_res.data or pickup_res.data["listings"]["farmer_id"] != user_id:
+    if not pickup_res.data:
+        raise HTTPException(status_code=404, detail="Pickup not found")
+        
+    listings = _extract_single(pickup_res.data.get("listings"))
+    if str(listings.get("farmer_id") or "") != user_id:
         raise HTTPException(status_code=403, detail="Forbidden")
         
     client.table("pickups").update({

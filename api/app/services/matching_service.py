@@ -189,10 +189,11 @@ async def accept_offer(user_id: str, offer_id: str) -> None:
     if isinstance(plots_data, list):
         plots_data = plots_data[0] if plots_data else {}
 
-    farmer_id = plots_data.get("farmer_id") or listings_data.get("farmer_id")
-    buyer_id = offer.get("buyer_id")
+    clean_uid = str(user_id).strip().lower()
+    f_id = str(plots_data.get("farmer_id") or listings_data.get("farmer_id") or "").strip().lower()
+    b_id = str(offer.get("buyer_id") or "").strip().lower()
 
-    if user_id != farmer_id and user_id != buyer_id:
+    if clean_uid != f_id and clean_uid != b_id:
         raise HTTPException(status_code=403, detail="Forbidden")
         
     # Update offer status to 'accepted'
@@ -306,10 +307,11 @@ async def decline_offer(user_id: str, offer_id: str) -> None:
     if isinstance(plots_data, list):
         plots_data = plots_data[0] if plots_data else {}
 
-    farmer_id = plots_data.get("farmer_id") or listings_data.get("farmer_id")
-    buyer_id = offer.get("buyer_id")
+    clean_uid = str(user_id).strip().lower()
+    f_id = str(plots_data.get("farmer_id") or listings_data.get("farmer_id") or "").strip().lower()
+    b_id = str(offer.get("buyer_id") or "").strip().lower()
 
-    if user_id != farmer_id and user_id != buyer_id:
+    if clean_uid != f_id and clean_uid != b_id:
         raise HTTPException(status_code=403, detail="Forbidden")
         
     client.table("offers").update({"status": "declined"}).eq("id", offer_id).execute()

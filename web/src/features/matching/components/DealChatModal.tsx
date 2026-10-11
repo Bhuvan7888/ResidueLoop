@@ -73,7 +73,19 @@ export function DealChatModal({
   const loadMessages = useCallback(async () => {
     try {
       const msgs = await getDealMessages(offerId)
-      setMessages(msgs)
+      setMessages((prev) => {
+        const pendingOptimistic = prev.filter((m) => m.id.startsWith('temp-'))
+        const prevConfirmed = prev.filter((m) => !m.id.startsWith('temp-'))
+        
+        const isSame =
+          prevConfirmed.length === msgs.length &&
+          (msgs.length === 0 || prevConfirmed[prevConfirmed.length - 1]?.id === msgs[msgs.length - 1]?.id)
+
+        if (isSame && pendingOptimistic.length === 0) {
+          return prev
+        }
+        return [...msgs, ...pendingOptimistic]
+      })
     } catch (err) {
       console.error('Failed to load chat messages:', err)
     }
@@ -86,12 +98,12 @@ export function DealChatModal({
     return () => clearInterval(timer)
   }, [loadDeal, loadMessages])
 
-  // Auto-scroll when messages change or chat tab opens
+  // Auto-scroll only when message count changes or chat tab opens
   useEffect(() => {
     if (activeTab === 'chat') {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [messages, activeTab])
+  }, [messages.length, activeTab])
 
   // Send message
   const handleSendMessage = async (customText?: string) => {
@@ -310,7 +322,7 @@ export function DealChatModal({
                         {m.sender_role === 'farmer' ? t('deal_chat.farmer', 'Farmer') : t('deal_chat.buyer', 'Buyer')}
                       </span>
                       <span className="text-[10px] text-copy-muted">
-                        {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                       </span>
                     </div>
 

@@ -1182,6 +1182,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
       {selectedChatOfferId && (
         <DealChatModal
           offerId={selectedChatOfferId}
+          initialDeal={matchedDeals.find((d) => d.offer_id === selectedChatOfferId || d.id === selectedChatOfferId)}
           currentUserRole="farmer"
           currentUserId={userId}
           currentUserName={farmerProfile?.name || 'Farmer'}

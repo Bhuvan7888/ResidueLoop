@@ -392,11 +392,23 @@ async def process_inbound_message(phone_number: str, message_text: str) -> None:
         intent = "ask_payment_status"
 
     try:
+        def _get_farmer_id(parent: dict[str, Any]) -> str:
+            listing = parent.get("listings") or {}
+            if isinstance(listing, list):
+                listing = listing[0] if listing else {}
+            return str(listing.get("farmer_id") or "")
+
+        def _get_pool_date(parent: dict[str, Any]) -> str | None:
+            pools = parent.get("pools") or {}
+            if isinstance(pools, list):
+                pools = pools[0] if pools else {}
+            return pools.get("pickup_date")
+
         if intent == "accept_offer":
             offers_resp = client.table("offers").select("id, status, price_per_tonne, listings(farmer_id, est_tonnes)").eq("status", "pending").execute()
             farmer_offer = None
             for o in offers_resp.data or []:
-                if o.get("listings", {}).get("farmer_id") == profile_id:
+                if _get_farmer_id(o) == profile_id:
                     farmer_offer = o
                     break
 
@@ -415,8 +427,8 @@ async def process_inbound_message(phone_number: str, message_text: str) -> None:
             pickups_resp = client.table("pickups").select("pools(pickup_date), listings(farmer_id)").order("created_at", desc=True).execute()
             pickup_date = None
             for p in pickups_resp.data or []:
-                if p.get("listings", {}).get("farmer_id") == profile_id:
-                    pickup_date = p.get("pools", {}).get("pickup_date")
+                if _get_farmer_id(p) == profile_id:
+                    pickup_date = _get_pool_date(p)
                     break
 
             if pickup_date:
@@ -426,8 +438,9 @@ async def process_inbound_message(phone_number: str, message_text: str) -> None:
 
         elif intent == "ask_pool_progress":
             listings_resp = client.table("listings").select("pool_id, pools(*)").eq("farmer_id", profile_id).eq("status", "pooled").limit(1).execute()
-            if listings_resp.data and listings_resp.data[0].get("pools"):
-                pool = listings_resp.data[0]["pools"]
+            raw_pools = listings_resp.data[0].get("pools") if listings_resp.data else None
+            pool = raw_pools[0] if isinstance(raw_pools, list) and raw_pools else (raw_pools if isinstance(raw_pools, dict) else None)
+            if pool:
                 cur = float(pool.get("current_tonnes") or 0)
                 target = float(pool.get("target_tonnes") or 25)
                 reply_text = f"📊 ਤੁਹਾਡੇ ਪਿੰਡ ਦੇ ਪੂਲ ਵਿੱਚ {cur:.1f} / {target:.1f} ਟਨ ਪਰਾਲੀ ਇਕੱਠੀ ਹੋ ਗਈ ਹੈ। ਸਥਿਤੀ: {pool.get('status')}।"
@@ -438,7 +451,7 @@ async def process_inbound_message(phone_number: str, message_text: str) -> None:
             pickups_resp = client.table("pickups").select("actual_tonnes, amount_due, payment_status, listings(farmer_id)").order("created_at", desc=True).execute()
             found_pickup = None
             for p in pickups_resp.data or []:
-                if p.get("listings", {}).get("farmer_id") == profile_id:
+                if _get_farmer_id(p) == profile_id:
                     found_pickup = p
                     break
 
@@ -455,7 +468,7 @@ async def process_inbound_message(phone_number: str, message_text: str) -> None:
             pickups_resp = client.table("pickups").select("id, listings(farmer_id)").order("created_at", desc=True).execute()
             my_pickup_id = None
             for p in pickups_resp.data or []:
-                if p.get("listings", {}).get("farmer_id") == profile_id:
+                if _get_farmer_id(p) == profile_id:
                     my_pickup_id = p["id"]
                     break
 

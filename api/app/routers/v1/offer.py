@@ -85,15 +85,16 @@ async def get_matched_deals(
         if isinstance(plot, list):
             plot = plot[0] if plot else {}
 
-        f_id = str(l.get("farmer_id") or plot.get("farmer_id") or "")
-        b_id = str(o.get("buyer_id") or "")
+        f_id = str(l.get("farmer_id") or plot.get("farmer_id") or "").strip().lower()
+        b_id = str(o.get("buyer_id") or "").strip().lower()
 
         if user_id:
-            if role == "farmer" and f_id != user_id:
+            clean_uid = user_id.strip().lower()
+            if role == "farmer" and f_id != clean_uid:
                 continue
-            if role == "buyer" and b_id != user_id:
+            if role == "buyer" and b_id != clean_uid:
                 continue
-            if not role and f_id != user_id and b_id != user_id:
+            if not role and f_id != clean_uid and b_id != clean_uid:
                 continue
         filtered_items.append((o, l, plot, f_id, b_id))
 

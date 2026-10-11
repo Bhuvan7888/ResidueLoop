@@ -783,6 +783,7 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
       {selectedChatOfferId && (
         <DealChatModal
           offerId={selectedChatOfferId}
+          initialDeal={matchedDeals.find((d) => d.offer_id === selectedChatOfferId || d.id === selectedChatOfferId)}
           currentUserRole="buyer"
           currentUserId={userId}
           onClose={() => setSelectedChatOfferId(null)}
