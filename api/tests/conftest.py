@@ -6,7 +6,8 @@ for name, value in {
     "SUPABASE_SERVICE_ROLE_KEY": "test-service-role",
     "SUPABASE_JWT_SECRET": "test-jwt-secret-with-at-least-32-chars!",
     "DATABASE_URL": "postgresql://test:test@localhost:5432/test",
-    "TWILIO_AUTH_TOKEN": "test-twilio-token",
+    "META_APP_SECRET": "test-meta-app-secret",
+    "WHATSAPP_VERIFY_TOKEN": "test-verify-token",
     "PUBLIC_BASE_URL": "https://hooks.example.test",
 }.items():
     os.environ[name] = value

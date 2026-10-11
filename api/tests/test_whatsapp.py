@@ -1,6 +1,6 @@
-import base64
 import hashlib
 import hmac
+import json
 from datetime import date
 from types import SimpleNamespace
 from typing import Any
@@ -16,54 +16,124 @@ from app.main import app
 from app.services import conversation_service
 from app.services.whatsapp_templates import render
 
-TOKEN = "test-twilio-token"
-URL = "https://hooks.example.test/api/v1/webhooks/whatsapp"
+SECRET = "test-meta-app-secret"
+VERIFY_TOKEN = "test-verify-token"
 HOST = {"host": "hooks.example.test"}
+URL = "/api/v1/webhooks/whatsapp"
 
 
-def _signed(params: dict[str, str]) -> str:
-    payload = URL + "".join(f"{k}{params[k]}" for k in sorted(params))
-    return base64.b64encode(hmac.new(TOKEN.encode(), payload.encode(), hashlib.sha1).digest()).decode()
+def _sign(raw: bytes) -> str:
+    return "sha256=" + hmac.new(SECRET.encode(), raw, hashlib.sha256).hexdigest()
 
 
-# --- signature and sender handling -------------------------------------------------------------
+def _payload(text: str = "hello", wa_id: str = "919999999990", message_id: str = "wamid.1") -> dict[str, Any]:
+    return {
+        "object": "whatsapp_business_account",
+        "entry": [
+            {
+                "id": "waba",
+                "changes": [
+                    {
+                        "field": "messages",
+                        "value": {
+                            "messaging_product": "whatsapp",
+                            "contacts": [{"wa_id": wa_id}],
+                            "messages": [{"from": wa_id, "id": message_id, "type": "text", "text": {"body": text}}],
+                        },
+                    }
+                ],
+            }
+        ],
+    }
 
 
-def test_valid_signature_is_accepted_and_forged_is_rejected() -> None:
-    params = {"MessageSid": "SM1", "From": "whatsapp:+919999999990", "Body": "hi"}
-    assert whatsapp.verify_signature(URL, params, _signed(params), TOKEN)
-    assert not whatsapp.verify_signature(URL, params, "forged", TOKEN)
-    assert not whatsapp.verify_signature(URL, {**params, "Body": "changed"}, _signed(params), TOKEN)
+# --- signature, handshake and message parsing ----------------------------------------------------
 
 
-def test_missing_token_or_signature_never_passes() -> None:
-    params = {"Body": "hi"}
-    assert not whatsapp.verify_signature(URL, params, _signed(params), "")
-    assert not whatsapp.verify_signature(URL, params, "", TOKEN)
+def test_valid_signature_is_accepted_and_forged_or_changed_is_rejected() -> None:
+    raw = b'{"a": 1}'
+    assert whatsapp.verify_signature(raw, _sign(raw), SECRET)
+    assert not whatsapp.verify_signature(raw, "sha256=forged", SECRET)
+    assert not whatsapp.verify_signature(b'{"a": 2}', _sign(raw), SECRET)
 
 
-def test_only_indian_numbers_are_accepted() -> None:
-    assert whatsapp.phone_from_sender("whatsapp:+919999999990") == "+919999999990"
-    assert whatsapp.phone_from_sender("whatsapp:+14155550100") is None
+def test_missing_secret_or_signature_never_passes() -> None:
+    raw = b"{}"
+    assert not whatsapp.verify_signature(raw, _sign(raw), "")
+    assert not whatsapp.verify_signature(raw, "", SECRET)
+    assert not whatsapp.verify_signature(raw, _sign(raw).removeprefix("sha256="), SECRET)
+
+
+def test_handshake_needs_the_matching_verify_token() -> None:
+    assert whatsapp.verify_token_matches("subscribe", VERIFY_TOKEN, VERIFY_TOKEN)
+    assert not whatsapp.verify_token_matches("subscribe", "wrong", VERIFY_TOKEN)
+    assert not whatsapp.verify_token_matches("subscribe", "", "")
+    assert not whatsapp.verify_token_matches("unsubscribe", VERIFY_TOKEN, VERIFY_TOKEN)
+
+
+def test_only_indian_numbers_are_accepted_and_masked_for_storage() -> None:
+    assert whatsapp.phone_from_wa_id("919999999990") == "+919999999990"
+    assert whatsapp.phone_from_wa_id("14155550100") is None
     assert whatsapp.mask_phone("+919999999990") == "+91******9990"
 
 
-def test_webhook_rejects_forged_signature_and_queues_valid_one(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_only_text_messages_from_indian_numbers_are_extracted() -> None:
+    assert whatsapp.text_messages(_payload("4 acres")) == [
+        whatsapp.IncomingMessage(id="wamid.1", phone="+919999999990", text="4 acres")
+    ]
+    assert whatsapp.text_messages(_payload(wa_id="14155550100")) == []
+    status_only = {"entry": [{"changes": [{"value": {"statuses": [{"id": "x", "status": "delivered"}]}}]}]}
+    assert whatsapp.text_messages(status_only) == []
+    image = _payload()
+    image["entry"][0]["changes"][0]["value"]["messages"][0]["type"] = "image"
+    assert whatsapp.text_messages(image) == []
+    assert whatsapp.text_messages({}) == [] and whatsapp.text_messages({"entry": [{"changes": None}]}) == []
+
+
+def test_webhook_handshake_returns_the_challenge_only_for_the_right_token() -> None:
+    client = TestClient(app)
+    ok = client.get(
+        URL, params={"hub.mode": "subscribe", "hub.verify_token": VERIFY_TOKEN, "hub.challenge": "12345"}, headers=HOST
+    )
+    assert ok.status_code == 200 and ok.text == "12345"
+    bad = client.get(
+        URL, params={"hub.mode": "subscribe", "hub.verify_token": "nope", "hub.challenge": "12345"}, headers=HOST
+    )
+    assert bad.status_code == 403
+
+
+def test_webhook_rejects_forged_signature_and_queues_a_valid_message(monkeypatch: pytest.MonkeyPatch) -> None:
     handled: list[tuple[str, str, str]] = []
 
-    async def fake_handle(sid: str, phone: str, text: str) -> None:
-        handled.append((sid, phone, text))
+    async def fake_handle(message_id: str, phone: str, text: str) -> None:
+        handled.append((message_id, phone, text))
 
     monkeypatch.setattr("app.routers.v1.webhooks.conversation_service.handle_inbound", fake_handle)
     client = TestClient(app)
-    form = {"MessageSid": "SM1", "From": "whatsapp:+919999999990", "Body": "hello"}
+    raw = json.dumps(_payload("ਹਾਂ")).encode()
 
-    forged = client.post("/api/v1/webhooks/whatsapp", data=form, headers={**HOST, "X-Twilio-Signature": "bad"})
+    forged = client.post(URL, content=raw, headers={**HOST, "X-Hub-Signature-256": "sha256=bad"})
     assert forged.status_code == 403 and handled == []
+    unsigned = client.post(URL, content=raw, headers=HOST)
+    assert unsigned.status_code == 403 and handled == []
 
-    ok = client.post("/api/v1/webhooks/whatsapp", data=form, headers={**HOST, "X-Twilio-Signature": _signed(form)})
+    ok = client.post(URL, content=raw, headers={**HOST, "X-Hub-Signature-256": _sign(raw)})
     assert ok.status_code == 200
-    assert handled == [("SM1", "+919999999990", "hello")]
+    assert handled == [("wamid.1", "+919999999990", "ਹਾਂ")]
+
+
+def test_webhook_acknowledges_status_updates_without_replying(monkeypatch: pytest.MonkeyPatch) -> None:
+    handled: list[Any] = []
+    monkeypatch.setattr("app.routers.v1.webhooks.conversation_service.handle_inbound", lambda *a: handled.append(a))
+    raw = json.dumps({"entry": [{"changes": [{"value": {"statuses": [{"id": "x", "status": "read"}]}}]}]}).encode()
+    response = TestClient(app).post(URL, content=raw, headers={**HOST, "X-Hub-Signature-256": _sign(raw)})
+    assert response.status_code == 200 and handled == []
+
+
+def test_webhook_rejects_a_signed_body_that_is_not_json() -> None:
+    raw = b"not json"
+    response = TestClient(app).post(URL, content=raw, headers={**HOST, "X-Hub-Signature-256": _sign(raw)})
+    assert response.status_code == 400
 
 
 # --- parser ------------------------------------------------------------------------------------
@@ -123,13 +193,13 @@ class Recorder:
         c = "app.services.conversation_service"
         monkeypatch.setattr(f"{c}.profiles.get_by_phone", lambda phone: profile)
         monkeypatch.setattr(f"{c}.messages.insert_message", lambda fields: self._insert(fields, fresh))
-        monkeypatch.setattr(f"{c}.messages.update_message", lambda sid, fields: None)
+        monkeypatch.setattr(f"{c}.messages.update_message", lambda message_id, fields: None)
 
         async def send(phone: str, body: str) -> str:
             self.sent.append(body)
-            return "SMOUT"
+            return "wamid.out"
 
-        monkeypatch.setattr(f"{c}.whatsapp.send_message", send)
+        monkeypatch.setattr(f"{c}.whatsapp.send_text", send)
 
     def _insert(self, fields: dict[str, Any], fresh: bool) -> bool:
         if fresh:
@@ -142,21 +212,21 @@ FARMER = {"id": "farmer-1", "role": "farmer", "language": "pa"}
 
 async def test_unknown_number_gets_registration_message(monkeypatch: pytest.MonkeyPatch) -> None:
     rec = Recorder(monkeypatch, None)
-    await conversation_service.handle_inbound("SM1", "+919999999991", "hello")
+    await conversation_service.handle_inbound("wamid.1", "+919999999991", "hello")
     assert rec.sent == [render("unknown_number")]
     assert [m["direction"] for m in rec.stored] == ["in", "out"]
-    assert rec.stored[0]["profile_id"] is None
+    assert rec.stored[0]["profile_id"] is None and rec.stored[1]["provider_message_id"] == "wamid.out"
 
 
 async def test_replayed_message_is_ignored(monkeypatch: pytest.MonkeyPatch) -> None:
     rec = Recorder(monkeypatch, FARMER, fresh=False)
-    await conversation_service.handle_inbound("SM1", "+919999999990", "RECEIVED")
+    await conversation_service.handle_inbound("wamid.1", "+919999999990", "RECEIVED")
     assert rec.sent == [] and rec.stored == []
 
 
 async def test_non_farmer_is_told_the_service_is_for_farmers(monkeypatch: pytest.MonkeyPatch) -> None:
     rec = Recorder(monkeypatch, {"id": "b1", "role": "buyer", "language": "en"})
-    await conversation_service.handle_inbound("SM1", "+919999999992", "RECEIVED")
+    await conversation_service.handle_inbound("wamid.1", "+919999999992", "RECEIVED")
     assert rec.sent == [render("farmers_only")]
 
 
@@ -167,7 +237,7 @@ async def test_overlong_message_is_not_parsed(monkeypatch: pytest.MonkeyPatch) -
         raise AssertionError("must not parse an over-long message")
 
     monkeypatch.setattr("app.services.conversation_service.llm.parse_message", explode)
-    await conversation_service.handle_inbound("SM1", "+919999999990", "x" * 600)
+    await conversation_service.handle_inbound("wamid.1", "+919999999990", "x" * 600)
     assert rec.sent == [render("too_long")]
 
 
@@ -175,8 +245,19 @@ async def test_unparseable_message_asks_for_clarification_and_creates_nothing(mo
     rec = Recorder(monkeypatch, FARMER)
     created: list[Any] = []
     monkeypatch.setattr("app.services.conversation_service.listing_service.create_listing", lambda *a, **k: created.append(a))
-    await conversation_service.handle_inbound("SM1", "+919999999990", "random gossip")
+    await conversation_service.handle_inbound("wamid.1", "+919999999990", "random gossip")
     assert rec.sent == [render("clarify")] and created == []
+
+
+async def test_a_failed_send_is_logged_and_the_reply_is_still_stored(monkeypatch: pytest.MonkeyPatch) -> None:
+    rec = Recorder(monkeypatch, None)
+
+    async def broken(phone: str, body: str) -> str:
+        raise RuntimeError("meta is down")
+
+    monkeypatch.setattr("app.services.conversation_service.whatsapp.send_text", broken)
+    await conversation_service.handle_inbound("wamid.1", "+919999999991", "hello")
+    assert rec.stored[1]["direction"] == "out" and rec.stored[1]["provider_message_id"] is None
 
 
 def test_listing_by_whatsapp_uses_the_web_service_with_whatsapp_source(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -9,8 +9,8 @@ ALLOWED_HOSTS = {
     "api.open-meteo.com",
     "firms.modaps.eosdis.nasa.gov",
     "sh.dataspace.copernicus.eu",
-    "api.twilio.com",
     "generativelanguage.googleapis.com",
+    "graph.facebook.com",
 }
 
 TIMEOUT_SECONDS = 10.0

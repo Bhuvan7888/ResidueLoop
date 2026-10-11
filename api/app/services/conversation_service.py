@@ -155,7 +155,7 @@ def _store(fields: dict[str, Any]) -> bool:
 async def _send_and_store(profile_id: str | None, phone: str, reply: Reply) -> None:
     body = render(reply.key, **reply.values)
     try:
-        provider_id: str | None = await whatsapp.send_message(phone, body)
+        provider_id: str | None = await whatsapp.send_text(phone, body)
     except Exception:
         logger.exception("whatsapp send failed")
         provider_id = None
@@ -173,11 +173,11 @@ async def _send_and_store(profile_id: str | None, phone: str, reply: Reply) -> N
     )
 
 
-async def handle_inbound(message_sid: str, phone: str, text: str) -> None:
+async def handle_inbound(message_id: str, phone: str, text: str) -> None:
     profile = await run_in_threadpool(profiles.get_by_phone, phone)
     profile_id = profile["id"] if profile else None
     inbound = {
-        "provider_message_id": message_sid,
+        "provider_message_id": message_id,
         "profile_id": profile_id,
         "phone_masked": whatsapp.mask_phone(phone),
         "direction": "in",
@@ -197,7 +197,7 @@ async def handle_inbound(message_sid: str, phone: str, text: str) -> None:
         reply = await run_in_threadpool(run_intent, profile["id"], parsed)
         await run_in_threadpool(
             messages.update_message,
-            message_sid,
+            message_id,
             {
                 "parsed_json": parsed.model_dump(mode="json"),
                 "intent": parsed.intent.value,
