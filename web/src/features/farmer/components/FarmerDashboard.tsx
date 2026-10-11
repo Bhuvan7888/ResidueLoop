@@ -8,8 +8,6 @@ import { OfferCard } from '@/features/matching/components/OfferCard'
 import { PoolProgress } from '@/features/matching/components/PoolProgress'
 import { getPickups, updatePickupPayment } from '@/features/pickup/api'
 import { PickupCard } from '@/features/pickup/components/PickupCard'
-import { VerificationCard } from '@/features/verification/components/VerificationCard'
-import { triggerVerification } from '@/features/verification/api'
 import { getNotifications, requestAssistance } from '@/features/charity/api'
 import { getMessages } from '@/features/whatsapp/api'
 import { WhatsappSimulator } from '@/features/whatsapp/components/WhatsappSimulator'
@@ -161,6 +159,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
   const [listings, setListings] = useState<
     {
       id: string
+      plot_id?: string
       acres?: number
       status: string
       harvest_date: string
@@ -209,7 +208,6 @@ export function FarmerDashboard({ userId }: { userId: string }) {
   const [messages, setMessages] = useState<{ id: string; direction: string; raw_text: string; created_at: string }[]>([])
   const [notifications, setNotifications] = useState<{ id: string; message: string; created_at: string }[]>([])
   const [actionMsg, setActionMsg] = useState<string | null>(null)
-  const [verifyingPlotId, setVerifyingPlotId] = useState<string | null>(null)
 
   const reloadData = useCallback(() => {
     getOffers().then((data) => setOffers((data as unknown as typeof offers) || [])).catch(console.error)
@@ -238,23 +236,6 @@ export function FarmerDashboard({ userId }: { userId: string }) {
       reloadData()
     } catch (err: unknown) {
       setActionMsg(err instanceof Error ? err.message : 'Failed to list on charity portal')
-    }
-  }
-
-  const handleRunSatelliteCheck = async (
-    plotId: string,
-    scenario: 'verified' | 'fire_detected' | 'inconclusive' | 'real'
-  ) => {
-    setVerifyingPlotId(plotId)
-    try {
-      await triggerVerification(plotId, scenario)
-      await queryClient.invalidateQueries({ queryKey: ['plots', userId] })
-      reloadData()
-      setActionMsg(i18n.language === 'hi' ? `🛰️ सैटेलाइट जाँच पूरी हुई (${scenario})! परिणाम नीचे देखें।` : `🛰️ Satellite check completed (scenario: ${scenario})! Check results below.`)
-    } catch (err: unknown) {
-      setActionMsg(err instanceof Error ? err.message : 'Failed to trigger satellite check')
-    } finally {
-      setVerifyingPlotId(null)
     }
   }
 
@@ -606,13 +587,13 @@ export function FarmerDashboard({ userId }: { userId: string }) {
             )}
           </div>
 
-          {/* Section 3: Registered Plots & Satellite Verification */}
+          {/* Section 3: Registered Plots */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-copy-primary">{t('farmer.plots_verif_title')}</h3>
+                <h3 className="text-lg font-medium text-copy-primary">{t('farmer.plots_title', 'Your Registered Plots')}</h3>
                 <p className="text-xs text-copy-secondary">
-                  {t('farmer.plots_verif_desc')}
+                  {t('farmer.plots_desc', 'Your registered agricultural land plots and acreage for paddy straw listing.')}
                 </p>
               </div>
             </div>
@@ -632,25 +613,81 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                       )
                     : []
                   const latestVerif = sortedVerifs[0]
+                  const linkedListing = listings.find((l) => l.plot_id === plot.id)
 
                   return (
-                    <div key={plot.id} className="bg-surface border border-surface-border rounded-2xl p-5 space-y-4 shadow-xs">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h4 className="font-semibold text-copy-primary text-base">{t('farmer.plot_num')}{idx + 1}</h4>
-                          <p className="text-xs text-copy-secondary mt-0.5">{plot.acres} {t('farmer.acres_registered')}</p>
+                    <div key={plot.id} className="bg-surface border border-surface-border rounded-2xl p-5 space-y-3.5 shadow-xs flex flex-col justify-between">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">🌾</span>
+                              <h4 className="font-semibold text-copy-primary text-base">{t('farmer.plot_num')}{idx + 1}</h4>
+                            </div>
+                            <p className="text-xs text-copy-secondary mt-0.5">
+                              {plot.acres} {t('farmer.acres_registered')}
+                            </p>
+                          </div>
+                          <span className="text-[11px] font-mono text-copy-muted bg-bg-subtle px-2 py-0.5 rounded border border-surface-border-subtle">
+                            GPS: {plot.centre?.coordinates ? `${plot.centre.coordinates[1]?.toFixed(3)}°N, ${plot.centre.coordinates[0]?.toFixed(3)}°E` : (i18n.language === 'hi' ? 'स्वतः प्राप्त' : i18n.language === 'pa' ? 'ਸਵੈ-ਪ੍ਰਾਪਤ' : 'Auto-detected')}
+                          </span>
                         </div>
-                        <span className="text-[11px] font-mono text-copy-muted bg-bg-subtle px-2 py-0.5 rounded border border-surface-border-subtle">
-                          GPS: {plot.centre?.coordinates ? `${plot.centre.coordinates[1]?.toFixed(3)}°N, ${plot.centre.coordinates[0]?.toFixed(3)}°E` : (i18n.language === 'hi' ? 'स्वतः प्राप्त' : i18n.language === 'pa' ? 'ਸਵੈ-ਪ੍ਰਾਪਤ' : 'Auto-detected')}
-                        </span>
+
+                        {/* Verification Status Pill */}
+                        <div className="pt-1">
+                          {latestVerif ? (
+                            latestVerif.status === 'verified' ? (
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-state-success-dim text-state-success border border-state-success/30">
+                                <span>{t('farmer.verif_clean', '✓ Verified Clean Field (Zero Burn)')}</span>
+                              </div>
+                            ) : latestVerif.status === 'fire_detected' ? (
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-state-error-dim text-state-error border border-state-error/30">
+                                <span>{t('farmer.verif_fire', '🔥 Fire Detected')}</span>
+                              </div>
+                            ) : (
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-state-warning-dim text-state-warning border border-state-warning/30">
+                                <span>{t('farmer.verif_cloudy', '⏳ Inconclusive (Cloud Obscured)')}</span>
+                              </div>
+                            )
+                          ) : (
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-bg-subtle text-copy-secondary border border-surface-border-subtle">
+                              <span>🌱 {t('farmer.verif_pending', 'Automated check runs post-pickup')}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
-                      <VerificationCard
-                        verification={latestVerif}
-                        plot={plot}
-                        onTriggerCheck={(scenario) => handleRunSatelliteCheck(plot.id, scenario)}
-                        isTriggering={verifyingPlotId === plot.id}
-                      />
+                      {/* Listing Action / Status */}
+                      <div className="pt-2 border-t border-surface-border-subtle flex items-center justify-between">
+                        {linkedListing ? (
+                          <div className="flex items-center justify-between w-full">
+                            <span className="text-xs text-copy-secondary">
+                              {t('farmer.listing_active', { status: t(`status.${linkedListing.status}`, linkedListing.status) })}
+                            </span>
+                            <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-brand-dim text-brand border border-brand/20">
+                              {t(`status.${linkedListing.status}`, linkedListing.status)}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between w-full">
+                            <span className="text-xs text-copy-secondary">
+                              {t('farmer.plot_ready_to_list', 'Ready to list paddy straw')}
+                            </span>
+                            <button
+                              onClick={() => {
+                                if (!isVerified) {
+                                  setActionMsg(i18n.language === 'hi' ? '⚠️ सत्यापित पहचान आवश्यक! लिस्टिंग बनाने से पहले कृपया ऊपर अपना पहचान प्रमाण जमा करें।' : '⚠️ Verified ID required! Please submit and verify your ID proof before creating a listing.')
+                                  return
+                                }
+                                setView('listing')
+                              }}
+                              className="text-xs font-medium px-2.5 py-1 rounded-lg bg-brand text-on-brand hover:bg-accent-secondary transition-colors"
+                            >
+                              {t('farmer.list_straw_btn', '+ List Straw')}
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )
                 })}

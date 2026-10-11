@@ -46,6 +46,14 @@ This tracker records verified evidence only. Earlier completion claims were inde
 - [x] Localized User Navigation: `UserProfileDropdown.tsx` (saved profile details for farmers/buyers/donors/NGOs, identity verification badges, acreage, mission statements, encryption pill, and portal role switcher).
 - [x] Verified quality across all portals: `cd web && npm run typecheck && npm run lint && npm test && npm run build` (13 tests passed, 0 errors, build in 495ms); `cd api && python3 -m poetry run pytest` (25 tests passed).
 
+## Farmer Dashboard Plots Simplification — 2026-10-11
+
+- [x] Streamlined Farmer Dashboard Section 3: Removed technical satellite verification telemetry console (Copernicus Sentinel-2 MSI, NIR/SWIR reflectance gauges, delta NBR formulas, NASA FIRMS radar sweeps) and developer simulation buttons (`Clean (Verified) | Fire Detected | Cloudy (Inconclusive)`) from the farmer plots view in `FarmerDashboard.tsx`.
+- [x] Replaced with clean, actionable plot cards displaying acreage, GPS coordinates, linked paddy straw listing status or "+ List Straw" action CTA, and lightweight plain-language status badges.
+- [x] Preserved technical `VerificationCard` in `SatelliteAuditModal.tsx` for buyer zero-burn compliance audits where telemetry inspection is required.
+- [x] Maintained 100% key parity across `en.json`, `hi.json`, and `pa.json` (520 keys, 0 diffs).
+- [x] Verified static quality: `npm run typecheck` (0 errors), `npm test` (13 tests passed), `npm run lint` (0 errors), `npm run build` (built in 515ms); `poetry run pytest` (25 tests passed).
+
 ## Recovery Decisions
 
 - D1. FastAPI under `/api/v1` is the only mutation boundary. The web app uses one token-aware API client and no Supabase Edge Functions.
