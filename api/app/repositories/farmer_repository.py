@@ -14,6 +14,8 @@ class FarmerRepository:
         self._client.table("farmers").upsert({"profile_id": user_id, "village_id": village_id}).execute()
 
     def create_plot(self, farmer_id: str, payload: dict[str, Any]) -> str:
+        if payload.get("village_id"):
+            self._client.table("farmers").upsert({"profile_id": farmer_id, "village_id": payload["village_id"]}).execute()
         response = self._client.table("plots").insert({"farmer_id": farmer_id, **payload}).execute()
         return str(response.data[0]["id"])
 

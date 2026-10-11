@@ -4,6 +4,7 @@ interface ApiErrorPayload {
   error?: {
     message?: string
   }
+  detail?: string | Array<{ msg?: string; message?: string }>
 }
 
 interface ApiRequestOptions {
@@ -32,7 +33,12 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
 
   if (!response.ok) {
     const payload = await response.json().catch((): ApiErrorPayload => ({})) as ApiErrorPayload
-    throw new Error(payload.error?.message || 'Request failed. Please try again.')
+    const detailMsg = typeof payload.detail === 'string'
+      ? payload.detail
+      : Array.isArray(payload.detail)
+        ? payload.detail.map((d) => d.msg || d.message).filter(Boolean).join(', ')
+        : null
+    throw new Error(payload.error?.message || detailMsg || 'Request failed. Please try again.')
   }
 
   const payload = await response.json() as { data: T }

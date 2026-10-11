@@ -18,7 +18,7 @@ export function Dashboard() {
         <p>{t('dashboard.description')}</p>
       </div>
       
-      {role === 'buyer' && <BuyerDashboard />}
+      {role === 'buyer' && <BuyerDashboard userId={session?.user.id || ''} />}
       {role === 'farmer' && (
         <>
           <FarmerSetup />

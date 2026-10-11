@@ -19,11 +19,11 @@ def get_village_heatmap() -> list[dict[str, Any]]:
 
     # 3. Fetch all open listings
     listings_resp = client.table("listings").select("est_tonnes, plots(village_id)").in_("status", ["open", "matched", "pooled"]).execute()
-    for l in listings_resp.data:
-        plots = l.get("plots")
+    for listing_item in listings_resp.data:
+        plots = listing_item.get("plots")
         v_id = plots.get("village_id") if plots else None
         if v_id in villages:
-            villages[v_id]["supply_tonnes"] += float(l["est_tonnes"])
+            villages[v_id]["supply_tonnes"] += float(listing_item["est_tonnes"])
             
     zones = []
     for v_id, v in villages.items():

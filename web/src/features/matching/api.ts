@@ -18,7 +18,7 @@ export async function handleOfferAction(offerId: string, action: 'accept' | 'dec
 export async function getPools() {
   const { data, error } = await supabase
     .from('pools')
-    .select('*')
+    .select('*, listings(*, plots(*)), villages(name, district)')
     .order('created_at', { ascending: false })
   
   if (error) throw error

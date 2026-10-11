@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -29,8 +29,18 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
   
   const form = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
-    defaultValues: { combineSmsUsed: false }
+    defaultValues: {
+      plotId: plots.length === 1 ? plots[0].id : '',
+      harvestDate: new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0],
+      combineSmsUsed: false,
+    },
   })
+
+  useEffect(() => {
+    if (plots.length === 1 && !form.getValues('plotId')) {
+      form.setValue('plotId', plots[0].id)
+    }
+  }, [plots, form])
 
   const selectedPlotId = form.watch('plotId')
   const selectedPlot = plots.find(p => p.id === selectedPlotId)

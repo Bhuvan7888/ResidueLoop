@@ -5,18 +5,31 @@ async def update_pickup_weight(user_id: str, pickup_id: str, actual_tonnes: floa
     client = get_supabase_client()
     
     # 1. Check ownership (buyer of the pool)
-    pickup_res = client.table("pickups").select("*, pools(buyer_id), listings(offers(price_per_tonne))").eq("id", pickup_id).single().execute()
+    pickup_res = client.table("pickups").select("*, pools(buyer_id), listings(farmer_id, offers(price_per_tonne))").eq("id", pickup_id).single().execute()
     if not pickup_res.data or pickup_res.data["pools"]["buyer_id"] != user_id:
         raise HTTPException(status_code=403, detail="Forbidden")
         
-    price = pickup_res.data["listings"]["offers"][0]["price_per_tonne"]
+    offers = pickup_res.data.get("listings", {}).get("offers", [])
+    price = offers[0]["price_per_tonne"] if offers else 1500.0
     amount_due = actual_tonnes * price
     
     client.table("pickups").update({
         "actual_tonnes": actual_tonnes,
         "amount_due": amount_due,
-        "completed_at": "now()"
+        "completed_at": "now()",
+        "payment_status": "received"
     }).eq("id", pickup_id).execute()
+
+    farmer_id = pickup_res.data.get("listings", {}).get("farmer_id")
+    if farmer_id:
+        try:
+            client.table("notifications").insert({
+                "profile_id": farmer_id,
+                "message": f"💵 Instant Hand-to-Hand Payment of ₹{amount_due:,.2f} received for your {actual_tonnes} tonnes paddy straw pickup!",
+                "read": False
+            }).execute()
+        except Exception:
+            pass
     
     return str(pickup_res.data["listing_id"])
 

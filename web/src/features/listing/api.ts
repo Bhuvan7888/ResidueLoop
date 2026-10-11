@@ -21,7 +21,7 @@ export async function createListing(data: ListingPayload) {
 }
 
 export async function getListings(farmerId?: string) {
-  let query = supabase.from('listings').select('*').order('created_at', { ascending: false })
+  let query = supabase.from('listings').select('*, plots(*)').order('created_at', { ascending: false })
   if (farmerId) {
     query = query.eq('farmer_id', farmerId)
   }

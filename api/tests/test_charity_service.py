@@ -1,0 +1,116 @@
+from unittest.mock import MagicMock, patch
+import pytest
+from app.services.charity_service import (
+    get_crowdfunding_campaigns,
+    create_donation,
+)
+
+
+@pytest.mark.asyncio
+@patch("app.services.charity_service.get_supabase_client")
+async def test_get_crowdfunding_campaigns(mock_client_factory: MagicMock) -> None:
+    client = MagicMock()
+    mock_client_factory.return_value = client
+
+    tables = {
+        "ngos": MagicMock(),
+        "listings": MagicMock(),
+        "assistance_requests": MagicMock(),
+        "donations": MagicMock(),
+        "profiles": MagicMock(),
+        "farmers": MagicMock(),
+    }
+    client.table.side_effect = lambda t: tables.get(t, MagicMock())
+
+    # Mock NGO query
+    tables["ngos"].select.return_value.limit.return_value.execute.return_value.data = [
+        {"profile_id": "ngo-1", "profiles": {"name": "Punjab Clean Air Trust"}}
+    ]
+
+    # Mock open listings query
+    tables["listings"].select.return_value.eq.return_value.execute.return_value.data = []
+
+    # Mock assistance requests query
+    tables["assistance_requests"].select.return_value.order.return_value.execute.return_value.data = [
+        {
+            "id": "req-1",
+            "farmer_id": "farmer-1",
+            "ngo_id": "ngo-1",
+            "listing_id": "list-1",
+            "amount_requested": 5000.0,
+            "purpose": "Emergency stubble clearance",
+            "status": "pending",
+            "created_at": "2026-10-10T12:00:00Z",
+            "ngos": {"profile_id": "ngo-1", "profiles": {"name": "Punjab Clean Air Trust"}},
+            "listings": {
+                "id": "list-1",
+                "est_tonnes": 25.0,
+                "status": "open",
+                "plots": {
+                    "acres": 10.0,
+                    "village_id": "v-1",
+                    "villages": {"name": "Ajitwal"}
+                }
+            }
+        }
+    ]
+
+    # Mock donations sum
+    tables["donations"].select.return_value.eq.return_value.execute.return_value.data = [
+        {"amount": 1000.0}
+    ]
+
+    # Mock farmer profile
+    tables["profiles"].select.return_value.eq.return_value.execute.return_value.data = [
+        {"name": "Gurpreet Singh"}
+    ]
+
+    campaigns = await get_crowdfunding_campaigns()
+    assert len(campaigns) == 1
+    assert campaigns[0]["id"] == "req-1"
+    assert campaigns[0]["farmer_name"] == "Gurpreet Singh"
+    assert campaigns[0]["acres"] == 10.0
+    assert campaigns[0]["amount_requested"] == 5000.0
+    assert campaigns[0]["amount_funded"] == 1000.0
+
+
+@pytest.mark.asyncio
+@patch("app.services.charity_service.get_supabase_client")
+async def test_create_donation_notifies_donor_and_farmer(mock_client_factory: MagicMock) -> None:
+    client = MagicMock()
+    mock_client_factory.return_value = client
+
+    tables = {
+        "assistance_requests": MagicMock(),
+        "donations": MagicMock(),
+        "notifications": MagicMock(),
+        "ngos": MagicMock(),
+    }
+    client.table.side_effect = lambda t: tables.get(t, MagicMock())
+
+    # Mock assistance request lookup
+    tables["assistance_requests"].select.return_value.eq.return_value.execute.return_value.data = [
+        {
+            "id": "req-1",
+            "farmer_id": "farmer-1",
+            "ngo_id": "ngo-1",
+            "amount_requested": 500.0,
+            "listing_id": "list-1",
+            "listings": {"id": "list-1", "plots": {"acres": 1.0, "village_id": "v-1"}}
+        }
+    ]
+
+    # Mock donation insert
+    tables["donations"].insert.return_value.execute.return_value.data = [
+        {"id": "don-1", "amount": 500.0, "donor_id": "donor-1", "ngo_id": "ngo-1"}
+    ]
+
+    res = await create_donation(
+        donor_id="donor-1",
+        ngo_id="ngo-1",
+        amount=500.0,
+        campaign_id="req-1"
+    )
+
+    assert res["id"] == "don-1"
+    assert res["amount"] == 500.0

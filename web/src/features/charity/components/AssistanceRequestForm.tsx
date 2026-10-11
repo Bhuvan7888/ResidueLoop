@@ -17,26 +17,33 @@ export function AssistanceRequestForm({ listingId, onSubmit, onCancel }: Props) 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const form = e.currentTarget
+    const selectedNgo = form.ngo_id?.value || (ngos[0] ? ngos[0].profile_id : undefined)
     await requestAssistance({
-      ngo_id: form.ngo_id.value,
+      ngo_id: selectedNgo,
       listing_id: listingId,
-      amount_requested: Number(form.amount.value),
-      purpose: form.purpose.value
+      amount_requested: Number(form.amount.value) || 2500,
+      purpose: form.purpose.value || 'Field clearance subsidy to prevent burning'
     })
     onSubmit()
   }
 
   return (
-    <div className="bg-surface border border-surface-border rounded-xl p-5">
-      <h3 className="font-medium text-copy-primary mb-4">Request Assistance</h3>
+    <div className="bg-surface border border-surface-border rounded-xl p-5 shadow-xs">
+      <h3 className="font-semibold text-copy-primary mb-1">Request Charity & Crowdfunded Clearance</h3>
+      <p className="text-xs text-copy-secondary mb-4">
+        List your field for citizen sponsorship so heavy balers can clear your stubble at zero cost to you.
+      </p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm text-copy-secondary mb-1">Select NGO</label>
-          <select name="ngo_id" required className="w-full border border-surface-border bg-surface rounded-lg p-2 text-copy-primary">
-            <option value="">Choose an NGO</option>
-            {ngos.map(n => (
-              <option key={n.profile_id} value={n.profile_id}>{n.profiles?.name}</option>
-            ))}
+          <label className="block text-sm text-copy-secondary mb-1">Partner NGO (Machinery Subsidies)</label>
+          <select name="ngo_id" className="w-full border border-surface-border bg-surface rounded-xl p-2.5 text-copy-primary">
+            {ngos.length === 0 ? (
+              <option value="">Clean Air Action Foundation (Default)</option>
+            ) : (
+              ngos.map(n => (
+                <option key={n.profile_id} value={n.profile_id}>{n.profiles?.name || 'Clean Air Trust'}</option>
+              ))
+            )}
           </select>
         </div>
         <div>

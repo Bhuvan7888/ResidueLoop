@@ -83,7 +83,7 @@
   "farmer": {
     "setup_eyebrow": "Farmer setup",
     "setup_title": "Complete these steps to list straw",
-    "setup_body": "Save your profile, add a plot, and submit ID proof. Listings unlock after the ID review is verified.",
+    "setup_body": "Save your profile and add a plot.",
     "profile_title": "1. Your profile",
     "plot_title": "2. Your plot",
     "id_title": "3. ID proof",

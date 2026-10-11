@@ -39,6 +39,27 @@ async def match_listing(user_id: str, listing_id: str) -> None:
     # Mark listing as matched
     client.table("listings").update({"status": "matched"}).eq("id", listing_id).execute()
 
+    # Notify buyer about nearby farmer listing
+    est_t = float(listing_res.data.get("est_tonnes", 0))
+    try:
+        client.table("notifications").insert({
+            "profile_id": buyer["profile_id"],
+            "message": f"🌾 Nearby Stubble Alert: Farmer has listed {est_t:.1f} tonnes of paddy straw nearby! Offer generated at ₹{buyer['price_per_tonne']}/tonne.",
+            "read": False
+        }).execute()
+    except Exception:
+        pass
+
+    # Notify farmer about matched buyer
+    try:
+        client.table("notifications").insert({
+            "profile_id": user_id,
+            "message": f"✨ Your listing of {est_t:.1f} tonnes has matched with {buyer.get('org_name', 'Biomass Buyer')} at ₹{buyer['price_per_tonne']}/tonne!",
+            "read": False
+        }).execute()
+    except Exception:
+        pass
+
 async def accept_offer(user_id: str, offer_id: str) -> None:
     client = get_supabase_client()
     
@@ -60,13 +81,17 @@ async def accept_offer(user_id: str, offer_id: str) -> None:
     # Find open pool for buyer in village
     pool_res = client.table("pools").select("*").eq("buyer_id", buyer_id).eq("village_id", village_id).in_("status", ["forming"]).execute()
     
-    # For now, hardcode min load as 8 if config not available in db
-    min_load = 8.0 
+    # Derive pool target load from buyer capacity/min_load_tonnes so multiple farmers can be pooled
+    buyer_info = client.table("buyers").select("min_load_tonnes, capacity").eq("profile_id", buyer_id).execute()
+    if buyer_info.data and buyer_info.data[0].get("min_load_tonnes"):
+        target_load = float(buyer_info.data[0]["min_load_tonnes"])
+    else:
+        target_load = 25.0
     
     if pool_res.data:
         pool = pool_res.data[0]
-        new_tonnes = pool["current_tonnes"] + est_tonnes
-        status = "ready" if new_tonnes >= min_load else "forming"
+        new_tonnes = float(pool["current_tonnes"]) + float(est_tonnes)
+        status = "ready" if new_tonnes >= target_load else "forming"
         pickup_date = (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d") if status == "ready" else None
         
         client.table("pools").update({
@@ -76,10 +101,9 @@ async def accept_offer(user_id: str, offer_id: str) -> None:
         }).eq("id", pool["id"]).execute()
         pool_id = pool["id"]
     else:
-        status = "ready" if est_tonnes >= min_load else "forming"
+        status = "ready" if est_tonnes >= target_load else "forming"
         pickup_date = (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d") if status == "ready" else None
         
-        # We need a dummy village_id since it's a UUID, mock it if not present
         pool_village_id = village_id if village_id else str(uuid.uuid4())
         
         new_pool = client.table("pools").insert({
@@ -87,7 +111,7 @@ async def accept_offer(user_id: str, offer_id: str) -> None:
             "buyer_id": buyer_id,
             "baler_id": baler_id,
             "status": status,
-            "target_tonnes": min_load,
+            "target_tonnes": target_load,
             "current_tonnes": est_tonnes,
             "pickup_date": pickup_date
         }).execute()
@@ -95,6 +119,17 @@ async def accept_offer(user_id: str, offer_id: str) -> None:
         
     # Link listing to pool
     client.table("listings").update({"pool_id": pool_id, "status": "pooled"}).eq("id", offer["listing_id"]).execute()
+
+    if status == "ready":
+        # Create/ensure pickups for all listings belonging to this ready pool
+        pool_listings = client.table("listings").select("id").eq("pool_id", pool_id).execute()
+        for pl in pool_listings.data or []:
+            client.table("pickups").upsert({
+                "pool_id": pool_id,
+                "listing_id": pl["id"],
+                "baler_id": baler_id,
+                "payment_status": "pending"
+            }, on_conflict="listing_id").execute()
 
 async def decline_offer(user_id: str, offer_id: str) -> None:
     client = get_supabase_client()

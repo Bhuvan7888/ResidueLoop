@@ -108,8 +108,8 @@ export function PhoneOtpForm({ onSuccess }: PhoneOtpFormProps) {
               try {
                 await signInDevUser();
                 onSuccess();
-              } catch (err: any) {
-                setError(err.message || 'Dev login failed');
+              } catch (err: unknown) {
+                setError(err instanceof Error ? err.message : 'Dev login failed');
               }
             }}
             className="w-full mt-2 bg-slate-200 text-slate-800 rounded-xl py-2 font-medium"

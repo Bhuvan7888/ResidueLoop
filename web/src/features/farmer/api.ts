@@ -1,4 +1,5 @@
 import { apiRequest } from '@/lib/api-client'
+import { supabase } from '@/lib/supabase'
 
 interface FarmerProfilePayload {
   language: 'en' | 'pa'
@@ -39,4 +40,15 @@ export function submitIdVerification(payload: IdVerificationPayload): Promise<{ 
   body.append('id_type', payload.idType)
   body.append('id_last4', payload.idLast4)
   return apiRequest('/farmers/id_verification', { body, method: 'POST' })
+}
+
+export async function getFarmerProfile(userId: string) {
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
+  const { data: farmer } = await supabase.from('farmers').select('*').eq('profile_id', userId).maybeSingle()
+  return {
+    name: profile?.name,
+    language: profile?.language,
+    villageId: farmer?.village_id,
+    idStatus: farmer?.id_status,
+  }
 }

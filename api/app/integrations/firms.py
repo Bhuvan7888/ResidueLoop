@@ -23,7 +23,7 @@ class FirmsClient:
         days_range = (date_end - date_start).days
         days_range = min(max(1, days_range), 10)
         
-        url = f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{self.settings.nasa_firms_map_key}/VIIRS_SNPP_NRT/{W},{S},{E},{N}/{days_range}/{date_start.isoformat()}"
+        url = f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{self.settings.nasa_firms_map_key}/VIIRS_NOAA21_NRT/{W},{S},{E},{N}/{days_range}/{date_start.isoformat()}"
         
         async with httpx.AsyncClient() as client:
             try:

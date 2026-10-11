@@ -11,11 +11,21 @@ export async function getRankedVillages(city: string = "Delhi") {
   return apiRequest<RankedVillage[]>(`/charity/villages/ranked?city=${encodeURIComponent(city)}`)
 }
 
-export async function createDonation(data: { ngo_id: string; amount: number; target_village_id?: string }) {
+export async function createDonation(data: {
+  ngo_id?: string
+  amount: number
+  target_village_id?: string
+  campaign_id?: string
+}) {
   return apiRequest('/charity/donate', { body: data, method: 'POST' })
 }
 
-export async function requestAssistance(data: { ngo_id: string; listing_id: string; amount_requested: number; purpose: string }) {
+export async function requestAssistance(data: {
+  ngo_id?: string
+  listing_id: string
+  amount_requested?: number
+  purpose?: string
+}) {
   return apiRequest('/charity/requests', { body: data, method: 'POST' })
 }
 
@@ -67,4 +77,18 @@ export async function getNotifications(userId: string) {
   const { data, error } = await supabase.from('notifications').select('*').eq('profile_id', userId).order('created_at', { ascending: false })
   if (error) throw error
   return data
+}
+
+export async function getCrowdfundingCampaigns() {
+  try {
+    const res = await apiRequest<{ data: Record<string, unknown>[] }>('/charity/campaigns')
+    return res.data || []
+  } catch (err) {
+    console.error('Error fetching crowdfunding campaigns:', err)
+    const { data } = await supabase
+      .from('assistance_requests')
+      .select('*, farmers(profiles(name)), listings(*, plots(*)), ngos(profiles(name))')
+      .order('created_at', { ascending: false })
+    return data || []
+  }
 }
