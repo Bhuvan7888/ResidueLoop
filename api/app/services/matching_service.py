@@ -144,13 +144,31 @@ async def match_listing(user_id: str, listing_id: str) -> None:
     except Exception:
         pass
 
-    # Notify farmer about matched buyer
+    # Notify farmer about matched buyer (Web + WhatsApp)
     try:
         client.table("notifications").insert({
             "profile_id": user_id,
-            "message": f"✨ Your listing of {est_t:.1f} tonnes has matched with {buyer.get('org_name', 'Biomass Buyer')} at ₹{buyer['price_per_tonne']}/tonne!",
+            "message": f"✨ Your listing of {est_t:.1f} tonnes has matched with {buyer.get('org_name', 'Biomass Buyer')} at ₹{offer_price:,.0f}/tonne!",
             "read": False
         }).execute()
+    except Exception:
+        pass
+
+    try:
+        farmer_prof = client.table("profiles").select("phone").eq("id", user_id).limit(1).execute()
+        if farmer_prof.data and farmer_prof.data[0].get("phone"):
+            farmer_phone = farmer_prof.data[0]["phone"]
+            total_val = est_t * offer_price
+            buyer_org = buyer.get("org_name", "ਬਾਇਓਮਾਸ ਪਲਾਂਟ (Biomass Buyer)")
+            wa_text = (
+                f"🎉 ਖੁਸ਼ਖਬਰੀ! ਤੁਹਾਡੀ {est_t:.1f} ਟਨ ਪਰਾਲੀ ਲਈ ਖਰੀਦਦਾਰ '{buyer_org}' ਨੇ ਪੇਸ਼ਕਸ਼ ਕੀਤੀ ਹੈ:\n"
+                f"💰 ਰੇਟ: ₹{offer_price:,.0f} / ਟਨ\n"
+                f"💵 ਕੁੱਲ ਰਕਮ: ₹{total_val:,.0f}\n"
+                f"🗓️ ਪਿਕਅੱਪ ਵਿੰਡੋ: {pickup_start} ਤੋਂ {pickup_end}\n\n"
+                "ਕੀ ਤੁਸੀਂ ਇਹ ਪੇਸ਼ਕਸ਼ ਸਵੀਕਾਰ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? ਸਵੀਕਾਰ ਕਰਨ ਲਈ 'ਹਾਂ' ਜਾਂ 'ACCEPT' ਲਿਖ ਕੇ ਜਵਾਬ ਦਿਓ।"
+            )
+            from app.services.whatsapp_service import send_whatsapp_message
+            await send_whatsapp_message(farmer_phone, wa_text, user_id)
     except Exception:
         pass
 
@@ -225,7 +243,7 @@ async def accept_offer(user_id: str, offer_id: str) -> None:
                 "payment_status": "pending"
             }, on_conflict="listing_id").execute()
 
-            # Notify each pooled farmer
+            # Notify each pooled farmer (Web + WhatsApp)
             if pl.get("farmer_id"):
                 try:
                     client.table("notifications").insert({
@@ -233,6 +251,19 @@ async def accept_offer(user_id: str, offer_id: str) -> None:
                         "message": f"🎉 Your village straw pool has reached target capacity! Scheduled pickup date fixed for {pickup_date}.",
                         "read": False
                     }).execute()
+                except Exception:
+                    pass
+
+                try:
+                    f_prof = client.table("profiles").select("phone").eq("id", pl["farmer_id"]).limit(1).execute()
+                    if f_prof.data and f_prof.data[0].get("phone"):
+                        f_phone = f_prof.data[0]["phone"]
+                        pool_wa_text = (
+                            f"🚛 ਖੁਸ਼ਖਬਰੀ! ਤੁਹਾਡੇ ਪਿੰਡ ਦਾ ਪਰਾਲੀ ਪੂਲ ਪੂਰਾ ਹੋ ਗਿਆ ਹੈ।\n"
+                            f"ਤੁਹਾਡੀ ਪਿਕਅੱਪ ਮਿਤੀ {pickup_date} ਤੈਅ ਹੋਈ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਖੇਤ ਵਿੱਚ ਟਰਾਲੀ ਤਿਆਰ ਰੱਖੋ।"
+                        )
+                        from app.services.whatsapp_service import send_whatsapp_message
+                        await send_whatsapp_message(f_phone, pool_wa_text, pl["farmer_id"])
                 except Exception:
                     pass
 

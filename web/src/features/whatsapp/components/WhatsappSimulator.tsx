@@ -7,12 +7,15 @@ interface WhatsappSimulatorProps {
 }
 
 const QUICK_PROMPTS = [
-  { label: '🗓️ ਪਿਕਅੱਪ ਮਿਤੀ (Pickup Date)', text: 'ਮੇਰੀ ਪਿਕਅੱਪ ਮਿਤੀ ਕਦੋਂ ਹੈ?' },
-  { label: '📊 ਪੂਲ ਪ੍ਰਗਤੀ (Pool Progress)', text: 'ਪੂਲ ਵਿੱਚ ਕਿੰਨੀ ਪਰਾਲੀ ਇਕੱਠੀ ਹੋ ਗਈ?' },
-  { label: '💵 ਭੁਗਤਾਨ ਸਥਿਤੀ (Payment Status)', text: 'ਮੇਰੇ ਪੈਸੇ ਦੀ ਕੀ ਸਥਿਤੀ ਹੈ?' },
-  { label: '🌾 5 ਏਕੜ ਲਿਸਟ ਕਰੋ (List 5 Acres)', text: '5 ਏਕੜ ਪਰਾਲੀ ਲਿਸਟ ਕਰੋ' },
-  { label: '🤝 ਪੇਸ਼ਕਸ਼ ਸਵੀਕਾਰ ਕਰੋ (Accept Offer)', text: 'ਪੇਸ਼ਕਸ਼ ਸਵੀਕਾਰ ਕਰੋ' },
-  { label: '✓ ਪੈਸੇ ਮਿਲ ਗਏ (Payment Received)', text: 'ਭੁਗਤਾਨ ਮਿਲ ਗਿਆ ਹੈ' },
+  { label: '🌾 1. "Hi" (Start Questionnaire)', text: 'Hi' },
+  { label: '📍 2. "5" (5 Acres)', text: '5' },
+  { label: '🗓️ 3. "2" (1 Week Harvest)', text: '2' },
+  { label: '⭐ 4. "1" (Grade A+ Fodder)', text: '1' },
+  { label: '🐄 5. "1" (Cattle Feed / Dairy)', text: '1' },
+  { label: '📦 6. "2" (Delivered Bales)', text: '2' },
+  { label: '🤝 "ਹਾਂ" (Accept Matched Offer)', text: 'ਹਾਂ' },
+  { label: '🗓️ ਪਿਕਅੱਪ ਮਿਤੀ (Pickup Status)', text: 'ਮੇਰੀ ਪਿਕਅੱਪ ਮਿਤੀ ਕਦੋਂ ਹੈ?' },
+  { label: '💵 "ਮਿਲ ਗਏ" (Payment Received)', text: 'ਭੁਗਤਾਨ ਮਿਲ ਗਿਆ ਹੈ' },
 ]
 
 export function WhatsappSimulator({ userPhone, onMessageSent }: WhatsappSimulatorProps) {

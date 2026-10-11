@@ -21,6 +21,11 @@ class Settings(BaseSettings):
     matching_weight_capacity: float = 0.20
     matching_weight_availability: float = 0.10
     pool_radius_km: float = 15.0
+    whatsapp_access_token: str | None = None
+    whatsapp_phone_number_id: str | None = None
+    whatsapp_verify_token: str = "residueloop-0cb6fc51a8d5"
+    meta_app_secret: str | None = None
+    graph_api_version: str = "v20.0"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

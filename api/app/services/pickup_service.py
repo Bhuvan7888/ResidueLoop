@@ -34,6 +34,18 @@ async def update_pickup_weight(user_id: str, pickup_id: str, actual_tonnes: floa
             }).execute()
         except Exception:
             pass
+
+        try:
+            f_prof = client.table("profiles").select("phone").eq("id", farmer_id).limit(1).execute()
+            if f_prof.data and f_prof.data[0].get("phone"):
+                pay_wa_text = (
+                    f"💵 ਭੁਗਤਾਨ ਮੁਕੰਮਲ! ਤੁਹਾਡੀ {actual_tonnes:.1f} ਟਨ ਪਰਾਲੀ ਦਾ ਕੁੱਲ ਭੁਗਤਾਨ ₹{amount_due:,.2f} ਜਾਰੀ ਕਰ ਦਿੱਤਾ ਗਿਆ ਹੈ।\n"
+                    "ਰਕਮ ਪ੍ਰਾਪਤ ਹੋਣ 'ਤੇ 'ਮਿਲ ਗਏ' ਲਿਖ ਕੇ ਪੁਸ਼ਟੀ ਕਰੋ।"
+                )
+                from app.services.whatsapp_service import send_whatsapp_message
+                await send_whatsapp_message(f_prof.data[0]["phone"], pay_wa_text, farmer_id)
+        except Exception:
+            pass
     
     return str(pickup_res.data["listing_id"])
 

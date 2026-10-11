@@ -1,7 +1,7 @@
 import logging
 import uuid
 from typing import Awaitable, Callable
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, Query, Header
 from fastapi.responses import JSONResponse
 import time
 from collections import defaultdict
@@ -25,7 +25,7 @@ app = FastAPI(
 
 # Baseline Security Middleware
 app.add_middleware(
-    TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "residueloop.example.com"]
+    TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "testserver", "residueloop.example.com", "*.trycloudflare.com", "*.ngrok-free.app", "*"]
 )
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -102,3 +102,20 @@ app.include_router(charity.router, prefix="/api/v1")
 app.include_router(whatsapp.router, prefix="/api/v1")
 app.include_router(heatmap.router, prefix="/api/v1")
 app.include_router(verification.router, prefix="/api/v1")
+
+
+@app.get("/api/v1/webhooks/whatsapp")
+def meta_webhook_get_alias(
+    hub_mode: str = Query("", alias="hub.mode"),
+    hub_verify_token: str = Query("", alias="hub.verify_token"),
+    hub_challenge: str = Query("", alias="hub.challenge"),
+):
+    return whatsapp.verify_meta_webhook(hub_mode, hub_verify_token, hub_challenge)
+
+
+@app.post("/api/v1/webhooks/whatsapp")
+async def meta_webhook_post_alias(
+    request: Request,
+    x_hub_signature_256: str | None = Header(default=None, alias="x-hub-signature-256"),
+):
+    return await whatsapp.inbound_webhook(request, x_hub_signature_256)
