@@ -158,6 +158,14 @@ async def get_all_listings(farmer_id: str | None = None, status_filter: str | No
             if o.get("buyers") and isinstance(o["buyers"], dict) and o["buyers"].get("org_name"):
                 buyer_org = o["buyers"]["org_name"]
 
+        # Ensure realistic pricing by form: farm-gate loose cannot be priced at delivered bale rates
+        if stubble_form == "farm_gate_loose" or not combine_sms:
+            price_per_tonne = min(price_per_tonne, 700.0)
+        elif stubble_form == "brick_kiln":
+            price_per_tonne = min(max(price_per_tonne, 600.0), 1200.0)
+        else:
+            price_per_tonne = max(price_per_tonne, 1330.0)
+
         tonnes = float(listing_item.get("est_tonnes") or 0.0)
         total_price = round(tonnes * price_per_tonne, 2)
         listing_item["price_per_tonne"] = price_per_tonne
@@ -170,7 +178,10 @@ async def get_all_listings(farmer_id: str | None = None, status_filter: str | No
         village = plot.get("villages") or {}
         listing_item["village_name"] = village.get("name", "Moga District")
         listing_item["district"] = village.get("district", "Punjab")
-        listing_item["acres"] = float(plot.get("acres") or round(tonnes / 2.5, 1))
+
+        # Realistic acreage: In Punjab, 1 acre produces ~2.5 tonnes of paddy straw
+        plot_acres = float(plot.get("acres") or 0.0)
+        listing_item["acres"] = round(tonnes / 2.5, 1) if tonnes > 0 else (plot_acres or 5.0)
 
         # Coordinates from village PostGIS geometry
         geom = village.get("geometry") or {}
@@ -244,3 +255,9 @@ async def get_all_listings(farmer_id: str | None = None, status_filter: str | No
         }
 
     return listings
+
+
+async def delete_listing(user_id: str, listing_id: str) -> None:
+    repository = MarketRepository(get_supabase_client())
+    repository.delete_listing(user_id, listing_id)
+

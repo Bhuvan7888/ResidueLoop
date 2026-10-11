@@ -24,6 +24,7 @@ interface Plot {
 
 interface NewListingFormProps {
   plots: Plot[]
+  activePlotIds?: string[]
   onSubmit: (data: z.infer<typeof listingSchema> & { estTonnes: number }) => Promise<void>
   onCancel: () => void
 }
@@ -31,7 +32,7 @@ interface NewListingFormProps {
 type HarvestTimingKey = 'now' | '1wk' | '2wk' | 'custom'
 type StrawConditionKey = 'standing' | 'chopped' | 'baled'
 
-export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProps) {
+export function NewListingForm({ plots, activePlotIds = [], onSubmit, onCancel }: NewListingFormProps) {
   const { t } = useTranslation()
   const [error, setError] = useState<string | null>(null)
   const [showCustomDate, setShowCustomDate] = useState(false)
@@ -39,27 +40,31 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
   const [selectedTiming, setSelectedTiming] = useState<HarvestTimingKey>('1wk')
   const [selectedCondition, setSelectedCondition] = useState<StrawConditionKey>('chopped')
 
+  const initialPlot = useMemo(() => {
+    return plots.find((p) => !activePlotIds.includes(p.id)) || plots[0]
+  }, [plots, activePlotIds])
+
   const form = useForm<z.infer<typeof listingSchema>>({
     resolver: zodResolver(listingSchema),
     defaultValues: {
-      plotId: plots.length === 1 ? plots[0].id : '',
+      plotId: initialPlot?.id || '',
       harvestDate: new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0],
       combineSmsUsed: true,
       qualityGrade: 'grade_a_sms',
       stubbleForm: 'delivered_bales',
       intendedPurposes: ['paper_packaging', 'thermal_power'],
-      expectedPricePerTonne: 1950,
+      expectedPricePerTonne: 1850,
     },
   })
 
   useEffect(() => {
-    if (plots.length === 1 && !form.getValues('plotId')) {
-      form.setValue('plotId', plots[0].id)
+    if (initialPlot && !form.getValues('plotId')) {
+      form.setValue('plotId', initialPlot.id)
     }
-  }, [plots, form])
+  }, [initialPlot, form])
 
   const selectedPlotId = form.watch('plotId')
-  const selectedPlot = plots.find((p) => p.id === selectedPlotId) || plots[0]
+  const selectedPlot = plots.find((p) => p.id === selectedPlotId) || initialPlot || plots[0]
 
   // Zero-Math Calculator: calculate yield & estimated range
   const acres = selectedPlot ? selectedPlot.acres : 5
@@ -113,14 +118,14 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
       form.setValue('stubbleForm', 'farm_gate_loose')
       form.setValue('qualityGrade', 'grade_b')
       form.setValue('combineSmsUsed', false)
-      form.setValue('intendedPurposes', ['biomass_plant', 'thermal_power', 'brick_kiln'])
-      form.setValue('expectedPricePerTonne', 1600)
+      form.setValue('intendedPurposes', ['biomass_plant', 'brick_kiln'])
+      form.setValue('expectedPricePerTonne', 600)
     } else if (cond === 'chopped') {
       form.setValue('stubbleForm', 'delivered_bales')
       form.setValue('qualityGrade', 'grade_a_sms')
       form.setValue('combineSmsUsed', true)
       form.setValue('intendedPurposes', ['paper_packaging', 'thermal_power', 'briquettes_pellets'])
-      form.setValue('expectedPricePerTonne', 1950)
+      form.setValue('expectedPricePerTonne', 1850)
     } else if (cond === 'baled') {
       form.setValue('stubbleForm', 'delivered_bales')
       form.setValue('qualityGrade', 'grade_a_plus')
@@ -174,7 +179,8 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {plots.map((plot) => {
-                const isSelected = (selectedPlotId || plots[0].id) === plot.id
+                const isSelected = selectedPlotId === plot.id
+                const hasActiveListing = activePlotIds.includes(plot.id)
                 return (
                   <button
                     key={plot.id}
@@ -186,7 +192,14 @@ export function NewListingForm({ plots, onSubmit, onCancel }: NewListingFormProp
                         : 'border-surface-border bg-bg-subtle/50 hover:border-brand/40'
                     }`}
                   >
-                    <div className="font-bold text-sm text-copy-primary">{plot.name}</div>
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="font-bold text-sm text-copy-primary">{plot.name}</span>
+                      {hasActiveListing && (
+                        <span className="text-[10px] bg-state-warning-dim text-state-warning px-1.5 py-0.5 rounded-full font-bold border border-state-warning/30">
+                          Listed
+                        </span>
+                      )}
+                    </div>
                     <div className="text-xs text-brand font-semibold mt-1">{plot.acres} {t('listing.acres', 'acres')}</div>
                   </button>
                 )

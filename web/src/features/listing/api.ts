@@ -53,3 +53,15 @@ export async function getPlots(farmerId: string) {
   if (error) throw error
   return data
 }
+
+export async function deleteListing(listingId: string) {
+  try {
+    return await apiRequest(`/listings/${listingId}`, { method: 'DELETE' })
+  } catch (err) {
+    console.warn('API deleteListing fallback to Supabase:', err)
+    const { error } = await supabase.from('listings').delete().eq('id', listingId)
+    if (error) throw error
+    return { deleted: true }
+  }
+}
+

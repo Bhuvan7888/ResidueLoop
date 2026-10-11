@@ -9,7 +9,7 @@ interface ApiErrorPayload {
 
 interface ApiRequestOptions {
   body?: FormData | unknown
-  method?: 'GET' | 'POST' | 'PATCH'
+  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'
 }
 
 const apiBaseUrl = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/v1').replace(/\/$/, '')

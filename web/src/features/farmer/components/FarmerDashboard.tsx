@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { NewListingForm } from '@/features/listing/components/NewListingForm'
-import { createListing, getPlots, getListings } from '@/features/listing/api'
+import { createListing, getPlots, getListings, deleteListing } from '@/features/listing/api'
 import { getOffers, handleOfferAction, getPools, getMatchedDeals, type MatchedDeal } from '@/features/matching/api'
 import { OfferCard } from '@/features/matching/components/OfferCard'
 import { DealCard } from '@/features/matching/components/DealCard'
@@ -241,7 +241,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
 
   const totalPending = pickups
     .filter((p) => p.payment_status !== 'received')
-    .reduce((sum, p) => sum + (p.amount_due || 0), 0) || (listings.length > 0 && totalReceived === 0 ? listings.reduce((sum, l) => sum + ((l.est_tonnes || 10) * (l.price_per_tonne || 1900)), 0) : 0)
+    .reduce((sum, p) => sum + (p.amount_due || 0), 0) || (listings.length > 0 && totalReceived === 0 ? listings.reduce((sum, l) => sum + ((l.est_tonnes || 0) * (l.price_per_tonne || (l.combine_sms_used ? 1850 : 600))), 0) : 0)
 
   const hasCompleted = pickups.some((p) => p.payment_status === 'received')
   const hasPickupWeighed = pickups.some((p) => p.actual_tonnes && p.actual_tonnes > 0)
@@ -268,6 +268,19 @@ export function FarmerDashboard({ userId }: { userId: string }) {
       reloadData()
     } catch (err: unknown) {
       setActionMsg(err instanceof Error ? err.message : 'Failed to list on charity portal')
+    }
+  }
+
+  const handleDeleteListing = async (listingId: string) => {
+    if (!window.confirm(i18n.language === 'hi' ? 'क्या आप वाकई इस लिस्टिंग को हटाना चाहते हैं?' : i18n.language === 'pa' ? 'ਕੀ ਤੁਸੀਂ ਵਾਕਈ ਇਸ ਲਿਸਟਿੰਗ ਨੂੰ ਹਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?' : 'Are you sure you want to cancel this listing?')) {
+      return
+    }
+    try {
+      await deleteListing(listingId)
+      setActionMsg(i18n.language === 'hi' ? '✓ लिस्टिंग सफलतापूर्वक हटा दी गई' : i18n.language === 'pa' ? '✓ ਲਿਸਟਿੰਗ ਸਫਲਤਾਪੂਰਵਕ ਹਟਾਈ ਗਈ' : '✓ Listing cancelled successfully')
+      reloadData()
+    } catch (err: unknown) {
+      setActionMsg(err instanceof Error ? err.message : 'Failed to cancel listing')
     }
   }
 
@@ -318,6 +331,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
           ) : (
             <NewListingForm 
               plots={plots.map((p, idx) => ({ id: p.id, name: `${t('farmer.plot_num')}${idx + 1}`, acres: p.acres }))}
+              activePlotIds={listings.filter((l) => l.status !== 'completed' && l.status !== 'cancelled').map((l) => l.plot_id).filter((id): id is string => Boolean(id))}
               onSubmit={async (data) => {
                 await createListing(data)
                 await queryClient.invalidateQueries({ queryKey: ['heatmap'] })
@@ -709,7 +723,13 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                 </div>
               ) : (
                 listings.map((listing) => {
-                  const acresDisplay = listing.acres ?? listing.plots?.acres ?? (listing.est_tonnes ? (listing.est_tonnes / 2.5).toFixed(1) : '?')
+                  // In Punjab agriculture, 1 acre produces ~2.5 tonnes of paddy straw
+                  const derivedAcres = listing.est_tonnes
+                    ? Number((listing.est_tonnes / 2.5).toFixed(1))
+                    : (listing.acres ?? listing.plots?.acres ?? 0)
+                  const acresDisplay = derivedAcres > 0
+                    ? (derivedAcres % 1 === 0 ? derivedAcres.toFixed(0) : derivedAcres.toFixed(1))
+                    : '?'
                   const isUnsold = listing.status === 'open'
                   const isMatched = listing.status === 'matched'
                   const isPooled = listing.status === 'pooled'
@@ -720,7 +740,8 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                   
                   // 4-step progress: 1. Listed -> 2. Buyer Matched -> 3. Trolley Scheduled -> 4. Money Received
                   const currentStep = isCompleted ? 4 : isPooled ? 3 : isMatched ? 2 : 1
-                  const estPayout = Math.round(listing.total_price || (listing.est_tonnes || 0) * (listing.price_per_tonne || 1950))
+                  const fairRate = listing.price_per_tonne || (listing.combine_sms_used ? 1850 : 600)
+                  const estPayout = Math.round((listing.est_tonnes || 0) * fairRate)
 
                   return (
                     <div key={listing.id} className="bg-surface border-2 border-surface-border hover:border-brand/40 rounded-3xl p-6 space-y-4 shadow-xs transition-all">
@@ -835,7 +856,7 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                             💵 {t('farmer.agreed_rate_label', 'Fair Rate')}
                           </span>
                           <strong className="text-state-success text-sm mt-1 block">
-                            ₹{(listing.price_per_tonne || (listing.combine_sms_used ? 1850 : 600)).toLocaleString()}/{t('listing.tonnes', 'tonne')}
+                            ₹{fairRate.toLocaleString()}/{t('listing.tonnes', 'tonne')}
                           </strong>
                           <span className="text-[11px] text-copy-secondary mt-0.5 block">
                             {t('farmer.zero_deductions', '100% Guaranteed')}
@@ -896,6 +917,17 @@ export function FarmerDashboard({ userId }: { userId: string }) {
                             <span>💬</span>
                             <span>{t('farmer.need_help_btn', 'Need Help?')}</span>
                           </button>
+                          {!isCompleted && !isPooled && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteListing(listing.id)}
+                              className="px-3 py-2 bg-surface border border-surface-border text-copy-muted hover:text-state-error hover:border-state-error/40 rounded-xl text-xs font-semibold hover:bg-state-error-dim cursor-pointer flex items-center gap-1 transition-colors"
+                              title={t('farmer.cancel_listing', 'Cancel / Delete this listing')}
+                            >
+                              <span>🗑️</span>
+                              <span>{t('farmer.cancel_listing', 'Cancel')}</span>
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>

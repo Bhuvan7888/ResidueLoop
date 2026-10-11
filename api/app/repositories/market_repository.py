@@ -32,3 +32,7 @@ class MarketRepository:
     def create_listing(self, farmer_id: str, payload: dict[str, Any]) -> str:
         response = self._client.table("listings").insert({"farmer_id": farmer_id, **payload}).execute()
         return str(response.data[0]["id"])
+
+    def delete_listing(self, farmer_id: str, listing_id: str) -> None:
+        self._client.table("listings").delete().eq("id", listing_id).eq("farmer_id", farmer_id).execute()
+

@@ -178,17 +178,19 @@ export function getEstimatedBenchmarkPrice(
   qualityGrade: string,
   purposes: string[]
 ): number {
-  if (purposes.includes('cattle_feed') || qualityGrade === 'grade_a_plus') {
-    return 6200
-  }
-  if (stubbleForm === 'processed_pellets' || purposes.includes('thermal_power')) {
+  if (stubbleForm === 'processed_pellets') {
     return 4800
   }
-  if (stubbleForm === 'delivered_bales' || qualityGrade === 'grade_a_sms') {
-    return 1850
+  if (stubbleForm === 'farm_gate_loose' || qualityGrade === 'grade_b' || qualityGrade === 'grade_c') {
+    if (purposes.includes('brick_kiln')) return 800
+    return 600
   }
-  if (stubbleForm === 'brick_kiln' || purposes.includes('brick_kiln')) {
+  if (stubbleForm === 'brick_kiln') {
     return 1000
   }
-  return 600
+  if (qualityGrade === 'grade_a_plus' || purposes.includes('cattle_feed')) {
+    return 2200
+  }
+  // Standard delivered bales
+  return 1850
 }

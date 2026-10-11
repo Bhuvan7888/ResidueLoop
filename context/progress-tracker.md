@@ -132,6 +132,15 @@ This tracker records verified evidence only. Earlier completion claims were inde
     4. 🔔 `Ground Alerts`: Real-time telemetry feed with timestamps for farmer applications, donor contributions, and machine dispatches.
   - Attained 100% key and semantic parity across `en.json`, `hi.json`, and `pa.json` (90 keys in NGO namespace, 0 diffs).
   - Verified static quality: `npm run typecheck` (0 errors), `npm test` (17 tests passed), `npm run lint` (0 errors), `npm run build` (built cleanly), `poetry run pytest` (34 tests passed).
+- [x] Calibrated Realistic Straw Yield, Corrected Inflated Payouts & Eliminated Duplicate Plot Listings (2026-10-11):
+  - Fixed Inflated Payout Discrepancy: Synchronized estimated payout formula on `FarmerDashboard.tsx` (`Math.round((listing.est_tonnes || 0) * fairRate)`) with the card's explicit Fair Rate (₹600/t loose, ₹1,850/t baled) instead of defaulting to ₹1,950/t. Fixed `getEstimatedBenchmarkPrice` in `marketTiers.ts` to return realistic field farm-gate rates (₹600–₹800/t for loose, ₹1,850–₹2,200/t for baled) instead of NTPC industrial pellet prices (₹4,800–₹6,200/t).
+  - Synchronized Acres & Straw Tonnage: Fixed `acresDisplay` calculation on listing cards to derive accurately from Punjab agronomic benchmarks (~2.0–2.5 tonnes of paddy straw per acre, `est_tonnes / 2.5`), preventing listings with 12.5 tonnes from displaying an incorrect "55 acres".
+  - Prevented Duplicate Plot Listings: Added `activePlotIds` check in `NewListingForm.tsx` to automatically pre-select unlisted plots, show warning badges on plots that are already listed, and prevent accidental duplicate submissions on the same field.
+  - Added Listing Deletion & Cancellation: Added `DELETE /api/v1/listings/{listing_id}` in `api/app/routers/v1/listing.py` and `delete_listing()` in `listing_service.py` and `market_repository.py`. Added frontend `deleteListing()` with Supabase fallback and a red "Cancel" button on listing cards in `FarmerDashboard.tsx`.
+  - Calibrated Database State: Standardized farmer's registered plots (4.0, 5.0, 3.5, 6.0, 2.5, 2.0 acres), re-associated distinct listings to unique plots with accurate tonnages, and eliminated duplicate test listings on Plot #1.
+  - Maintained 100% key and semantic parity across `en.json`, `hi.json`, and `pa.json` (856 keys each, 0 diffs).
+  - Verified static quality: `npm run typecheck` (0 errors), `npm test` (17 tests passed), `npm run lint` (0 errors), `npm run build` (built cleanly in 635ms), `poetry run pytest` (34 tests passed).
+
 
 ## Recovery Decisions
 
