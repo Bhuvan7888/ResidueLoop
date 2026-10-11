@@ -221,6 +221,32 @@ export function NearestFarmersMatching({
     }
   }
 
+  // Handle batch pooling of all critical matching farmers to satisfy the tender
+  const [isBatchPooling, setIsBatchPooling] = useState(false)
+  const handlePoolAll = async () => {
+    if (criticalListingIds.size === 0) return
+    setIsBatchPooling(true)
+    setActionSuccess(null)
+    try {
+      const idsToProcure = Array.from(criticalListingIds)
+      for (const id of idsToProcure) {
+        await procureListing(id, tenderPrice)
+      }
+      setProcuredIds((prev) => new Set([...prev, ...idsToProcure]))
+      setActionSuccess(
+        t(
+          'buyer.batch_pool_success',
+          `🎉 Successfully created straw pool with ${farmersMeetingDemandCount} nearby farmers for ${cumulativeTonnes} tonnes! Trolley logistics scheduled.`
+        )
+      )
+      onReload()
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to pool farmers')
+    } finally {
+      setIsBatchPooling(false)
+    }
+  }
+
   return (
     <section className="bg-surface border border-surface-border rounded-2xl p-5 md:p-6 shadow-xs space-y-6">
       {/* Header & Active Tender Switcher */}
@@ -361,6 +387,42 @@ export function NearestFarmersMatching({
                 )}
               </span>
             </p>
+          )}
+
+          {farmersMeetingDemandCount > 1 && (
+            <div className="mt-4 pt-3 border-t border-brand/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">🤝</span>
+                  <span className="text-xs font-bold text-copy-primary">
+                    {t('buyer.cluster_pooling_active', 'Multi-Farmer Cluster Pooling Activated')}
+                  </span>
+                  <span className="text-[10px] bg-state-success-dim text-state-success px-2 py-0.5 rounded-full font-bold">
+                    {cumulativeTonnes >= targetTonnes ? '100% Sourced' : `${percentFulfilled}% Ready`}
+                  </span>
+                </div>
+                <p className="text-[11px] text-copy-secondary">
+                  {t(
+                    'buyer.cluster_pooling_desc',
+                    'Combining nearby smallholders satisfies your factory tender with zero straw burning.'
+                  )}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handlePoolAll}
+                disabled={isBatchPooling}
+                className="px-3.5 py-2 bg-brand text-on-brand font-bold text-xs rounded-xl shadow-xs hover:bg-accent-secondary transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5 shrink-0"
+              >
+                <span>⚡</span>
+                <span>
+                  {isBatchPooling
+                    ? t('buyer.pooling_progress', 'Creating Pooled Order...')
+                    : t('buyer.pool_all_cta', `1-Click Pool All ${farmersMeetingDemandCount} Farmers (${cumulativeTonnes}t)`)}
+                </span>
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -518,11 +580,11 @@ export function NearestFarmersMatching({
 
                   {isCritical && (
                     <span
-                      title="Needed to fulfill your active factory capacity"
-                      className="text-[10px] bg-brand text-on-brand font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs"
+                      title="Part of the nearest cluster fulfilling your factory tender"
+                      className="text-[10px] bg-state-success text-white font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs"
                     >
                       <Sparkles className="w-3 h-3" />
-                      <span>{t('buyer.demand_match_badge', 'Target Match')}</span>
+                      <span>{t('buyer.in_pool_badge', 'In Pooled Cluster')}</span>
                     </span>
                   )}
                 </div>
@@ -557,6 +619,11 @@ export function NearestFarmersMatching({
                       <span className="text-[10px] text-copy-muted block">
                         ({listing.acres || Math.round(lotTonnes / 2.5)} {t('common.acres', 'acres')})
                       </span>
+                      {isCritical && (
+                        <span className="text-[10px] text-state-success font-bold block mt-0.5">
+                          +{lotTonnes}t {t('buyer.pooled_contribution', 'in pool')}
+                        </span>
+                      )}
                     </div>
 
                     <div>

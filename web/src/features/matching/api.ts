@@ -63,6 +63,13 @@ export async function handleOfferAction(offerId: string, action: 'accept' | 'dec
 }
 
 export async function getPools() {
+  try {
+    const res = await apiRequest<{ data: Record<string, unknown>[] } | Record<string, unknown>[]>('/pools')
+    if (res && 'data' in res && Array.isArray(res.data)) return res.data
+    if (Array.isArray(res)) return res
+  } catch (err) {
+    console.warn('API getPools fallback to Supabase:', err)
+  }
   const { data, error } = await supabase
     .from('pools')
     .select('*, listings(*, plots(*)), villages(name, district)')

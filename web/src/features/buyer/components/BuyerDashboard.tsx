@@ -492,13 +492,20 @@ export function BuyerDashboard({ userId }: { userId?: string }) {
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2">
                     {pools.map((pool) => (
-                      <div key={pool.id} className="space-y-2 bg-surface p-4 rounded-2xl border border-surface-border shadow-xs">
+                      <div key={pool.id} className="space-y-3 bg-surface p-4 rounded-2xl border border-surface-border shadow-xs hover:border-brand/30 transition-all">
                         <PoolProgress pool={pool} />
-                        {pool.villages && (
-                          <p className="text-xs text-copy-secondary">
-                            {t('buyer.sourced_from', '📍 Sourced from farmers in:')} <strong className="text-copy-primary">{pool.villages.name}, {pool.villages.district}</strong>
-                          </p>
-                        )}
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs pt-1 border-t border-surface-border">
+                          {pool.villages && (
+                            <span className="text-copy-secondary">
+                              {t('buyer.sourced_from', '📍 Sourced from farmers in:')} <strong className="text-copy-primary">{pool.villages.name}, {pool.villages.district}</strong>
+                            </span>
+                          )}
+                          {pool.pickup_date && (
+                            <span className="font-semibold text-brand bg-brand/10 px-2 py-0.5 rounded-lg text-[11px]">
+                              🚚 {t('buyer.pickup_schedule', 'Pickup:')} {pool.pickup_date}
+                            </span>
+                          )}
+                        </div>
                         <button
                           type="button"
                           onClick={() =>

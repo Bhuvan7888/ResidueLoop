@@ -140,6 +140,15 @@ This tracker records verified evidence only. Earlier completion claims were inde
   - Calibrated Database State: Standardized farmer's registered plots (4.0, 5.0, 3.5, 6.0, 2.5, 2.0 acres), re-associated distinct listings to unique plots with accurate tonnages, and eliminated duplicate test listings on Plot #1.
   - Maintained 100% key and semantic parity across `en.json`, `hi.json`, and `pa.json` (856 keys each, 0 diffs).
   - Verified static quality: `npm run typecheck` (0 errors), `npm test` (17 tests passed), `npm run lint` (0 errors), `npm run build` (built cleanly in 635ms), `poetry run pytest` (34 tests passed).
+- [x] Multi-Farmer Nearby Straw Pooling Demo Data & Interactive Cluster Aggregation (2026-10-11):
+  - Fixed Local API & CORS Boundary: Configured `TrustedHostMiddleware` to allow `localhost` and `127.0.0.1` and added local dev origins (`http://localhost:5173`, `http://127.0.0.1:5173`) to `CORSMiddleware`, allowing browser clients to consume `/api/v1` without falling back to RLS-restricted Supabase anon calls.
+  - Added Dedicated Pools API Router: Created `api/app/routers/v1/pool.py` serving `GET /api/v1/pools` with related listings and village PostGIS geometries. Updated `getPools()` in `web/src/features/matching/api.ts` to call the API with Supabase fallback.
+  - Seeded 10 Verified Nearby Farmers Fulfilling 200t Demand: Added realistic smallholder farmers in Moga villages (Badhni Kalan, Ajitwal, Dharamkot within 0.7–14.5 km of Moga Industrial Focal Point), supplying exactly 202.5 tonnes of delivered SMS bales at the tender benchmark of ₹1,500/t.
+  - Calibrated Multi-Farmer Straw Pools: Seeded active village pools for Badhni Kalan (65.0t / 100.0t) and Ajitwal (82.5t / 100.0t) with pickup dates and zero-burn satellite audit links.
+  - Enhanced Proximity Demand Coverage UI: Added interactive "🤝 Multi-Farmer Cluster Pooling Activated" callout card with 1-click batch procurement (`⚡ 1-Click Pool All 10 Farmers (202.5t)`), optimal group badges (`🤝 In Pooled Cluster`), and per-farmer contribution indicators (`+15t in pool`).
+  - Maintained 100% key parity across `en.json`, `hi.json`, and `pa.json` (863 keys each, 0 diffs).
+  - Verified static quality: `npm run typecheck` (0 errors), `npm test` (17 tests passed), `npm run lint` (0 errors), `npm run build` (built in 629ms), `poetry run pytest` (34 tests passed).
+
 
 
 ## Recovery Decisions

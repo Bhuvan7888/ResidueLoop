@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.routers.v1 import buyer, charity, farmer, health, listing, offer, pickup, profile, whatsapp, heatmap, verification
+from app.routers.v1 import buyer, charity, farmer, health, listing, offer, pickup, profile, whatsapp, heatmap, verification, pool
 from app.core.config import get_settings
 from app.core.errors import setup_exception_handlers
 
@@ -26,7 +26,7 @@ app = FastAPI(
 # Baseline Security Middleware
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["residueloop.in", "www.residueloop.in"],
+    allowed_hosts=["residueloop.in", "www.residueloop.in", "localhost", "127.0.0.1", "testserver"],
 )
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -81,6 +81,9 @@ app.add_middleware(
     allow_origins=[
         "https://residueloop.in",
         "https://www.residueloop.in",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
     ],
     # Supports free Vercel production and preview deployments without opening CORS to every origin.
     allow_origin_regex=r"^https://[a-z0-9-]+\.vercel\.app$",
@@ -101,6 +104,7 @@ app.include_router(charity.router, prefix="/api/v1")
 app.include_router(whatsapp.router, prefix="/api/v1")
 app.include_router(heatmap.router, prefix="/api/v1")
 app.include_router(verification.router, prefix="/api/v1")
+app.include_router(pool.router, prefix="/api/v1")
 
 
 @app.get("/api/v1/webhooks/whatsapp")
