@@ -19,5 +19,5 @@ class VillageHeat(BaseModel):
 
 
 @router.get("/villages")
-def village_heatmap(_: str = Depends(require_role(["buyer"]))) -> dict[str, list[VillageHeat]]:
+def village_heatmap() -> dict[str, list[VillageHeat]]:
     return {"data": [VillageHeat(**zone) for zone in heatmap_service.get_village_heatmap()]}

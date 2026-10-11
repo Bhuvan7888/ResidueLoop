@@ -1,21 +1,40 @@
 import { useEffect, useRef } from 'react'
-import { LngLatBounds, Map as MapLibreMap, Marker, type GeoJSONSource, type StyleSpecification } from 'maplibre-gl'
+import { LngLatBounds, Map as MapLibreMap, Marker, setWorkerUrl, type GeoJSONSource, type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import type { VillageHeat } from '../api'
 
+// Initialize MapLibre Web Worker for Vite
+setWorkerUrl(workerUrl)
+
 const SOURCE = 'villages'
-const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY as string | undefined
 
 function token(name: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
 }
 
-function baseStyle(): StyleSpecification | string {
-  if (MAPTILER_KEY) return `https://api.maptiler.com/maps/dataviz-light/style.json?key=${MAPTILER_KEY}`
+function baseStyle(): StyleSpecification {
   return {
     version: 8,
-    sources: {},
-    layers: [{ id: 'background', type: 'background', paint: { 'background-color': token('--bg-subtle') } }],
+    sources: {
+      'light-canvas': {
+        type: 'raster',
+        tiles: [
+          'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+        ],
+        tileSize: 256,
+        attribution: '&copy; Esri, HERE, Garmin, OpenStreetMap contributors',
+      },
+    },
+    layers: [
+      {
+        id: 'light-canvas-layer',
+        type: 'raster',
+        source: 'light-canvas',
+        minzoom: 0,
+        maxzoom: 18,
+      },
+    ],
   }
 }
 
