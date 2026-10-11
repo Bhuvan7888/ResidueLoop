@@ -1,15 +1,23 @@
 from datetime import date, datetime, timedelta
 import logging
 from typing import Any
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from app.core.config import get_settings
-from app.core.security import get_supabase_client
+from app.core.security import get_supabase_client, require_role
 from app.services.verification_service import _evaluate_verdict, _notify_stakeholders
 
 router = APIRouter(prefix="/verifications", tags=["verifications"])
 logger = logging.getLogger(__name__)
+
+
+def _own_plot(client: Any, plot_id: str, user_id: str) -> dict[str, Any]:
+    """The plot, only if it belongs to the caller. Anyone else gets 404, so plot ids cannot be probed."""
+    res = client.table("plots").select("id, farmer_id, acres, centre, radius_m").eq("id", plot_id).limit(1).execute()
+    if not res.data or res.data[0]["farmer_id"] != user_id:
+        raise HTTPException(status_code=404, detail="Plot not found")
+    return res.data[0]  # type: ignore[no-any-return]
 
 
 class VerificationResponse(BaseModel):
@@ -27,7 +35,8 @@ class VerificationResponse(BaseModel):
 @router.post("/trigger/{plot_id}")
 async def trigger_plot_verification(
     plot_id: str,
-    scenario: str = Query("real", description="One of: 'verified', 'fire_detected', 'inconclusive', 'real'")
+    scenario: str = Query("real", description="One of: 'verified', 'fire_detected', 'inconclusive', 'real'"),
+    user_id: str = Depends(require_role(["farmer"])),
 ) -> dict[str, Any]:
     """
     On-demand Satellite Verification endpoint for plots.
@@ -37,12 +46,11 @@ async def trigger_plot_verification(
     client = get_supabase_client()
     settings = get_settings()
 
-    # 1. Fetch plot details
-    plot_res = client.table("plots").select("id, farmer_id, acres, centre, radius_m").eq("id", plot_id).maybeSingle().execute()
-    if not plot_res.data:
-        raise HTTPException(status_code=404, detail="Plot not found")
-
-    plot = plot_res.data
+    # 1. Fetch the caller's own plot
+    plot = _own_plot(client, plot_id, user_id)
+    # MOCK: fixed verdicts exist only for demos and stay off unless the flag is on.
+    if scenario != "real" and not settings.allow_verification_scenarios:
+        raise HTTPException(status_code=403, detail="Scenario overrides are disabled")
     today = date.today()
     window_start = today - timedelta(days=15)
     window_end = today + timedelta(days=settings.verification_window_days)
@@ -109,8 +117,11 @@ async def trigger_plot_verification(
 
 
 @router.get("/plot/{plot_id}")
-def get_plot_verifications(plot_id: str) -> dict[str, list[dict[str, Any]]]:
-    """Retrieve satellite verification history for a plot."""
+def get_plot_verifications(
+    plot_id: str, user_id: str = Depends(require_role(["farmer"]))
+) -> dict[str, list[dict[str, Any]]]:
+    """Retrieve satellite verification history for the caller's own plot."""
     client = get_supabase_client()
+    _own_plot(client, plot_id, user_id)
     res = client.table("verifications").select("*").eq("plot_id", plot_id).order("checked_at", desc=True).execute()
     return {"data": res.data or []}

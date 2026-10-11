@@ -29,7 +29,8 @@ class SentinelClient:
         import math
         
         if self.settings.cdse_client_id in ("mock", "", None):
-            return 0.0
+            # No imagery access means no evidence of a burn scar either way, so the verdict must stay Inconclusive.
+            return None
             
         token = await self._get_token()
         if not token:

@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     nbr_drop_threshold: float = 0.1
     verification_window_days: int = 30
     plot_buffer_radius_m: float = 100.0
+    # MOCK: lets the verification route return a fixed verdict (?scenario=). Demo only, off by default.
+    allow_verification_scenarios: bool = False
 
     # Matching weights. They sum to 1 and are tunable without code changes.
     match_weight_distance: float = 0.4
